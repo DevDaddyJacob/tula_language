@@ -40,7 +40,8 @@
  * ==================================================
  */
 
-size_t str_copy(char* destination, const char* source, const size_t destSize) {
+size_t str_copy(char* destination, const char* source, const size_t destSize)
+{
     /* Null check our arguments*/
     if (NULL == destination || NULL == source)
     {
@@ -57,7 +58,8 @@ size_t str_copy(char* destination, const char* source, const size_t destSize) {
 
     /* Copy the characters up to destSize - 1 */
     size_t i = 0;
-    for (i = 0; i < destSize - 1 && source[i] != '\0'; i++) {
+    for (i = 0; i < destSize - 1 && source[i] != '\0'; i++)
+    {
         destination[i] = source[i];
     }
 
