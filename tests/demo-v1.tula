@@ -1,0 +1,34 @@
+
+
+/////////////
+// [0] TBD //
+/////////////
+
+// The following key words are interchangeable
+// define -> def
+// variable -> variable
+// constant -> const
+// function -> func
+
+
+///////////////////
+// [1] Variables //
+///////////////////
+
+// Defining Variables (Global & Local scopes)
+def global var globalVar = "I am global"
+def var localVar = "I am local"
+
+// Modifying Variables
+set global var globalVar = "I am still global"
+set var localVar = "I am still local"
+
+unset global var globalVar
+unset var localVar
+
+
+// Defining Constants
+def global const = "I am global"
+def const = "I am local"
+
+// Constants cannot be set / unset
