@@ -1,0 +1,192 @@
+/////////////
+// [0] TBD //
+/////////////
+
+// The following key words are interchangeable
+// define -> def
+// variable -> variable
+// constant -> const
+// function -> func
+
+
+///////////////////
+// [1] Variables //
+///////////////////
+
+// Defining Variables (Global & Local scopes)
+def global var globalVar = "I am global"
+def var localVar = "I am local"
+
+// Modifying Variables
+set global var globalVar = "I am still global"
+set var localVar = "I am still local"
+
+unset global var globalVar
+unset var localVar
+
+
+// Defining Constants
+def global const = "I am global"
+def const = "I am local"
+
+// Constants cannot be set / unset
+
+// Unset states
+def var mySpecialVar = "foo"
+isSet(mySpecialVar) // Produces true
+unset var mySpecialVar
+isSet(mySpecialVar) // Produces false
+
+
+//////////////////////////////
+// [2] Primitive Data Types //
+//////////////////////////////
+
+def var n_int8 = 72s        // 8-bit signed integer (short)
+def var n_uint8 = 72us      // 8-bit unsigned integer (ushort)
+def var n_int32 = 72        // 32-bit signed integer (int)
+def var n_uint32 = 72u      // 32-bit unsigned integer (uint)
+def var n_int64 = 72l       // 64-bit signed integer (long)
+def var n_uint64 = 72ul     // 64-bit unsigned integer (ulong)
+
+def var n_float = 3.14      // 32-bit single-precision floating point number (float)
+def var n_double = 3.14d    // 64-bit double-precision floating point number (double)
+
+def var char = 'a'
+def var string = "apple"
+
+def var b_true = true
+def var b_false = false
+
+
+///////////////////
+// [3] Operators //
+///////////////////
+
+// Arithmetic
+def var op_sum = 10 + 3     // Addition operator
+def var op_sub = 10 - 3     // Subtraction operator
+def var op_prod = 10 * 3    // Multiplication operator (product)
+def var op_div = 10 / 3     // Division operator
+def var op_mod = 10 % 3     // Modulo operator
+def var op_expo = 2 ^ 10    // Exponentiation operator
+def var op_neg = -72        // Unary negation / minus operator
+
+def var op_init = 72
+op_init++                   // Post-increment operator (returns value then increments)
+++op_init                   // Pre-increment operator (increments then returns value)
+op_init--                   // Post-decrement operator (returns value then decrements)
+--op_init                   // Pre-decrement operator (decrements then returns value)
+
+
+// Relational
+def var rel_eq = 1 == 1     // Equality operator
+def var rel_neq = 1 != 1    // Inequality operator
+def var rel_gt = 3 > 4      // Greater-than operator
+def var rel_lt = 3 < 4      // Less-than operator
+def var rel_gte = 3 >= 4    // Greater-than or equal operator
+def var rel_lte = 3 <= 4    // Less-than or equal operator
+
+// Logical
+def var log_and = true && false     // AND operator
+def var log_or = true || false      // OR operator
+def var log_not = !true             // NOT operator
+
+
+//////////////////////
+// [4] Control Flow //
+//////////////////////
+
+// if-else
+def var x = 7
+if (x < 0) {
+    // x is negative
+} else if (x == 0) {
+    // x is zero
+} else {
+    // x positive
+}
+
+// while / do-while
+def var i = 1
+while (i <= 3) {
+    i++             // Equivalent to: set var i = i + 1
+}
+
+do {
+    i--             // Equivalent to: set var i = i - 1
+} while (i >= 0)
+
+// Numeric for
+// Structured with 4 parts: initialization, condition, update, body
+// Executes in the following order: initialization > loop(condition > body > update)
+// Once condition evaluates to true, the loop ends
+for (def var j = 0; i < 10; i++) {
+    // Body to execute
+}
+
+// Keywords
+// break            exits the loop
+// continue         ends the current loop body
+
+
+///////////////////
+// [5] Functions //
+///////////////////
+
+def global func globalFunc(foo, bar) {
+    return foo + bar
+}
+
+def func localFunc(foo, bar) {
+    return foo + bar
+}
+
+// Functions are first-class values, so the following alternative syntax is valid
+// although not recommended, it is valid
+def global var alternativeGlobalFunc = func(foo, bar) {
+    return foo + bar
+}
+
+def var alternativeLocalFunc = func(foo, bar) {
+    return foo + bar
+}
+
+// Variable Arguments (vargs)
+// Treated as an array of values
+def func myPrintF(format, vargs) {
+    print(format)
+
+    for (def var i = 0; i < vargs.length; i++) {
+        print(vargs[i])
+    }
+}
+
+
+////////////////////////
+// [6] Error Handling //
+////////////////////////
+
+// Error handling is similar to Java. Errors are emitted from functions
+def func myUnsafeFunc(foo) {
+    if (!isSet(foo)) {
+        emit error("invalid argument.")
+    }
+
+    return foo
+}
+
+def func mySafeFunc(foo) {
+    // try takes a single argument, of a no-argument function.
+    def var result = try(func() {
+        myUnsafeFunc(foo)
+    })
+
+    // try returns a special data type called an "attempt" which can
+    // be used in the following functions:
+    // - `attempt.failed(result)` which returns a boolean indicating if the try failed
+    // - `attempt.succeeded(result)` which returns a boolean indicating if the try succeeded
+    // - `attempt.err(result)` which returns the error produced by the function passed to try (or unset value if no error occurred)
+    // - `attempt.val(result)` which returns the value produced by the function passed to try (or unset value if an error occurred)
+}
+
