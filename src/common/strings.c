@@ -71,7 +71,7 @@ size_t str_copy(char* destination, const char* source, const size_t destSize)
 }
 
 
-uint8_t str_equals(const char* str, const char* target, const size_t targetLen)
+bool str_equals(const char* str, const char* target, const size_t targetLen)
 {
 	/* Handle null comparison */
 	if (NULL == str || NULL == target)
@@ -83,7 +83,7 @@ uint8_t str_equals(const char* str, const char* target, const size_t targetLen)
 	/* Length validation */
 	if (0 >= targetLen)
 	{
-		return 0;
+		return false;
 	}
 
 
@@ -92,7 +92,7 @@ uint8_t str_equals(const char* str, const char* target, const size_t targetLen)
 }
 
 
-uint8_t str_partialEquals(
+bool str_partialEquals(
     const char* str,
     const char* target,
     const size_t targetLen,
@@ -108,7 +108,7 @@ uint8_t str_partialEquals(
     /* Length validation */
     if (0 >= strOffset || 0 >= targetLen)
     {
-	    return 0;
+	    return false;
     }
 
 
@@ -117,7 +117,7 @@ uint8_t str_partialEquals(
 }
 
 
-uint8_t str_startsWith(
+bool str_startsWith(
     const char* str,
     const char* target,
     const size_t strLen,
@@ -126,21 +126,21 @@ uint8_t str_startsWith(
 	/* Handle null comparison */
 	if (NULL == str || NULL == target)
 	{
-		return 0;
+		return false;
 	}
 
 
 	/* Length validation */
 	if (0 >= strLen || 0 >= targetLen)
 	{
-		return 0;
+		return false;
 	}
 
 
     /* Safety check the lengths */
     if (targetLen > strLen)
     {
-    	return 0;
+    	return false;
     }
 
 
@@ -149,7 +149,7 @@ uint8_t str_startsWith(
 }
 
 
-uint8_t str_endsWith(
+bool str_endsWith(
     const char* str,
     const char* target,
     const size_t strLen,
@@ -158,21 +158,21 @@ uint8_t str_endsWith(
 	/* Handle null comparison */
 	if (NULL == str || NULL == target)
 	{
-		return 0;
+		return false;
 	}
 
 
 	/* Length validation */
 	if (0 >= strLen || 0 >= targetLen)
 	{
-		return 0;
+		return false;
 	}
 
 
 	/* Safety check the lengths */
 	if (targetLen > strLen)
 	{
-		return 0;
+		return false;
 	}
 
 
@@ -181,11 +181,11 @@ uint8_t str_endsWith(
 }
 
 
-uint8_t str_startsWithChar(const char* str, const char target) {
+bool str_startsWithChar(const char* str, const char target) {
     /* Handle null comparison */
     if (str == NULL)
     {
-    	return 0;
+    	return false;
     }
 
 
@@ -194,7 +194,7 @@ uint8_t str_startsWithChar(const char* str, const char target) {
 }
 
 
-uint8_t str_endsWithChar(
+bool str_endsWithChar(
 	const char* str,
 	const char target,
 	const size_t strLen
@@ -202,14 +202,14 @@ uint8_t str_endsWithChar(
     /* Handle null comparison */
     if (NULL == str)
     {
-    	return 0;
+    	return false;
     }
 
 
     /* Length validation */
     if (0 >= strLen)
     {
-    	return 0;
+    	return false;
     }
 
 

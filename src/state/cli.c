@@ -33,7 +33,7 @@ typedef enum tula_option_type {
 
 static void printHelpMenu();
 
-static uint8_t hasNext(const cli_params_t* params);
+static bool hasNext(const cli_params_t* params);
 
 static const char* peekArgument(const cli_params_t* params);
 
@@ -41,7 +41,7 @@ static const char* consumeArgument(cli_params_t* params);
 
 static option_type_t parseOptionType(const char* arg);
 
-static uint8_t consumeNextOption(cli_params_t* params, cli_config_t* config);
+static bool consumeNextOption(cli_params_t* params, cli_config_t* config);
 
 
 /*
@@ -101,14 +101,14 @@ static void printHelpMenu()
 }
 
 
-static uint8_t hasNext(const cli_params_t* params)
+static bool hasNext(const cli_params_t* params)
 {
     if (params->pointer >= params->argc)
     {
-    	return 0;
+    	return false;
     }
 
-    return 1;
+    return true;
 }
 
 static const char* peekArgument(const cli_params_t* params)
@@ -197,13 +197,13 @@ static option_type_t parseOptionType(const char* arg)
 }
 
 
-static uint8_t consumeNextOption(cli_params_t* params, cli_config_t* config)
+static bool consumeNextOption(cli_params_t* params, cli_config_t* config)
 {
     option_type_t optionType;
 
     if (!hasNext(params))
     {
-    	return 0;
+    	return false;
     }
 
     switch (optionType = parseOptionType(peekArgument(params)))
@@ -238,29 +238,30 @@ static uint8_t consumeNextOption(cli_params_t* params, cli_config_t* config)
                 UNREACHABLE_DEFAULT(break);
             }
 
-            UNREACHABLE_RETURN(0);
+            UNREACHABLE_RETURN(false);
         }
 
         case OPTION_UNKNOWN:
     	{
-            return 0;
+            return false;
         }
 
         case OPTION_END_OF_OPTIONS:
     	{
             consumeArgument(params);
-            return 0;
+            return false;
         }
 
         case OPTION_INTERACTIVE:
     	{
             consumeArgument(params);
-            config->interactive = 1;
-            return 1;
+            config->interactive = true;
+
+        	return true;
         }
     }
 
-    return 1; /* Unreachable? */
+    return true; /* Unreachable? */
 }
 
 
@@ -290,7 +291,7 @@ cli_config_t* cli_parseArgs(const int argc, const char** argv)
 
     /* Default the config */
     config->file = NULL;
-    config->interactive = 0;
+    config->interactive = false;
 
 
     /* Consume the options */

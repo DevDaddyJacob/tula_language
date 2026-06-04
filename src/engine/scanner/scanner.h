@@ -1,6 +1,7 @@
 #ifndef TULA_ENGINE_SCANNER_SCANNER_H
 #define TULA_ENGINE_SCANNER_SCANNER_H
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -16,67 +17,67 @@
  *	)
  */
 #define DEFINE_TOKENS(def)												\
-	def(TOK_ERROR,			"<error>",		NULL,		1,	0,	0,	0)	\
-	def(TOK_EOS,			"<eos>",		NULL,		1,	0,	0,	0)	\
-	def(TOK_IDENT,			"<identifier>",	NULL,		0,	0,	0,	0)	\
-	def(TOK_INT8,			"<int8>",		NULL,		0,	1,	0,	0)	\
-	def(TOK_UINT8,			"<uint8>",		NULL,		0,	1,	0,	0)	\
-	def(TOK_INT16,			"<int16>",		NULL,		0,	1,	0,	0)	\
-	def(TOK_UINT16,			"<uint16>",		NULL,		0,	1,	0,	0)	\
-	def(TOK_INT32,			"<int32>",		NULL,		0,	1,	0,	0)	\
-	def(TOK_UINT32,			"<uint32>",		NULL,		0,	1,	0,	0)	\
-	def(TOK_INT64,			"<int64>",		NULL,		0,	1,	0,	0)	\
-	def(TOK_UINT64,			"<uint64>",		NULL,		0,	1,	0,	0)	\
-	def(TOK_FLOAT,			"<float>",		NULL,		0,	1,	0,	0)	\
-	def(TOK_DOUBLE,			"<double>",		NULL,		0,	1,	0,	0)	\
-	def(TOK_CHAR,			"<char>",		NULL,		0,	1,	0,	0)	\
-	def(TOK_STRING,			"<string>",		NULL,		0,	1,	0,	0)	\
-	def(TOK_TRUE,			"true",			NULL,		0,	1,	1,	0)	\
-	def(TOK_FALSE,			"false",		NULL,		0,	1,	1,	0)	\
-	def(TOK_DEFINE,			"define",		"def",		0,	0,	1,	0)	\
-	def(TOK_VARIABLE,		"variable",		"var",		0,	0,	1,	0)	\
-	def(TOK_CONSTANT,		"constant",		"const",	0,	0,	1,	0)	\
-	def(TOK_FUNC,			"function",		"func",		0,	0,	1,	0)	\
-	def(TOK_GLOBAL,			"global",		NULL,		0,	0,	1,	0)	\
-	def(TOK_SET,			"set",			NULL,		0,	0,	1,	0)	\
-	def(TOK_UNSET,			"unset",		NULL,		0,	0,	1,	0)	\
-	def(TOK_IS_SET,			"isSet",		NULL,		0,	0,	1,	0)	\
-	def(TOK_IF,				"if",			NULL,		0,	0,	1,	0)	\
-	def(TOK_ELSE,			"else",			NULL,		0,	0,	1,	0)	\
-	def(TOK_WHILE,			"while",		NULL,		0,	0,	1,	0)	\
-	def(TOK_DO,				"do",			NULL,		0,	0,	1,	0)	\
-	def(TOK_FOR,			"for",			NULL,		0,	0,	1,	0)	\
-	def(TOK_BREAK,			"break",		NULL,		0,	0,	1,	0)	\
-	def(TOK_CONTINUE,		"continue",		NULL,		0,	0,	1,	0)	\
-	def(TOK_RETURN,			"return",		NULL,		0,	0,	1,	0)	\
-	def(TOK_AND,			"and",			NULL,		0,	0,	1,	0)	\
-	def(TOK_OR,				"or",			NULL,		0,	0,	1,	0)	\
-	def(TOK_NOT,			"not",			NULL,		0,	0,	1,	0)	\
-	def(TOK_PAREN_LEFT,		"(",			NULL,		0,	0,	0,	1)	\
-	def(TOK_PAREN_RIGHT,	")",			NULL,		0,	0,	0,	1)	\
-	def(TOK_BRACKET_LEFT,	"[",			NULL,		0,	0,	0,	1)	\
-	def(TOK_BRACKET_RIGHT,	"]",			NULL,		0,	0,	0,	1)	\
-	def(TOK_BRACE_LEFT,		"{",			NULL,		0,	0,	0,	1)	\
-	def(TOK_BRACE_RIGHT,	"}",			NULL,		0,	0,	0,	1)	\
-	def(TOK_DOT,			".",			NULL,		0,	0,	0,	1)	\
-	def(TOK_COMMA,			",",			NULL,		0,	0,	0,	1)	\
-	def(TOK_EQUAL,			"=",			NULL,		0,	0,	0,	1)	\
-	def(TOK_PLUS,			"+",			NULL,		0,	0,	0,	1)	\
-	def(TOK_MINUS,			"-",			NULL,		0,	0,	0,	1)	\
-	def(TOK_STAR,			"*",			NULL,		0,	0,	0,	1)	\
-	def(TOK_CARET,			"^",			NULL,		0,	0,	0,	1)	\
-	def(TOK_SLASH_FWD,		"/",			NULL,		0,	0,	0,	1)	\
-	def(TOK_PERCENT,		"%",			NULL,		0,	0,	0,	1)	\
-	def(TOK_QUOTE_SIGNLE,	"'",			NULL,		0,	0,	0,	1)	\
-	def(TOK_QUOTE_DOUBLE,	"\"",			NULL,		0,	0,	0,	1)	\
-	def(TOK_GREATER_THAN,	">",			NULL,		0,	0,	0,	1)	\
-	def(TOK_LESS_THAN,		"<",			NULL,		0,	0,	0,	1)	\
-	def(TOK_PLUS_PLUS,		"++",			NULL,		0,	0,	0,	1)	\
-	def(TOK_MINUS_MINUS,	"--",			NULL,		0,	0,	0,	1)	\
-	def(TOK_EQUAL_EQUAL,	"==",			NULL,		0,	0,	0,	1)	\
-	def(TOK_EXCLAM_EQUAL,	"!=",			NULL,		0,	0,	0,	1)	\
-	def(TOK_GT_EQUAL,		">=",			NULL,		0,	0,	0,	1)	\
-	def(TOK_LT_EQUAL,		"<=",			NULL,		0,	0,	0,	1)	\
+	def(TOK_ERROR,			"<error>",		NULL,		true,	false,	false,	false)	\
+	def(TOK_EOS,			"<eos>",		NULL,		true,	false,	false,	false)	\
+	def(TOK_IDENT,			"<identifier>",	NULL,		false,	false,	false,	false)	\
+	def(TOK_INT8,			"<int8>",		NULL,		false,	true,	false,	false)	\
+	def(TOK_UINT8,			"<uint8>",		NULL,		false,	true,	false,	false)	\
+	def(TOK_INT16,			"<int16>",		NULL,		false,	true,	false,	false)	\
+	def(TOK_UINT16,			"<uint16>",		NULL,		false,	true,	false,	false)	\
+	def(TOK_INT32,			"<int32>",		NULL,		false,	true,	false,	false)	\
+	def(TOK_UINT32,			"<uint32>",		NULL,		false,	true,	false,	false)	\
+	def(TOK_INT64,			"<int64>",		NULL,		false,	true,	false,	false)	\
+	def(TOK_UINT64,			"<uint64>",		NULL,		false,	true,	false,	false)	\
+	def(TOK_FLOAT,			"<float>",		NULL,		false,	true,	false,	false)	\
+	def(TOK_DOUBLE,			"<double>",		NULL,		false,	true,	false,	false)	\
+	def(TOK_CHAR,			"<char>",		NULL,		false,	true,	false,	false)	\
+	def(TOK_STRING,			"<string>",		NULL,		false,	true,	false,	false)	\
+	def(TOK_true,			"true",			NULL,		false,	true,	true,	false)	\
+	def(TOK_false,			"false",		NULL,		false,	true,	true,	false)	\
+	def(TOK_DEFINE,			"define",		"def",		false,	false,	true,	false)	\
+	def(TOK_VARIABLE,		"variable",		"var",		false,	false,	true,	false)	\
+	def(TOK_CONSTANT,		"constant",		"const",	false,	false,	true,	false)	\
+	def(TOK_FUNC,			"function",		"func",		false,	false,	true,	false)	\
+	def(TOK_GLOBAL,			"global",		NULL,		false,	false,	true,	false)	\
+	def(TOK_SET,			"set",			NULL,		false,	false,	true,	false)	\
+	def(TOK_UNSET,			"unset",		NULL,		false,	false,	true,	false)	\
+	def(TOK_IS_SET,			"isSet",		NULL,		false,	false,	true,	false)	\
+	def(TOK_IF,				"if",			NULL,		false,	false,	true,	false)	\
+	def(TOK_ELSE,			"else",			NULL,		false,	false,	true,	false)	\
+	def(TOK_WHILE,			"while",		NULL,		false,	false,	true,	false)	\
+	def(TOK_DO,				"do",			NULL,		false,	false,	true,	false)	\
+	def(TOK_FOR,			"for",			NULL,		false,	false,	true,	false)	\
+	def(TOK_BREAK,			"break",		NULL,		false,	false,	true,	false)	\
+	def(TOK_CONTINUE,		"continue",		NULL,		false,	false,	true,	false)	\
+	def(TOK_RETURN,			"return",		NULL,		false,	false,	true,	false)	\
+	def(TOK_AND,			"and",			NULL,		false,	false,	true,	false)	\
+	def(TOK_OR,				"or",			NULL,		false,	false,	true,	false)	\
+	def(TOK_NOT,			"not",			NULL,		false,	false,	true,	false)	\
+	def(TOK_PAREN_LEFT,		"(",			NULL,		false,	false,	false,	true)	\
+	def(TOK_PAREN_RIGHT,	")",			NULL,		false,	false,	false,	true)	\
+	def(TOK_BRACKET_LEFT,	"[",			NULL,		false,	false,	false,	true)	\
+	def(TOK_BRACKET_RIGHT,	"]",			NULL,		false,	false,	false,	true)	\
+	def(TOK_BRACE_LEFT,		"{",			NULL,		false,	false,	false,	true)	\
+	def(TOK_BRACE_RIGHT,	"}",			NULL,		false,	false,	false,	true)	\
+	def(TOK_DOT,			".",			NULL,		false,	false,	false,	true)	\
+	def(TOK_COMMA,			",",			NULL,		false,	false,	false,	true)	\
+	def(TOK_EQUAL,			"=",			NULL,		false,	false,	false,	true)	\
+	def(TOK_PLUS,			"+",			NULL,		false,	false,	false,	true)	\
+	def(TOK_MINUS,			"-",			NULL,		false,	false,	false,	true)	\
+	def(TOK_STAR,			"*",			NULL,		false,	false,	false,	true)	\
+	def(TOK_CARET,			"^",			NULL,		false,	false,	false,	true)	\
+	def(TOK_SLASH_FWD,		"/",			NULL,		false,	false,	false,	true)	\
+	def(TOK_PERCENT,		"%",			NULL,		false,	false,	false,	true)	\
+	def(TOK_QUOTE_SIGNLE,	"'",			NULL,		false,	false,	false,	true)	\
+	def(TOK_QUOTE_DOUBLE,	"\"",			NULL,		false,	false,	false,	true)	\
+	def(TOK_GREATER_THAN,	">",			NULL,		false,	false,	false,	true)	\
+	def(TOK_LESS_THAN,		"<",			NULL,		false,	false,	false,	true)	\
+	def(TOK_PLUS_PLUS,		"++",			NULL,		false,	false,	false,	true)	\
+	def(TOK_MINUS_MINUS,	"--",			NULL,		false,	false,	false,	true)	\
+	def(TOK_EQUAL_EQUAL,	"==",			NULL,		false,	false,	false,	true)	\
+	def(TOK_EXCLAM_EQUAL,	"!=",			NULL,		false,	false,	false,	true)	\
+	def(TOK_GT_EQUAL,		">=",			NULL,		false,	false,	false,	true)	\
+	def(TOK_LT_EQUAL,		"<=",			NULL,		false,	false,	false,	true)	\
 
 
 /**
@@ -84,7 +85,7 @@
  */
 enum tula_token_type
 {
-#define TOKEN_ENUM_DEFINER(identifier, _1, _2, _3, _4, _5, _6) identifier,
+#define TOKEN_ENUM_DEFINER(identifier, _true, _2, _3, _4, _5, _6) identifier,
 	DEFINE_TOKENS(TOKEN_ENUM_DEFINER)
 #undef TOKEN_ENUM_DEFINER
 	TOTAL_TOKENS
@@ -109,28 +110,28 @@ extern const char* TOKENS_VALUE_ALT[TOTAL_TOKENS];
  * \brief	An array which contains the booleans indicating if each token is a
  *			meta token or not.
  */
-extern const uint8_t TOKENS_IS_META[TOTAL_TOKENS];
+extern const bool TOKENS_IS_META[TOTAL_TOKENS];
 
 
 /**
  * \brief	An array which contains the booleans indicating if each token
  *			represents a primitive type value.
  */
-extern const uint8_t TOKENS_IS_PRIMITIVE[TOTAL_TOKENS];
+extern const bool TOKENS_IS_PRIMITIVE[TOTAL_TOKENS];
 
 
 /**
  * \brief	An array which contains the booleans indicating if each token
  *			represents a keyword.
  */
-extern const uint8_t TOKENS_IS_KEYWORD[TOTAL_TOKENS];
+extern const bool TOKENS_IS_KEYWORD[TOTAL_TOKENS];
 
 
 /**
  * \brief	An array which contains the booleans indicating if each token
  *			represents an operator.
  */
-extern const uint8_t TOKENS_IS_OPERATOR[TOTAL_TOKENS];
+extern const bool TOKENS_IS_OPERATOR[TOTAL_TOKENS];
 
 
 #endif /* TULA_ENGINE_SCANNER_SCANNER_H */

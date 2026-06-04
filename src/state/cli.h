@@ -1,13 +1,15 @@
 #ifndef TULAC_STATE_CLI_H
 #define TULAC_STATE_CLI_H
 
+#include <stdbool.h>
+
 #include "../tula.h"
 
 typedef struct tula_cli_config {
 	/**
 	 * If the interactive option is selected
 	 */
-	uint8_t interactive;
+	bool interactive;
 
 	/**
 	 * The file to run

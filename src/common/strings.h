@@ -1,6 +1,7 @@
 #ifndef TULAC_COMMON_STRINGS_H
 #define TULAC_COMMON_STRINGS_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #define char_isAlpha(c) \
@@ -31,10 +32,10 @@ size_t str_copy(char* destination, const char* source, size_t destSize);
  * \return          Returns a 1 if the target matches the str, otherwise 0.
  * \note            Return value is a boolean-treated integer
  */
-uint8_t str_equals(const char* str, const char* target, size_t targetLen);
+bool str_equals(const char* str, const char* target, size_t targetLen);
 
 
-uint8_t str_partialEquals(
+bool str_partialEquals(
 	const char* str,
 	const char* target,
 	size_t targetLen,
@@ -42,7 +43,7 @@ uint8_t str_partialEquals(
 );
 
 
-uint8_t str_startsWith(
+bool str_startsWith(
 	const char* str,
 	const char* target,
 	size_t strLen,
@@ -50,7 +51,7 @@ uint8_t str_startsWith(
 );
 
 
-uint8_t str_endsWith(
+bool str_endsWith(
 	const char* str,
 	const char* target,
 	size_t strLen,
@@ -58,9 +59,9 @@ uint8_t str_endsWith(
 );
 
 
-uint8_t str_startsWithChar(const char* str, char target);
+bool str_startsWithChar(const char* str, char target);
 
 
-uint8_t str_endsWithChar(const char* str, char target, size_t strLen);
+bool str_endsWithChar(const char* str, char target, size_t strLen);
 
 #endif /* TULAC_COMMON_STRINGS_H */
