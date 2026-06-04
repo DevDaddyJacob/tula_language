@@ -22,56 +22,9 @@
  * ============================================================================
  */
 
-#ifndef _TULA_OS_DEF // NOLINT(*-reserved-identifier)
-    #undef TULA_OS_WINDOWS
-    #undef TULA_OS_MAC
-    #undef TULA_OS_UNIX
-    #undef TULA_OS_POSIX_COMPLIANT
-
-    #if defined(_WIN32) || defined(_WIN64)
-        #define TULA_OS_WINDOWS
-        #define _TULA_OS_DEF
-
-    #elif defined(__APPLE__) && defined(__MACH__)
-        #define TULA_OS_MAC
-        #define TULA_OS_POSIX_COMPLIANT
-        #define _TULA_OS_DEF
-
-    #elif defined(__linux__) || defined(__unix__)
-        #define TULA_OS_UNIX
-        #define TULA_OS_POSIX_COMPLIANT
-        #define _TULA_OS_DEF
-
-    #else
-        #error "Unknown or unsupported platform"
-    #endif
-#endif /* _TULA_OS_DEF */
-
-
-#ifndef TULA_OS_PATH_SEPARATOR
-    #if defined(TULA_OS_WINDOWS)
-        #define TULA_OS_PATH_SEPARATOR '\\'
-    #elif defined(TULA_OS_POSIX_COMPLIANT)
-        #define TULA_OS_PATH_SEPARATOR '/'
-    #else
-        #error "Unsupported platform, " \
-            "no compliant implementation of macro 'TULA_OS_PATH_SEPARATOR'."
-    #endif
-#endif /* TULA_OS_PATH_SEPARATOR */
-
-
-#ifndef TULA_OS_MAX_PATH_LENGTH
-    #if defined(TULA_OS_WINDOWS)
-        #define TULA_OS_MAX_PATH_LENGTH 260
-    #elif defined(TULA_OS_MAC)
-        #define TULA_OS_MAX_PATH_LENGTH 1024
-    #elif defined(TULA_OS_POSIX_COMPLIANT)
-        #define TULA_OS_MAX_PATH_LENGTH 4096
-    #else
-        #error "Unsupported platform, " \
-            "no compliant implementation of macro 'MAX_PATH_LENGTH'."
-    #endif
-#endif /* TULA_OS_MAX_PATH_LENGTH */
+#ifndef IS_OS_DEFINED
+#include "common/os.h"
+#endif /* IS_OS_DEFINED */
 
 /* ========================================================================= */
 
