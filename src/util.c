@@ -41,7 +41,7 @@
  * ==================================================
  */
 
-int32_t errPrint(const char* format, ...) {
+int32_t err_print_f(const char* format, ...) {
 	/* Null check the format */
 	if (format == NULL) return PRINT_FAILED;
 
@@ -52,7 +52,7 @@ int32_t errPrint(const char* format, ...) {
 
 
 	/* Send to the v function */
-	const int32_t charsPrinted = vErrPrint(format, vargs);
+	const int32_t charsPrinted = err_print_v(format, vargs);
 
 
 	/* Release the vargs and return the status */
@@ -73,7 +73,7 @@ int32_t errPrint(const char* format, ...) {
 }
 
 
-int32_t vErrPrint(const char* format, const va_list vargs) {
+int32_t err_print_v(const char* format, const va_list vargs) {
 	/* Null check the format */
 	if (format == NULL) return PRINT_FAILED;
 

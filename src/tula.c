@@ -46,13 +46,13 @@ static void teardown();
 
 static void setup(const int32_t argc, const char* argv[])
 {
-	setupGlobalState(argc, argv);
+	setup_global_state(argc, argv);
 }
 
 
 static void teardown()
 {
-	teardownGlobalState();
+	teardown_global_state();
 }
 
 
@@ -63,14 +63,14 @@ void tula_exit(const int32_t exitCode)
 }
 
 
-void tula_exitError(const int32_t exitCode, const char* format, ...)
+void tula_exit_error(const int32_t exitCode, const char* format, ...)
 {
 	if (NULL != format)
 	{
 		/* Get the vargs, and print the message */
 		va_list vargs;
 		va_start(vargs, format);
-		vErrPrint(format, vargs);
+		err_print_v(format, vargs);
 		va_end(vargs);
 	}
 

@@ -35,7 +35,7 @@ static global_state_t* GLOBAL_STATE = NULL;
  * ==================================================
  */
 
-void setupGlobalState(const int32_t argc, const char** argv)
+void setup_global_state(const int32_t argc, const char** argv)
 {
 	if (NULL != GLOBAL_STATE)
 	{
@@ -46,7 +46,7 @@ void setupGlobalState(const int32_t argc, const char** argv)
 	GLOBAL_STATE = (global_state_t*)malloc(sizeof(global_state_t));
 	if (NULL == GLOBAL_STATE)
 	{
-		exitErr_noMem();
+		exit_err_no_mem();
 	}
 
 
@@ -57,14 +57,14 @@ void setupGlobalState(const int32_t argc, const char** argv)
 
 
 	/* Set up the cli config */
-	GLOBAL_STATE->cli = cli_parseArgs(
+	GLOBAL_STATE->cli = cli_parse_args(
 		GLOBAL_STATE->argc,
 		GLOBAL_STATE->argv
 	);
 }
 
 
-void teardownGlobalState()
+void teardown_global_state()
 {
 	if (GLOBAL_STATE == NULL)
 	{
@@ -85,11 +85,11 @@ void teardownGlobalState()
 }
 
 
-global_state_t* getGlobalState()
+global_state_t* get_global_state()
 {
 	if (NULL == GLOBAL_STATE)
 	{
-		exitErr_earlyStateAccess();
+		exit_err_early_state_access();
 	}
 
 	return GLOBAL_STATE;

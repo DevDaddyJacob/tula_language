@@ -22,7 +22,7 @@ typedef struct tula_cli_config {
  * \brief               Takes the command line arguments and parses them into
  *                      a cli_config_t struct
  */
-cli_config_t* cli_parseArgs(int32_t argc, const char* argv[]);
+cli_config_t* cli_parse_args(int32_t argc, const char* argv[]);
 
 
 void cli_destroy(cli_config_t* config);

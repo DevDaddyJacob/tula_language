@@ -31,17 +31,17 @@ typedef enum tula_option_type {
 
 
 
-static void printHelpMenu();
+static void print_help_menu();
 
-static bool hasNext(const cli_params_t* params);
+static bool has_next(const cli_params_t* params);
 
-static const char* peekArgument(const cli_params_t* params);
+static const char* peek_argument(const cli_params_t* params);
 
-static const char* consumeArgument(cli_params_t* params);
+static const char* consume_argument(cli_params_t* params);
 
-static option_type_t parseOptionType(const char* arg);
+static option_type_t parse_option_type(const char* arg);
 
-static bool consumeNextOption(cli_params_t* params, cli_config_t* config);
+static bool consume_next_option(cli_params_t* params, cli_config_t* config);
 
 
 /*
@@ -58,7 +58,7 @@ static bool consumeNextOption(cli_params_t* params, cli_config_t* config);
  * ==================================================
  */
 
-static void printHelpMenu()
+static void print_help_menu()
 {
 #define TOTAL_OPTIONS 4
 	// ReSharper disable once CppTooWideScope
@@ -101,7 +101,7 @@ static void printHelpMenu()
 }
 
 
-static bool hasNext(const cli_params_t* params)
+static bool has_next(const cli_params_t* params)
 {
     if (params->pointer >= params->argc)
     {
@@ -111,9 +111,9 @@ static bool hasNext(const cli_params_t* params)
     return true;
 }
 
-static const char* peekArgument(const cli_params_t* params)
+static const char* peek_argument(const cli_params_t* params)
 {
-    if (!hasNext(params))
+    if (!has_next(params))
     {
     	return NULL;
     }
@@ -122,9 +122,9 @@ static const char* peekArgument(const cli_params_t* params)
 }
 
 
-static const char* consumeArgument(cli_params_t* params)
+static const char* consume_argument(cli_params_t* params)
 {
-    if (!hasNext(params))
+    if (!has_next(params))
     {
     	return NULL;
     }
@@ -133,7 +133,7 @@ static const char* consumeArgument(cli_params_t* params)
 }
 
 
-static option_type_t parseOptionType(const char* arg)
+static option_type_t parse_option_type(const char* arg)
 {
     if ('-' != arg[0] || 2 > strlen(arg))
     {
@@ -153,17 +153,17 @@ static option_type_t parseOptionType(const char* arg)
             {
                 default:
             	{
-                    if (str_partialEquals(arg, "end-of-options", 14, 2))
+                    if (str_equals_partial(arg, "end-of-options", 14, 2))
                     {
                         return OPTION_END_OF_OPTIONS;
                     }
 
-					if (str_partialEquals(arg, "help", 4, 2))
+					if (str_equals_partial(arg, "help", 4, 2))
 					{
 						return OPTION_HELP;
 					}
 
-                	if (str_partialEquals(arg, "version", 7, 2))
+                	if (str_equals_partial(arg, "version", 7, 2))
                 	{
 						return OPTION_VERSION;
 					}
@@ -197,22 +197,22 @@ static option_type_t parseOptionType(const char* arg)
 }
 
 
-static bool consumeNextOption(cli_params_t* params, cli_config_t* config)
+static bool consume_next_option(cli_params_t* params, cli_config_t* config)
 {
     option_type_t optionType;
 
-    if (!hasNext(params))
+    if (!has_next(params))
     {
     	return false;
     }
 
-    switch (optionType = parseOptionType(peekArgument(params)))
+    switch (optionType = parse_option_type(peek_argument(params)))
     {
         case OPTION_INVALID:
         case OPTION_HELP:
         case OPTION_VERSION:
     	{
-            const char* arg = peekArgument(params);
+            const char* arg = peek_argument(params);
             free(params);
             free(config);
 
@@ -220,12 +220,15 @@ static bool consumeNextOption(cli_params_t* params, cli_config_t* config)
             {
                 case OPTION_INVALID:
             	{
-                    exitErr_badUsageF("'%s' is not a recognized option.", arg);
+                    exit_err_bad_usage_f(
+                    	"'%s' is not a recognized option.",
+                    	arg
+                    );
                 }
 
                 case OPTION_HELP:
             	{
-                    printHelpMenu();
+                    print_help_menu();
                     break;
                 }
 
@@ -248,13 +251,13 @@ static bool consumeNextOption(cli_params_t* params, cli_config_t* config)
 
         case OPTION_END_OF_OPTIONS:
     	{
-            consumeArgument(params);
+            consume_argument(params);
             return false;
         }
 
         case OPTION_INTERACTIVE:
     	{
-            consumeArgument(params);
+            consume_argument(params);
             config->interactive = true;
 
         	return true;
@@ -265,20 +268,20 @@ static bool consumeNextOption(cli_params_t* params, cli_config_t* config)
 }
 
 
-cli_config_t* cli_parseArgs(const int argc, const char** argv)
+cli_config_t* cli_parse_args(const int argc, const char** argv)
 {
 	/* Allocate memory for params & config */
     cli_params_t* params = malloc(sizeof(cli_params_t));
     if (NULL == params)
     {
-        exitErr_noMem();
+        exit_err_no_mem();
     }
 
     cli_config_t* config = malloc(sizeof(cli_config_t));
     if (NULL == config)
     {
         free(params);
-        exitErr_noMem();
+        exit_err_no_mem();
     }
 
 
@@ -295,17 +298,17 @@ cli_config_t* cli_parseArgs(const int argc, const char** argv)
 
 
     /* Consume the options */
-    while (consumeNextOption(params, config)) { }
+    while (consume_next_option(params, config)) { }
 
 
 	/* If we still have next args, store it as the file */
-    if (hasNext(params))
+    if (has_next(params))
     {
-		const char* arg = consumeArgument(params);
+		const char* arg = consume_argument(params);
 		const uint8_t is_quotted = ('"' == arg[0] || '\'' == arg[0])
 			&& (
-				str_endsWithChar(arg, '"', strlen(arg))
-				|| str_endsWithChar(arg, '\'', strlen(arg))
+				str_ends_with_char(arg, '"', strlen(arg))
+				|| str_ends_with_char(arg, '\'', strlen(arg))
 			);
 
 		const size_t raw_len = strlen(arg);
@@ -321,12 +324,12 @@ cli_config_t* cli_parseArgs(const int argc, const char** argv)
 			free(params);
 			free(config);
 
-			exitErr_noMem();
+			exit_err_no_mem();
 		}
 
 
 		/* Copy the memory of the argument to the config */
-		str_copy(config->file, is_quotted ? arg + 1 : arg, str_len);
+		str_copy_safe(config->file, is_quotted ? arg + 1 : arg, str_len);
 	}
 
     free(params);

@@ -8,8 +8,8 @@
 #define PRINT_PARTIAL_SUCCESS (-2)
 
 
-int32_t errPrintF(const char* format, ...);
+int32_t err_print_f(const char* format, ...);
 
-int32_t vErrPrint(const char* format, va_list vargs);
+int32_t err_print_v(const char* format, va_list vargs);
 
 #endif /* TULA_LANGUAGE_UTIL_H */

@@ -13,12 +13,12 @@ typedef struct tula_global_state {
 } global_state_t;
 
 
-void setupGlobalState(int32_t argc, const char** argv);
+void setup_global_state(int32_t argc, const char** argv);
 
 
-void teardownGlobalState();
+void teardown_global_state();
 
 
-global_state_t* getGlobalState();
+global_state_t* get_global_state();
 
 #endif /* TULA_STATE_GSTATE_H */

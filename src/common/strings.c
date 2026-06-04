@@ -40,7 +40,11 @@
  * ==================================================
  */
 
-size_t str_copy(char* destination, const char* source, const size_t destSize)
+size_t str_copy_safe(
+	char* destination,
+	const char* source,
+	const size_t destSize
+)
 {
     /* Null check our arguments*/
     if (NULL == destination || NULL == source)
@@ -92,7 +96,7 @@ bool str_equals(const char* str, const char* target, const size_t targetLen)
 }
 
 
-bool str_partialEquals(
+bool str_equals_partial(
     const char* str,
     const char* target,
     const size_t targetLen,
@@ -117,7 +121,7 @@ bool str_partialEquals(
 }
 
 
-bool str_startsWith(
+bool str_starts_with(
     const char* str,
     const char* target,
     const size_t strLen,
@@ -149,7 +153,7 @@ bool str_startsWith(
 }
 
 
-bool str_endsWith(
+bool str_ends_with(
     const char* str,
     const char* target,
     const size_t strLen,
@@ -181,7 +185,7 @@ bool str_endsWith(
 }
 
 
-bool str_startsWithChar(const char* str, const char target) {
+bool str_starts_with_char(const char* str, const char target) {
     /* Handle null comparison */
     if (str == NULL)
     {
@@ -194,7 +198,7 @@ bool str_startsWithChar(const char* str, const char target) {
 }
 
 
-bool str_endsWithChar(
+bool str_ends_with_char(
 	const char* str,
 	const char target,
 	const size_t strLen
