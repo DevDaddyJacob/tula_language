@@ -61,23 +61,15 @@
  */
 
 /**
- * The maximum size a buffer can be
+ * The maximum size a general use buffer can be
  */
 #define TULA_MAX_BUFFER_SIZE 2048
 
-/* ========================================================================= */
-
-
-/*
- * ============================================================================
- * Configure the parameters for file scanner
- * ============================================================================
- */
 
 /**
- * The size in bytes of the scanner's buffer
+ * The size in bytes of any reader's buffer
  */
-#define TULA_SCANNER_BUFFER_SIZE 4096
+#define TULA_READER_BUFFER_SIZE 4096
 
 /* ========================================================================= */
 
