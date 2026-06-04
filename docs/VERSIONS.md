@@ -15,5 +15,5 @@ This version expands on Tula v2 by adding a multithreading structure
 
 
 ## Tula Version 4
-This version expands on Tula v4 by adding some static typing in the language,
+This version expands on Tula v3 by adding some static typing in the language,
 controllable by compile flags.

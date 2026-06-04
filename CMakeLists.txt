@@ -15,4 +15,6 @@ add_executable(tula
         src/common/strings.h
         src/state/gstate.c
         src/state/gstate.h
+        src/engine/scanner/scanner.c
+        src/engine/scanner/scanner.h
 )

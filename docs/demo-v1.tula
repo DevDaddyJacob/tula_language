@@ -42,8 +42,10 @@ isSet(mySpecialVar) // Produces false
 // [2] Primitive Data Types //
 //////////////////////////////
 
-def var n_int8 = 72s        // 8-bit signed integer (short)
-def var n_uint8 = 72us      // 8-bit unsigned integer (ushort)
+def var n_int8 = 72b        // 8-bit signed integer (byte)
+def var n_uint8 = 72ub      // 8-bit unsigned integer (ubyte)
+def var n_int16 = 72s       // 16-bit signed integer (short)
+def var n_uint16 = 72us     // 16-bit unsigned integer (ushort)
 def var n_int32 = 72        // 32-bit signed integer (int)
 def var n_uint32 = 72u      // 32-bit unsigned integer (uint)
 def var n_int64 = 72l       // 64-bit signed integer (long)
@@ -70,7 +72,7 @@ def var op_prod = 10 * 3    // Multiplication operator (product)
 def var op_div = 10 / 3     // Division operator
 def var op_mod = 10 % 3     // Modulo operator
 def var op_expo = 2 ^ 10    // Exponentiation operator
-def var op_neg = -72        // Unary negation / minus operator
+def var op_neg = -72        // Unary negation / minus operator (?)
 
 def var op_init = 72
 op_init++                   // Post-increment operator (returns value then increments)
@@ -88,9 +90,9 @@ def var rel_gte = 3 >= 4    // Greater-than or equal operator
 def var rel_lte = 3 <= 4    // Less-than or equal operator
 
 // Logical
-def var log_and = true && false     // AND operator
-def var log_or = true || false      // OR operator
-def var log_not = !true             // NOT operator
+def var log_and = true and false    // AND operator
+def var log_or = true or false      // OR operator
+def var log_not = not true          // NOT operator
 
 
 //////////////////////
@@ -121,7 +123,7 @@ do {
 // Structured with 4 parts: initialization, condition, update, body
 // Executes in the following order: initialization > loop(condition > body > update)
 // Once condition evaluates to true, the loop ends
-for (def var j = 0; i < 10; i++) {
+for (def var j = 0, i < 10, i++) {
     // Body to execute
 }
 
@@ -155,10 +157,10 @@ def var alternativeLocalFunc = func(foo, bar) {
 // Variable Arguments (vargs)
 // Treated as an array of values
 def func myPrintF(format, vargs) {
-    print(format)
+    io.print(format)
 
-    for (def var i = 0; i < vargs.length; i++) {
-        print(vargs[i])
+    for (def var i = 0, i < vargs.length, i++) {
+        io.print(vargs[i])
     }
 }
 
@@ -178,11 +180,11 @@ def func myUnsafeFunc(foo) {
 
 def func mySafeFunc(foo) {
     // try takes a single argument, of a no-argument function.
-    def var result = try(func() {
+    def var result = attempt.try(func() {
         myUnsafeFunc(foo)
     })
 
-    // try returns a special data type called an "attempt" which can
+    // try returns a special data type called an "attempt result" which can
     // be used in the following functions:
     // - `attempt.failed(result)` which returns a boolean indicating if the try failed
     // - `attempt.succeeded(result)` which returns a boolean indicating if the try succeeded
