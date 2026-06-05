@@ -57,7 +57,12 @@ static size_t buf_reader_refill(buf_reader_t* reader) {
 
 
 	/* Preserve remaining characters to the front of the buffer */
-	const size_t bufRemaining = BUF_READER_BUFFER_SIZE - reader->bufferPosition;
+	size_t bufRemaining = BUF_READER_BUFFER_SIZE - reader->bufferPosition;
+	if (reader->bufferPosition == reader->bufferLength)
+	{
+		bufRemaining = 0;
+	}
+
 	if (0 < bufRemaining) {
 		memmove(
 			reader->buffer,
@@ -108,6 +113,8 @@ buf_reader_t* buf_reader_new(const char* fileName)
 
 
 	/* Default the struct values */
+	memset(reader->buffer, 0, sizeof(reader->buffer));
+
 	reader->file = NULL;
 	reader->bufferLength = 0;
 	reader->bufferPosition = 0;
@@ -203,6 +210,8 @@ bool buf_reader_open(buf_reader_t* reader, const char* fileName)
 		reader->stateError = true;
 		return false;
 	}
+
+	buf_reader_refill(reader);
 
 	return true;
 }

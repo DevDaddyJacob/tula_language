@@ -294,3 +294,59 @@ bool os_path_exists(const char* path) {
 	free(nPath);
 	return true;
 }
+
+
+bool os_path_is_file(const char* path) {
+#if !defined(OS_WINDOWS) && !defined(OS_POSIX_COMPLIANT)
+#error Unsupported platform, \
+	no compliant implementation of function 'os_path_is_file'.
+#endif
+
+	/* Validate the path */
+	if (NULL == path)
+	{
+		return false;
+	}
+
+
+	/* Normalize the path */
+	char* nPath = os_path_normalize(path);
+
+
+	/* Perform platform dependant check */
+#if defined(OS_WINDOWS)
+	/* Get the file attributes */
+	const DWORD fileAttributes = GetFileAttributesA(nPath);
+	if (INVALID_FILE_ATTRIBUTES == fileAttributes) {
+		free(nPath);
+		return false;
+	}
+
+
+	/* Ensure the path isn't a directory */
+	if (fileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+		free(nPath);
+		return false;
+	}
+#endif
+
+#if defined(OS_POSIX_COMPLIANT)
+	/* Get the file stat */
+	struct stat fileStat;
+	if (0 != stat(nPath, &fileStat)) {
+		free(nPath);
+		return false;
+	}
+
+
+	/* Ensure the path is a file */
+	if (!S_ISREG(fileStat.st_mode)) {
+		free(nPath);
+		return false;
+	}
+
+#endif
+
+	free(nPath);
+	return true;
+}

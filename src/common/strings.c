@@ -85,7 +85,7 @@ bool str_equals(const char* str, const char* target, const size_t targetLen)
 
 
 	/* Length validation */
-	if (0 >= targetLen)
+	if (0 == targetLen)
 	{
 		return false;
 	}
@@ -110,7 +110,7 @@ bool str_equals_partial(
 
 
     /* Length validation */
-    if (0 >= strOffset || 0 >= targetLen)
+    if (0 >= targetLen)
     {
 	    return false;
     }
