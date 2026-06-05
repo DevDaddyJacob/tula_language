@@ -3,7 +3,7 @@ project(tula C)
 
 set(CMAKE_C_STANDARD 99)
 
-include(CTest)
+#include(CTest)
 
 # Enable Unity memory extension before adding the subdirectory
 set(UNITY_EXTENSION_MEMORY ON CACHE BOOL "" FORCE)
@@ -20,8 +20,8 @@ add_library(tula_lib STATIC
         src/common/strings.h
         src/state/gstate.c
         src/state/gstate.h
-        src/engine/scanner/scanner.c
-        src/engine/scanner/scanner.h
+        src/engine/scanner/token.c
+        src/engine/scanner/token.h
         src/common/buffered_reader.c
         src/common/buffered_reader.h
         src/common/os.c
@@ -42,4 +42,5 @@ add_custom_target(run_all_tests
         DEPENDS
             test_buffered_reader
             test_strings
+            test_token
 )
