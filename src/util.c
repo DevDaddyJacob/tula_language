@@ -61,7 +61,8 @@ int32_t err_print_f(const char* format, ...) {
 	// ReSharper disable once CppDFAConstantConditions
 	if (charsPrinted > TULA_MAX_BUFFER_SIZE)
 	{
-		return PRINT_PARTIAL_SUCCESS;
+		/* Don't ask... */
+		UNREACHABLE_RETURN(PRINT_PARTIAL_SUCCESS);
 	}
 
 	if (charsPrinted <= 0)

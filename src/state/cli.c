@@ -274,14 +274,14 @@ cli_config_t* cli_parse_args(const int argc, const char** argv)
     cli_params_t* params = malloc(sizeof(cli_params_t));
     if (NULL == params)
     {
-        exit_err_no_mem();
+        tula_exit_err_no_mem();
     }
 
     cli_config_t* config = malloc(sizeof(cli_config_t));
     if (NULL == config)
     {
         free(params);
-        exit_err_no_mem();
+        tula_exit_err_no_mem();
     }
 
 
@@ -324,7 +324,7 @@ cli_config_t* cli_parse_args(const int argc, const char** argv)
 			free(params);
 			free(config);
 
-			exit_err_no_mem();
+			tula_exit_err_no_mem();
 		}
 
 

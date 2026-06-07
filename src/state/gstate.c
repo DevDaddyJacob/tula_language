@@ -46,7 +46,7 @@ void setup_global_state(const int32_t argc, const char** argv)
 	GLOBAL_STATE = (global_state_t*)malloc(sizeof(global_state_t));
 	if (NULL == GLOBAL_STATE)
 	{
-		exit_err_no_mem();
+		tula_exit_err_no_mem();
 	}
 
 
@@ -89,7 +89,7 @@ global_state_t* get_global_state()
 {
 	if (NULL == GLOBAL_STATE)
 	{
-		exit_err_early_state_access();
+		tula_exit_err_early_state_access();
 	}
 
 	return GLOBAL_STATE;

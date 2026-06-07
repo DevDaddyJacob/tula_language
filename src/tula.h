@@ -72,7 +72,7 @@ NO_RETURN void tula_exit(int32_t exitCode);
 NO_RETURN void tula_exit_error(int32_t exitCode, const char* format, ...);
 
 
-static NO_RETURN void exit_err_internal(const char* msg)
+static NO_RETURN void tula_exit_err_internal(const char* msg)
 {
 	tula_exit_error(
 		TULA_EXIT_UNDEF_INTERNAL_ERR,
@@ -82,7 +82,7 @@ static NO_RETURN void exit_err_internal(const char* msg)
 }
 
 
-static NO_RETURN void exit_err_bad_usage(const char* msg)
+static NO_RETURN void tula_exit_err_bad_usage(const char* msg)
 {
 	tula_exit_error(
 		TULA_EXIT_NO_MEM,
@@ -92,7 +92,7 @@ static NO_RETURN void exit_err_bad_usage(const char* msg)
 }
 
 
-static NO_RETURN void exit_err_no_mem(void)
+static NO_RETURN void tula_exit_err_no_mem(void)
 {
 	tula_exit_error(
 		TULA_EXIT_NO_MEM,
@@ -101,7 +101,7 @@ static NO_RETURN void exit_err_no_mem(void)
 }
 
 
-static NO_RETURN void exit_err_early_state_access(void)
+static NO_RETURN void tula_exit_err_early_state_access(void)
 {
 	tula_exit_error(
 		TULA_EXIT_ACCESS_STATE_BEFORE_INIT,
