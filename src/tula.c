@@ -2,7 +2,12 @@
 #include <stdlib.h>
 
 #include "tula.h"
+
+#include <stdio.h>
+
 #include "util.h"
+#include "common/buffered_reader.h"
+#include "engine/scanner/scanner.h"
 #include "state/gstate.h"
 
 
@@ -79,13 +84,30 @@ void tula_exit_error(const int32_t exitCode, const char* format, ...)
 }
 
 
-void test_lexer() {
-	// global_state_t* state = getGlobalState();
-	// printf("%s\n", state->cli->file);
-	//
-	// buffered_file_t* bFile = bufferedFile_new(state->cli->file);
-	// lexer_t* lexer = lex_new(bFile);
-	//
+void test_scanner() {
+	global_state_t* state = get_global_state();
+	printf("%s\n", state->cli->file);
+
+	buf_reader_t* reader = buf_reader_new(NULL);
+	buf_reader_open(reader, state->cli->file);
+	scanner_t* scanner = scanner_new(reader);
+
+	const token_t* lastToken = scanner_read_next(scanner);
+	do {
+		token_print(lastToken);
+		printf("\n");
+
+		lastToken = scanner_read_next(scanner);
+	}
+	while (
+		NULL != lastToken
+		&& TOK_ERROR != lastToken->type
+		&& TOK_EOS != lastToken->type
+	);
+
+	token_print(lastToken);
+	printf("\n");
+
 	// token_t curToken;
 	// int16_t line = -1;
 	//
@@ -107,7 +129,7 @@ void test_lexer() {
 int main(const int32_t argc, const char* argv[]) {
 	setup(argc, argv);
 
-	test_lexer();
+	test_scanner();
 
 	tula_exit(TULA_EXIT_GOOD);
 }

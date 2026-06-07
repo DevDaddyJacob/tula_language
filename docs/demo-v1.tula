@@ -1,6 +1,9 @@
-/////////////
-// [0] TBD //
-/////////////
+//////////////
+// [0] Misc //
+//////////////
+
+// Comments are defined by either "//" for a full line comment
+/* or between "/*" and "*/" for section based comments */
 
 // The following key words are interchangeable
 // define -> def

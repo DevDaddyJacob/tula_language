@@ -36,6 +36,11 @@
 
 #define UNUSED(value) (void)(value)
 
+#define DEFAULT_BREAK default: { break; }
+
+#define TO_STRING(x) #x
+#define STRINGIFY(x) TO_STRING(x)
+
 #define NO_RETURN __attribute__((noreturn))
 
 /* ========================================================================= */

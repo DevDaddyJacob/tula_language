@@ -14,51 +14,51 @@ void tearDown(void)
 
 
 /* -------------------------------------------------------------------------
- * char_isAlpha
+ * char_is_alpha
  * ------------------------------------------------------------------------- */
 
-void test_char_isAlpha_lowercase(void) {
-    TEST_ASSERT_TRUE(char_isAlpha('a'));
-    TEST_ASSERT_TRUE(char_isAlpha('z'));
-    TEST_ASSERT_TRUE(char_isAlpha('m'));
+void test_char_is_alpha_lowercase(void) {
+    TEST_ASSERT_TRUE(char_is_alpha('a'));
+    TEST_ASSERT_TRUE(char_is_alpha('z'));
+    TEST_ASSERT_TRUE(char_is_alpha('m'));
 }
 
-void test_char_isAlpha_uppercase(void) {
-    TEST_ASSERT_TRUE(char_isAlpha('A'));
-    TEST_ASSERT_TRUE(char_isAlpha('Z'));
-    TEST_ASSERT_TRUE(char_isAlpha('M'));
+void test_char_is_alpha_uppercase(void) {
+    TEST_ASSERT_TRUE(char_is_alpha('A'));
+    TEST_ASSERT_TRUE(char_is_alpha('Z'));
+    TEST_ASSERT_TRUE(char_is_alpha('M'));
 }
 
-void test_char_isAlpha_rejects_digits(void) {
-    TEST_ASSERT_FALSE(char_isAlpha('0'));
-    TEST_ASSERT_FALSE(char_isAlpha('9'));
+void test_char_is_alpha_rejects_digits(void) {
+    TEST_ASSERT_FALSE(char_is_alpha('0'));
+    TEST_ASSERT_FALSE(char_is_alpha('9'));
 }
 
-void test_char_isAlpha_rejects_symbols(void) {
-    TEST_ASSERT_FALSE(char_isAlpha('!'));
-    TEST_ASSERT_FALSE(char_isAlpha(' '));
-    TEST_ASSERT_FALSE(char_isAlpha('_'));
+void test_char_is_alpha_rejects_symbols(void) {
+    TEST_ASSERT_FALSE(char_is_alpha('!'));
+    TEST_ASSERT_FALSE(char_is_alpha(' '));
+    TEST_ASSERT_FALSE(char_is_alpha('_'));
 }
 
 
 /* -------------------------------------------------------------------------
- * char_isDigit
+ * char_is_digit
  * ------------------------------------------------------------------------- */
 
-void test_char_isDigit_all_digits(void) {
-    TEST_ASSERT_TRUE(char_isDigit('0'));
-    TEST_ASSERT_TRUE(char_isDigit('5'));
-    TEST_ASSERT_TRUE(char_isDigit('9'));
+void test_char_is_digit_all_digits(void) {
+    TEST_ASSERT_TRUE(char_is_digit('0'));
+    TEST_ASSERT_TRUE(char_is_digit('5'));
+    TEST_ASSERT_TRUE(char_is_digit('9'));
 }
 
-void test_char_isDigit_rejects_alpha(void) {
-    TEST_ASSERT_FALSE(char_isDigit('a'));
-    TEST_ASSERT_FALSE(char_isDigit('Z'));
+void test_char_is_digit_rejects_alpha(void) {
+    TEST_ASSERT_FALSE(char_is_digit('a'));
+    TEST_ASSERT_FALSE(char_is_digit('Z'));
 }
 
-void test_char_isDigit_rejects_symbols(void) {
-    TEST_ASSERT_FALSE(char_isDigit('/'));  /* one below '0' */
-    TEST_ASSERT_FALSE(char_isDigit(':'));  /* one above '9' */
+void test_char_is_digit_rejects_symbols(void) {
+    TEST_ASSERT_FALSE(char_is_digit('/'));  /* one below '0' */
+    TEST_ASSERT_FALSE(char_is_digit(':'));  /* one above '9' */
 }
 
 
@@ -241,14 +241,14 @@ void test_str_ends_with_char_empty_string(void) {
 int main(void) {
     UNITY_BEGIN();
 
-    RUN_TEST(test_char_isAlpha_lowercase);
-    RUN_TEST(test_char_isAlpha_uppercase);
-    RUN_TEST(test_char_isAlpha_rejects_digits);
-    RUN_TEST(test_char_isAlpha_rejects_symbols);
+    RUN_TEST(test_char_is_alpha_lowercase);
+    RUN_TEST(test_char_is_alpha_uppercase);
+    RUN_TEST(test_char_is_alpha_rejects_digits);
+    RUN_TEST(test_char_is_alpha_rejects_symbols);
 
-    RUN_TEST(test_char_isDigit_all_digits);
-    RUN_TEST(test_char_isDigit_rejects_alpha);
-    RUN_TEST(test_char_isDigit_rejects_symbols);
+    RUN_TEST(test_char_is_digit_all_digits);
+    RUN_TEST(test_char_is_digit_rejects_alpha);
+    RUN_TEST(test_char_is_digit_rejects_symbols);
 
     RUN_TEST(test_str_copy_safe_normal_copy);
     RUN_TEST(test_str_copy_safe_truncates_to_buffer);

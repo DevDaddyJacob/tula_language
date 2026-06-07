@@ -26,6 +26,8 @@ add_library(tula_lib STATIC
         src/common/buffered_reader.h
         src/common/os.c
         src/common/os.h
+        src/engine/scanner/scanner.c
+        src/engine/scanner/scanner.h
 )
 target_include_directories(tula_lib PUBLIC src)
 

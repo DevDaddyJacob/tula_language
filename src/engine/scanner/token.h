@@ -7,6 +7,12 @@
 
 #include "../../config.h"
 
+
+/**
+ * \brief	Represents the maximum number of characters that a token may have.
+ */
+#define TOKEN_MAX_LENGTH 128
+
 /*
  * def(
  *		tokenIdentifier,	<-	The identifier used to define the token
@@ -34,8 +40,8 @@
 	def(TOK_DOUBLE,			"<double>",		NULL,		false,	true,	false,	false)	\
 	def(TOK_CHAR,			"<char>",		NULL,		false,	true,	false,	false)	\
 	def(TOK_STRING,			"<string>",		NULL,		false,	true,	false,	false)	\
-	def(TOK_true,			"true",			NULL,		false,	true,	true,	false)	\
-	def(TOK_false,			"false",		NULL,		false,	true,	true,	false)	\
+	def(TOK_TRUE,			"true",			NULL,		false,	true,	true,	false)	\
+	def(TOK_FALSE,			"false",		NULL,		false,	true,	true,	false)	\
 	def(TOK_DEFINE,			"define",		"def",		false,	false,	true,	false)	\
 	def(TOK_VARIABLE,		"variable",		"var",		false,	false,	true,	false)	\
 	def(TOK_CONSTANT,		"constant",		"const",	false,	false,	true,	false)	\
@@ -44,6 +50,7 @@
 	def(TOK_SET,			"set",			NULL,		false,	false,	true,	false)	\
 	def(TOK_UNSET,			"unset",		NULL,		false,	false,	true,	false)	\
 	def(TOK_IS_SET,			"isSet",		NULL,		false,	false,	true,	false)	\
+	def(TOK_EMIT,			"emit",			NULL,		false,	false,	true,	false)	\
 	def(TOK_IF,				"if",			NULL,		false,	false,	true,	false)	\
 	def(TOK_ELSE,			"else",			NULL,		false,	false,	true,	false)	\
 	def(TOK_WHILE,			"while",		NULL,		false,	false,	true,	false)	\
@@ -70,8 +77,8 @@
 	def(TOK_CARET,			"^",			NULL,		false,	false,	false,	true)	\
 	def(TOK_SLASH_FWD,		"/",			NULL,		false,	false,	false,	true)	\
 	def(TOK_PERCENT,		"%",			NULL,		false,	false,	false,	true)	\
-	def(TOK_QUOTE_SIGNLE,	"'",			NULL,		false,	false,	false,	true)	\
-	def(TOK_QUOTE_DOUBLE,	"\"",			NULL,		false,	false,	false,	true)	\
+	/* def(TOK_QUOTE_SINGLE,	"'",			NULL,		false,	false,	false,	true) 	*/ \
+	/* def(TOK_QUOTE_DOUBLE,	"\"",			NULL,		false,	false,	false,	true)	*/ \
 	def(TOK_GREATER_THAN,	">",			NULL,		false,	false,	false,	true)	\
 	def(TOK_LESS_THAN,		"<",			NULL,		false,	false,	false,	true)	\
 	def(TOK_PLUS_PLUS,		"++",			NULL,		false,	false,	false,	true)	\
@@ -183,6 +190,21 @@ extern const bool TOKENS_IS_KEYWORD[TOTAL_TOKENS];
  *			represents an operator.
  */
 extern const bool TOKENS_IS_OPERATOR[TOTAL_TOKENS];
+
+
+token_t* token_new(
+	token_type_t type,
+	uint32_t line,
+	uint32_t column,
+	const char* content,
+	uint32_t contentLength
+);
+
+
+token_t* token_new_error(uint32_t line, uint32_t column, const char* content);
+
+
+token_t* token_new_eos(uint32_t line, uint32_t column);
 
 
 /**

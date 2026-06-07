@@ -2,8 +2,10 @@
 #include "token.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #include "util.h"
+#include "common/strings.h"
 
 /*
  * ==================================================
@@ -78,6 +80,58 @@ const bool TOKENS_IS_OPERATOR[TOTAL_TOKENS] = {
  * Function Definitions
  * ==================================================
  */
+
+token_t* token_new(
+	const token_type_t type,
+	const uint32_t line,
+	const uint32_t column,
+	const char* content,
+	const uint32_t contentLength
+)
+{
+	token_t* token = malloc(sizeof(token_t));
+	if (NULL == token)
+	{
+		return NULL;
+	}
+
+	token->type = type;
+	token->line = line;
+	token->column = column;
+	token->content = NULL;
+	token->contentLength = contentLength;
+
+	if (NULL != content)
+	{
+		token->content = malloc(sizeof(char) * (contentLength + 1));
+		if (NULL == token->content)
+		{
+			free(token);
+			return NULL;
+		}
+
+		str_copy_safe(token->content, content, contentLength + 1);
+	}
+
+	return token;
+}
+
+
+token_t* token_new_error(
+	const uint32_t line,
+	const uint32_t column,
+	const char* content
+)
+{
+	return token_new(TOK_ERROR, line, column, content, strlen(content));
+}
+
+
+token_t* token_new_eos(const uint32_t line, const uint32_t column)
+{
+	return token_new(TOK_EOS, line, column, NULL, 0);
+}
+
 
 void token_destroy(token_t* token)
 {

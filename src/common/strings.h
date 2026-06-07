@@ -4,10 +4,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define char_isAlpha(c) \
+#define char_is_alpha(c) \
 	((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
 
-#define char_isDigit(c) \
+#define char_is_digit(c) \
 	(c >= '0' && c <= '9')
 
 
