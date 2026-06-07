@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "../../config.h"
+
 /*
  * def(
  *		tokenIdentifier,	<-	The identifier used to define the token
@@ -92,6 +94,55 @@ typedef enum tula_token_type
 } token_type_t;
 
 
+typedef struct tula_token
+{
+	/**
+	 * \brief	The token's type
+	 */
+	token_type_t type;
+
+	/**
+	 * \brief	The line the token is found on
+	 */
+	uint32_t line;
+
+	/**
+	 * \brief	The column the token is starts at
+	 */
+	uint32_t column;
+
+	/**
+	 * \brief	Pointer to the start of the token
+	 */
+	char* content;
+
+	/**
+	 * \brief	The length of the token
+	 */
+	uint32_t contentLength;
+} token_t;
+
+
+typedef struct tula_arr_token
+{
+	/**
+	 * \brief	The amount of elements currently in the array.
+	 */
+	size_t count;
+
+	/**
+	 * \brief	The amount of elements the array can currently accommodate.
+	 */
+	size_t capacity;
+
+
+	/**
+	 * \brief	Pointer to the first element of the array.
+	 */
+	token_t* values;
+} arr_token_t;
+
+
 /**
  * \brief	An array which contains the string of the textual representation of
  *			each token.
@@ -132,6 +183,46 @@ extern const bool TOKENS_IS_KEYWORD[TOTAL_TOKENS];
  *			represents an operator.
  */
 extern const bool TOKENS_IS_OPERATOR[TOTAL_TOKENS];
+
+
+/**
+ * \brief           Releases the provided token
+ * \param[in]       token: Pointer to the token to free
+ */
+void token_destroy(token_t* token);
+
+
+/**
+ * \brief           Initializes the provided array
+ * \param[in]       array: Pointer to the array to initialize
+ */
+void arr_token_init(arr_token_t* array);
+
+
+/**
+ * \brief           Releases the provided array
+ * \param[in]       array: Pointer to the array to free
+ */
+void arr_token_destroy(arr_token_t* array);
+
+
+/**
+ * \brief           Writes the provided value to the array
+ * \param[in]       array: Pointer to the array to write to
+ * \param[in]       value: The value to write to the array
+ */
+void arr_token_add(arr_token_t* array, const token_t* value);
+
+
+#ifdef TULA_DEBUGGING
+void token_print(const token_t* token);
+
+void arr_token_print(const arr_token_t* array);
+#else
+#define token_print(_0) ((void)_0)
+
+#define arr_token_print(_0) ((void)_0)
+#endif
 
 
 #endif /* TULA_ENGINE_SCANNER_TOKEN_H */

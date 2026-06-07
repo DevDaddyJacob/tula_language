@@ -116,3 +116,33 @@ int32_t err_print_v(const char* format, const va_list vargs) {
 
 	return charsPrinted;
 }
+
+void* tula_array_reallocate(
+	void* pointer,
+	const size_t oldSize,
+	const size_t newSize
+)
+{
+	/* Currently unused, but probably will be useful for GC down the road */
+	UNUSED(oldSize);
+
+
+	/* If the new size is 0 handle the deallocation */
+	if (0 == newSize)
+	{
+		free(pointer);
+		return NULL;
+	}
+
+
+	/* Try to allocate more memory */
+	void* result = realloc(pointer, newSize);
+	if (NULL == result)
+	{
+		tula_exit_err_no_mem();
+
+		UNREACHABLE_RETURN(NULL);
+	}
+
+	return result;
+}
