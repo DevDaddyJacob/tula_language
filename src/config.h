@@ -3,15 +3,31 @@
 
 /*
  * ============================================================================
- * Development debugging config
+ * Executable type config
  * ============================================================================
  */
 
-/**
- * Used manually if you want to have some extra debugging output, mainly for
- * development work
+/*
+ * You can use "-DTULA_EXECUTABLE_TYPE=#" as a compiler flag to define this.
+ * Supported values include:
+ *		- 0: standard mode
+ *		- 1: debugging mode
  */
-#define TULA_DEBUGGING
+#ifndef TULA_EXECUTABLE_TYPE
+#define TULA_EXECUTABLE_TYPE 1
+#endif /* TULA_EXECUTABLE_TYPE */
+
+
+/* Standard executable mode */
+#if 0 == TULA_EXECUTABLE_TYPE
+#define TULA_EXE_STANDARD
+#endif
+
+
+/* Debugging executable mode */
+#if 1 == TULA_EXECUTABLE_TYPE
+#define TULA_EXE_DEBUGGING
+#endif
 
 /* ========================================================================= */
 

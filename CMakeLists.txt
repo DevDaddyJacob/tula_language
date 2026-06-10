@@ -1,12 +1,25 @@
 cmake_minimum_required(VERSION 4.2)
+
 project(tula C)
 
-set(CMAKE_C_STANDARD 99)
+################################################################################
+# Define the global settings for the build
+################################################################################
 
-#include(CTest)
+# Define the C standard
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+
+# Define the compiler flags
+add_compile_options(-Wall -Wextra)
 
 # Enable Unity memory extension before adding the subdirectory
 set(UNITY_EXTENSION_MEMORY ON CACHE BOOL "" FORCE)
+
+
+################################################################################
+# Define the library for the tula program
+################################################################################
 
 # All source as a library so tests can link against it
 add_library(tula_lib STATIC
@@ -31,18 +44,38 @@ add_library(tula_lib STATIC
 )
 target_include_directories(tula_lib PUBLIC src)
 
-# Main executable just provides main()
+
+################################################################################
+# Define the standard tula cli executable (named "tula")
+################################################################################
+
 add_executable(tula src/tula.c)
+
 target_link_libraries(tula PRIVATE tula_lib)
 
-add_subdirectory(vendor/unity)
-add_subdirectory(test)
+target_compile_options(tula PRIVATE -Werror)
 
-add_custom_target(run_all_tests
-        COMMAND
-            ${CMAKE_CTEST_COMMAND} --output-on-failure
-        DEPENDS
-            test_buffered_reader
-            test_strings
-            test_token
-)
+target_compile_definitions(tula PRIVATE TULA_EXECUTABLE_TYPE=0)
+
+
+################################################################################
+# Define the debugging tula cli executable (named "tulad")
+################################################################################
+
+add_executable(tulad src/tula.c)
+
+target_link_libraries(tulad PRIVATE tula_lib)
+
+target_compile_options(tulad PRIVATE)
+
+target_compile_definitions(tulad PRIVATE TULA_EXECUTABLE_TYPE=1)
+
+
+################################################################################
+# Define additional targets
+################################################################################
+
+# Process CMakeLists from subdirectories
+add_subdirectory(vendor/unity)
+add_subdirectory(test/integration_tests)
+add_subdirectory(test/unit_tests)

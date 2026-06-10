@@ -83,7 +83,7 @@ void tula_exit_error(const int32_t exitCode, const char* format, ...)
 	exit(exitCode);
 }
 
-
+#ifdef TULA_EXE_DEBUGGING
 void test_scanner() {
 	global_state_t* state = get_global_state();
 	printf("%s\n", state->cli->file);
@@ -124,12 +124,15 @@ void test_scanner() {
 	// 	&& curToken.type != TOK_ERROR
 	// );
 }
+#endif /* TULA_EXE_DEBUGGING */
 
 
 int main(const int32_t argc, const char* argv[]) {
 	setup(argc, argv);
 
+#ifdef TULA_EXE_DEBUGGING
 	test_scanner();
+#endif /* TULA_EXE_DEBUGGING */
 
 	tula_exit(TULA_EXIT_GOOD);
 }

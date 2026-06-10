@@ -204,7 +204,7 @@ void arr_token_add(arr_token_t* array, const token_t* value)
 }
 
 
-#ifdef TULA_DEBUGGING
+#ifdef TULA_EXE_DEBUGGING
 void token_print(const token_t* token)
 {
 	printf(
@@ -258,4 +258,4 @@ void arr_token_print(const arr_token_t* array)
 
 	printf("]");
 }
-#endif
+#endif /* TULA_EXE_DEBUGGING */

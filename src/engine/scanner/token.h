@@ -243,15 +243,11 @@ void arr_token_destroy(arr_token_t* array);
 void arr_token_add(arr_token_t* array, const token_t* value);
 
 
-#ifdef TULA_DEBUGGING
+#ifdef TULA_EXE_DEBUGGING
 void token_print(const token_t* token);
 
 void arr_token_print(const arr_token_t* array);
-#else
-#define token_print(_0) ((void)_0)
-
-#define arr_token_print(_0) ((void)_0)
-#endif
+#endif /* TULA_EXE_DEBUGGING */
 
 
 #endif /* TULA_ENGINE_SCANNER_TOKEN_H */
