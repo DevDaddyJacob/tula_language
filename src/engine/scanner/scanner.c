@@ -42,16 +42,16 @@ static token_t* scanner_consume_operator(
 );
 
 
-static token_t* scanner_consume_identifier(scanner_t* lexer);
+static token_t* scanner_consume_identifier(const scanner_t* scanner);
 
 
-static token_t* scanner_consume_number(scanner_t* lexer);
+static token_t* scanner_consume_number(scanner_t* scanner);
 
 
-static token_t* scanner_consume_string(scanner_t* lexer);
+static token_t* scanner_consume_string(const scanner_t* scanner);
 
 
-static token_t* scanner_consume_char(scanner_t* lexer);
+static token_t* scanner_consume_char(const scanner_t* scanner);
 
 /*
  * ==================================================
@@ -650,20 +650,20 @@ static token_t* scanner_consume_operator(
 	scanner_t* lexer,
 	token_type_t type,
 	size_t size
-	)
+)
 {
 	// TODO: Implement
 	return NULL;
 }
 
 
-static token_t* scanner_consume_identifier(scanner_t* scanner)
+static token_t* scanner_consume_identifier(const scanner_t* scanner)
 {
 	const uint32_t startLine = scanner->reader->lineNumber;
 	const uint32_t startCol = scanner->reader->columnNumber;
 
 	uint32_t i = 0;
-	char buffer[TOKEN_MAX_LENGTH];
+	char buffer[TOKEN_MAX_LENGTH] = { 0 };
 
 	/*
 	 * First char cannot be numeric
@@ -705,24 +705,101 @@ static token_t* scanner_consume_identifier(scanner_t* scanner)
 }
 
 
-static token_t* scanner_consume_number(scanner_t* lexer)
+static token_t* scanner_consume_number(scanner_t* scanner)
 {
 	// TODO: Implement
 	return NULL;
 }
 
 
-static token_t* scanner_consume_string(scanner_t* lexer)
+static token_t* scanner_consume_string(const scanner_t* scanner)
 {
-	// TODO: Implement
-	return NULL;
+	const uint32_t startLine = scanner->reader->lineNumber;
+	const uint32_t startCol = scanner->reader->columnNumber;
+
+	uint32_t i = 0;
+	char buffer[TOKEN_STRING_MAX_LENGTH] = { 0 };
+
+	/* Don't include the first character (") in the string */
+	buf_reader_consume(scanner->reader);
+
+	int32_t nextChar = buf_reader_peek(scanner->reader);
+	bool inEscapeSequence = false;
+	while (
+		buf_reader_has_next(scanner->reader)
+		&& (inEscapeSequence || '"' != nextChar)
+		&& TOKEN_STRING_MAX_LENGTH > i
+	)
+	{
+		if (!inEscapeSequence && '\\' == nextChar)
+		{
+			buf_reader_consume(scanner->reader);
+			inEscapeSequence = true;
+		}
+		else
+		{
+			inEscapeSequence = false;
+			buffer[i++] = (char) buf_reader_read(scanner->reader);
+		}
+
+		nextChar = buf_reader_peek(scanner->reader);
+	}
+
+
+	/* Consume the trialing '"' */
+	buf_reader_consume(scanner->reader);
+
+
+	if (TOKEN_STRING_MAX_LENGTH <= i)
+	{
+		return token_new_error(
+			scanner->reader->lineNumber,
+			scanner->reader->columnNumber,
+			"String too long! Strings cannot exceed " \
+				STRINGIFY(TOKEN_STRING_MAX_LENGTH) " characters."
+		);
+	}
+
+	return token_new(
+		TOK_STRING,
+		startLine,
+		startCol,
+		buffer,
+		i
+	);
 }
 
 
-static token_t* scanner_consume_char(scanner_t* lexer)
+static token_t* scanner_consume_char(const scanner_t* scanner)
 {
-	// TODO: Implement
-	return NULL;
+	const uint32_t startLine = scanner->reader->lineNumber;
+	const uint32_t startCol = scanner->reader->columnNumber;
+
+	/* Don't include the first character (') in the string */
+	buf_reader_consume(scanner->reader);
+
+	char buffer[1] = { 0 };
+	buffer[0] = (char) buf_reader_read(scanner->reader);
+
+	if ('\'' != buf_reader_peek(scanner->reader))
+	{
+		return token_new_error(
+			scanner->reader->lineNumber,
+			scanner->reader->columnNumber,
+			"Unexpected character! Expected \"'\"."
+		);
+	}
+
+	/* Consume the trialing ' */
+	buf_reader_consume(scanner->reader);
+
+	return token_new(
+		TOK_CHAR,
+		startLine,
+		startCol,
+		buffer,
+		1
+	);
 }
 
 

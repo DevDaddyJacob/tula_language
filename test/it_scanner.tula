@@ -41,3 +41,7 @@ var
 while
 
 my_special_identifier
+
+"My Special \"String\"!"
+
+'a''b''c'

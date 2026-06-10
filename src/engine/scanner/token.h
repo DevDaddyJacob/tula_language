@@ -13,6 +13,13 @@
  */
 #define TOKEN_MAX_LENGTH 128
 
+
+/**
+ * \brief	Represents the maximum number of characters that a string token may
+ *			have.
+ */
+#define TOKEN_STRING_MAX_LENGTH 2048
+
 /*
  * def(
  *		tokenIdentifier,	<-	The identifier used to define the token
