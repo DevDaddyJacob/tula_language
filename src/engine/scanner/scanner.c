@@ -637,8 +637,11 @@ static void scanner_skip_whitespace(const scanner_t* scanner)
 					{
 						buf_reader_consume(scanner->reader);
 					}
+
+					continue;
 				}
-				else if ('*' == nextChar)
+
+				if ('*' == nextChar)
 				{
 					/* eat the '*' up next to prime the while loop */
 					buf_reader_consume(scanner->reader);
