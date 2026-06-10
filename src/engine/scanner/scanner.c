@@ -340,9 +340,40 @@ handle_con:
 	{
 		case 's':
 		{
-			if (5 > contentLength)
+			goto handle_cons;
+		}
+
+		case 't':
+		{
+			/* keyword "continue" */
+			return try_infer_identifier_type(
+				content, contentLength,
+				4,
+				TOK_CONTINUE,
+				false
+			);
+		}
+
+		DEFAULT_BREAK
+	}
+
+	goto end_with_default;
+
+
+handle_cons:
+	if (5 > contentLength)
+	{
+		goto end_with_default;
+	}
+
+	switch (content[4])
+	{
+		case 't':
+		{
+			if (6 > contentLength)
 			{
-				break;
+				/* keyword "const" */
+				return TOK_CONSTANT;
 			}
 
 			switch (content[4])
@@ -369,17 +400,6 @@ handle_con:
 			}
 		}
 
-		case 't':
-		{
-			/* keyword "continue" */
-			return try_infer_identifier_type(
-				content, contentLength,
-				4,
-				TOK_CONTINUE,
-				false
-			);
-		}
-
 		DEFAULT_BREAK
 	}
 
@@ -397,6 +417,12 @@ handle_d:
 		case 'e':
 		{
 			goto handle_de;
+		}
+
+		case 'o':
+		{
+			/* keyword "do" */
+			return TOK_DO;
 		}
 
 		DEFAULT_BREAK
@@ -417,7 +443,8 @@ handle_de:
 		{
 			if (4 > contentLength)
 			{
-				break;
+				/* keyword "def" */
+				return TOK_DEFINE;
 			}
 
 			switch (content[3])
@@ -444,12 +471,6 @@ handle_de:
 			}
 
 			break;
-		}
-
-		case 'o':
-		{
-			/* keyword "do" */
-			return TOK_DO;
 		}
 
 		DEFAULT_BREAK
