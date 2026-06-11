@@ -4,6 +4,7 @@
 #include "gstate.h"
 #include "cli.h"
 #include "../tula.h"
+#include "common/exit.h"
 
 /*
  * ==================================================

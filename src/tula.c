@@ -7,6 +7,8 @@
 
 #include "util.h"
 #include "common/buffered_reader.h"
+#include "common/exit.h"
+#include "common/trace.h"
 #include "engine/scanner/scanner.h"
 #include "state/gstate.h"
 
@@ -58,29 +60,6 @@ static void setup(const int32_t argc, const char* argv[])
 static void teardown()
 {
 	teardown_global_state();
-}
-
-
-void tula_exit(const int32_t exitCode)
-{
-	teardown();
-	exit(exitCode);
-}
-
-
-void tula_exit_error(const int32_t exitCode, const char* format, ...)
-{
-	if (NULL != format)
-	{
-		/* Get the vargs, and print the message */
-		va_list vargs;
-		va_start(vargs, format);
-		err_print_v(format, vargs);
-		va_end(vargs);
-	}
-
-	teardown();
-	exit(exitCode);
 }
 
 #ifdef TULA_EXE_DEBUGGING

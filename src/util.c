@@ -5,6 +5,7 @@
 
 #include "config.h"
 #include "tula.h"
+#include "common/exit.h"
 
 /*
  * ==================================================

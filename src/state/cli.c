@@ -4,8 +4,9 @@
 #include <string.h>
 
 #include "cli.h"
-#include "../tula.h"
-#include "../common/strings.h"
+#include "tula.h"
+#include "common/exit.h"
+#include "common/strings.h"
 
 /*
  * ==================================================

@@ -2,9 +2,34 @@
 #define TULA_LANGUAGE_UTIL_H
 
 #include <stdarg.h>
+#include <stdint.h>
 
 #include "config.h"
-#include "tula.h"
+
+/*
+ * ============================================================================
+ * Common / Utility Macros
+ * ============================================================================
+ */
+
+#define UNREACHABLE_HINT __assume(0)
+
+#define UNREACHABLE_RETURN(value) \
+do { UNREACHABLE_HINT; return value; } while(0)
+#define UNREACHABLE_DEFAULT(value)  default: UNREACHABLE_HINT; value
+#define UNREACHABLE(value)          UNREACHABLE_HINT
+
+#define UNUSED(value) (void)(value)
+
+#define DEFAULT_BREAK default: { break; }
+
+#define TO_STRING(x) #x
+#define STRINGIFY(x) TO_STRING(x)
+
+#define NO_RETURN __declspec(noreturn)
+
+/* ========================================================================= */
+
 
 /*
  * ============================================================================

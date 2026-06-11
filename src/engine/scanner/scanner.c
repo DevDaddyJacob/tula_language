@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-#include "tula.h"
+#include "common/exit.h"
 #include "common/strings.h"
 
 /*
@@ -643,7 +643,8 @@ static void scanner_skip_whitespace(const scanner_t* scanner)
 
 				if ('*' == nextChar)
 				{
-					/* eat the '*' up next to prime the while loop */
+					/* eat the '/' and the '*' to prime the while loop */
+					buf_reader_consume(scanner->reader);
 					buf_reader_consume(scanner->reader);
 
 					while (
@@ -1039,6 +1040,15 @@ const token_t* scanner_read_next(scanner_t* scanner)
 
 		case '/':
 		{
+			if (
+				'*' == buf_reader_peek_n(scanner->reader, 1)
+				|| '\\' == buf_reader_peek_n(scanner->reader, 1)
+			)
+			{
+				scanner_skip_whitespace(scanner);
+				break;
+			}
+
 			CONSUME_TOKEN(scanner_consume_operator(scanner, TOK_SLASH_FWD, 1));
 		}
 

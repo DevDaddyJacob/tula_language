@@ -14,19 +14,19 @@
  *		- 1: debugging mode
  */
 #ifndef TULA_EXECUTABLE_TYPE
-#define TULA_EXECUTABLE_TYPE 1
+#	define TULA_EXECUTABLE_TYPE 1
 #endif /* TULA_EXECUTABLE_TYPE */
 
 
 /* Standard executable mode */
 #if 0 == TULA_EXECUTABLE_TYPE
-#define TULA_EXE_STANDARD
+#	define TULA_EXE_STANDARD
 #endif
 
 
 /* Debugging executable mode */
 #if 1 == TULA_EXECUTABLE_TYPE
-#define TULA_EXE_DEBUGGING
+#	define TULA_EXE_DEBUGGING
 #endif
 
 /* ========================================================================= */
@@ -39,7 +39,7 @@
  */
 
 #ifndef IS_OS_DEFINED
-#include "common/os.h"
+#	include "common/os.h"
 #endif /* IS_OS_DEFINED */
 
 /* ========================================================================= */
@@ -86,6 +86,26 @@
  * The size in bytes of any reader's buffer
  */
 #define TULA_READER_BUFFER_SIZE 4096
+
+/* ========================================================================= */
+
+
+/*
+ * ============================================================================
+ * Configure the parameters for stack traces
+ * ============================================================================
+ */
+
+/**
+ * Maximum call-stack depth captured.
+ */
+#define TULA_TRACE_MAX_FRAMES 64
+
+
+/**
+ * Maximum length of a resolved symbol name (including null terminator).
+ */
+#define TULA_TRACE_MAX_SYMB_LEN 256
 
 /* ========================================================================= */
 

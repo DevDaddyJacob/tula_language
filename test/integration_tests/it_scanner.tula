@@ -1,4 +1,6 @@
 // A testing file to test debug output from the scanner implementation
+/* This line should be ignored
+and this one too */
 
 and
 
