@@ -36,7 +36,7 @@ static void scanner_skip_whitespace(const scanner_t* scanner);
 
 
 static token_t* scanner_consume_operator(
-	scanner_t* lexer,
+	const scanner_t* scanner,
 	token_type_t type,
 	size_t size
 );
@@ -674,13 +674,26 @@ static void scanner_skip_whitespace(const scanner_t* scanner)
 
 
 static token_t* scanner_consume_operator(
-	scanner_t* lexer,
-	token_type_t type,
-	size_t size
+	const scanner_t* scanner,
+	const token_type_t type,
+	const size_t size
 )
 {
-	// TODO: Implement
-	return NULL;
+	const uint32_t startLine = scanner->reader->lineNumber;
+	const uint32_t startCol = scanner->reader->columnNumber;
+
+	for (size_t i = 0; i < size; i++)
+	{
+		buf_reader_consume(scanner->reader);
+	}
+
+	return token_new(
+		type,
+		startLine,
+		startCol,
+		TOKENS_VALUE[type],
+		size
+	);
 }
 
 

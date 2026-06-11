@@ -212,7 +212,7 @@ bool buf_reader_open(buf_reader_t* reader, const char* fileName)
 	}
 
 	buf_reader_refill(reader);
-	reader->columnNumber = 1;
+	reader->columnNumber = 0;
 	reader->lineNumber = 1;
 
 	return true;
