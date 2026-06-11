@@ -4,6 +4,7 @@
 #include "token.h"
 #include "common/buffered_reader.h"
 
+
 typedef struct tula_scanner
 {
 	/**

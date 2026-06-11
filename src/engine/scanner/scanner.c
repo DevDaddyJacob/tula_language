@@ -11,6 +11,58 @@
  * ==================================================
  */
 
+/* Covers literals up to "18446744073709551615ul" */
+#define SCANNER_INT_MAX_CHARS 22
+
+/* Covers literals up to "-0." + 149 frac digits (2^-149) */
+#define SCANNER_FLOAT_MAX_CHARS 152
+
+/* Covers literals up to "-0." + 1074 frac digits + "d" */
+#define SCANNER_DOUBLE_MAX_CHARS 1078
+
+#define UNEXPECTED_CHARACTER_MSG(varMsg, varChar)		\
+	char varMsg[27] = "Unexpected character: '"; 	\
+	switch (varChar) 								\
+	{ 												\
+		case '\t': 									\
+		{ 											\
+			varMsg[23] = '\\'; 						\
+			varMsg[24] = 't'; 						\
+			varMsg[25] = '\''; 						\
+			break; 									\
+		} 											\
+		case '\r': 									\
+		{ 											\
+			varMsg[23] = '\\'; 						\
+			varMsg[24] = 'r'; 						\
+			varMsg[25] = '\''; 						\
+			break; 									\
+		} 											\
+		case '\n': 									\
+		{ 											\
+			varMsg[23] = '\\'; 						\
+			varMsg[24] = 'n'; 						\
+			varMsg[25] = '\''; 						\
+			break; 									\
+		} 											\
+		case '\0': 									\
+		{ 											\
+			varMsg[23] = '\\'; 						\
+			varMsg[24] = '0'; 						\
+			varMsg[25] = '\''; 						\
+			break; 									\
+		} 											\
+		default: 									\
+		{ 											\
+			varMsg[23] = (char) varChar; 			\
+			varMsg[24] = '\''; 						\
+			varMsg[25] = '\0'; 						\
+			break; 									\
+		} 											\
+	}												\
+	varMsg[26] = '\0';
+
+
 /*
  * ==================================================
  * Typedefs & Prototypes
@@ -747,8 +799,286 @@ static token_t* scanner_consume_identifier(const scanner_t* scanner)
 
 static token_t* scanner_consume_number(scanner_t* scanner)
 {
-	// TODO: Implement
-	return NULL;
+	const uint32_t startLine = scanner->reader->lineNumber;
+	const uint32_t startCol = scanner->reader->columnNumber;
+
+
+	/* Do a first pass to determine the numeric type */
+	token_type_t type = TOK_ERROR;
+
+	bool isNegative = false;
+	bool isFloatingPoint = false;
+	uint32_t charsSeeked = 0;
+	int32_t nextChar;
+	while (
+		TOK_ERROR == type
+		&& (nextChar = buf_reader_peek_n(scanner->reader, charsSeeked++)) != -1
+	)
+	{
+		if (1 == charsSeeked && '-' == nextChar)
+		{
+			isNegative = true;
+			continue;
+		}
+
+		if (1 != charsSeeked && '.' == nextChar)
+		{
+			isFloatingPoint = true;
+			continue;
+		}
+
+		if (char_is_digit(nextChar))
+		{
+			continue;
+		}
+
+		switch (nextChar)
+		{
+			case ' ':
+			case '\t':
+			case '\r':
+			case '\n':
+			case '\0':
+			{
+				charsSeeked--;
+
+				if (isFloatingPoint)
+				{
+					type = TOK_FLOAT;
+				}
+				else
+				{
+					type = TOK_INT32;
+				}
+				break;
+			}
+
+			case 'u':
+			{
+				if (isFloatingPoint)
+				{
+					return token_new_error(
+						startLine,
+						startCol + charsSeeked,
+						"Unexpected character 'u' in numeric literal!"
+					);
+				}
+
+				if (isNegative)
+				{
+					return token_new_error(
+						startLine,
+						startCol,
+						"Unsigned numeric literals cannot be negative!"
+					);
+				}
+
+				const int32_t nextNextChar
+					= buf_reader_peek_n(scanner->reader, charsSeeked++);
+
+				switch (nextNextChar)
+				{
+					case ' ':
+					case '\t':
+					case '\r':
+					case '\n':
+					case '\0':
+					{
+						charsSeeked--;
+						type = TOK_UINT32;
+						break;
+					}
+
+					case 'b':
+					{
+						type = TOK_UINT8;
+						break;
+					}
+
+					case 's':
+					{
+						type = TOK_UINT16;
+						break;
+					}
+
+					case 'l':
+					{
+						type = TOK_UINT64;
+						break;
+					}
+
+					default:
+					{
+						UNEXPECTED_CHARACTER_MSG(msg, nextNextChar)
+						return token_new_error(
+							startLine,
+							startCol + charsSeeked,
+							msg
+						);
+					}
+				}
+
+				break;
+			}
+
+			case 'b':
+			{
+				if (isFloatingPoint)
+				{
+					return token_new_error(
+						startLine,
+						startCol + charsSeeked,
+						"Unexpected character 'b' in numeric literal!"
+					);
+				}
+
+				type = TOK_INT8;
+				break;
+			}
+
+			case 's':
+			{
+				if (isFloatingPoint)
+				{
+					return token_new_error(
+						startLine,
+						startCol + charsSeeked,
+						"Unexpected character 's' in numeric literal!"
+					);
+				}
+
+				type = TOK_INT16;
+				break;
+			}
+
+			case 'l':
+			{
+				if (isFloatingPoint)
+				{
+					return token_new_error(
+						startLine,
+						startCol + charsSeeked,
+						"Unexpected character 'l' in numeric literal!"
+					);
+				}
+
+				type = TOK_INT64;
+				break;
+			}
+
+			case 'd':
+			{
+				if (!isFloatingPoint)
+				{
+					return token_new_error(
+						startLine,
+						startCol + charsSeeked,
+						"Unexpected character 'd' in numeric literal!"
+					);
+				}
+
+				type = TOK_DOUBLE;
+				break;
+			}
+
+			default:
+			{
+				UNEXPECTED_CHARACTER_MSG(msg, nextChar)
+				return token_new_error(
+					startLine,
+					startCol + charsSeeked + 1,
+					msg
+				);
+			}
+		}
+	}
+
+
+	int32_t bufferSize;
+	switch (type)
+	{
+		case TOK_INT8:
+		case TOK_UINT8:
+		case TOK_INT16:
+		case TOK_UINT16:
+		case TOK_INT32:
+		case TOK_UINT32:
+		case TOK_INT64:
+		case TOK_UINT64:
+		{
+			bufferSize = SCANNER_INT_MAX_CHARS + 1;
+			break;
+		}
+
+		case TOK_FLOAT:
+		{
+			bufferSize = SCANNER_FLOAT_MAX_CHARS + 1;
+			break;
+		}
+
+		case TOK_DOUBLE:
+		{
+			bufferSize = SCANNER_DOUBLE_MAX_CHARS + 1;
+			break;
+		}
+
+		default:
+		{
+			tula_exit_err_internal(
+				"Entered illegal state while scanning numeric"
+			);
+
+			UNREACHABLE_RETURN(NULL);
+		}
+	}
+
+	char* buffer = malloc(sizeof(char) * bufferSize);
+	if (NULL == buffer)
+	{
+		tula_exit_err_no_mem();
+		UNREACHABLE_RETURN(NULL);
+	}
+
+	memset(buffer, 0, bufferSize);
+
+
+	int32_t i = 0;
+	nextChar = -1;
+	while (
+		i < charsSeeked
+		&& buf_reader_has_next(scanner->reader)
+		&& (nextChar = buf_reader_read(scanner->reader)) != -1
+	)
+	{
+		buffer[i++] = (char) nextChar;
+	}
+
+	if (
+		i == bufferSize - 1
+		&& buf_reader_has_next(scanner->reader)
+		&& char_is_digit(buf_reader_peek(scanner->reader))
+	)
+	{
+		free(buffer);
+		return token_new_error(
+			startLine,
+			startCol + i + 1,
+			"Numeric literal exceeds maximum characters for data type!"
+		);
+	}
+
+
+	token_t* token = token_new(
+		type,
+		startLine,
+		startCol,
+		buffer,
+		i
+	);
+
+	free(buffer);
+
+	return token;
 }
 
 
@@ -1040,6 +1370,11 @@ const token_t* scanner_read_next(scanner_t* scanner)
 				));
 			}
 
+			if (char_is_digit(buf_reader_peek_n(scanner->reader, 1)))
+			{
+				CONSUME_TOKEN(scanner_consume_number(scanner));
+			}
+
 			CONSUME_TOKEN(scanner_consume_operator(scanner, TOK_MINUS, 1));
 		}
 
@@ -1117,44 +1452,7 @@ const token_t* scanner_read_next(scanner_t* scanner)
 		DEFAULT_BREAK
 	}
 
-
-	char msg[28] = "Unexpected character: '";
-	switch (nextChar)
-	{
-		case '\t':
-		{
-			msg[23] = '\\';
-			msg[24] = 't';
-			msg[25] = '\'';
-			break;
-		}
-
-		case '\r':
-		{
-			msg[23] = '\\';
-			msg[24] = 'r';
-			msg[25] = '\'';
-			break;
-		}
-
-		case '\n':
-		{
-			msg[23] = '\\';
-			msg[24] = 'n';
-			msg[25] = '\'';
-			break;
-		}
-
-		default:
-		{
-			msg[23] = (char) nextChar;
-			msg[24] = '\'';
-			msg[25] = '\0';
-			break;
-		}
-	}
-
-	msg[26] = '\0';
+	UNEXPECTED_CHARACTER_MSG(msg, nextChar)
 
 	CONSUME_TOKEN(token_new_error(
 		scanner->reader->lineNumber,

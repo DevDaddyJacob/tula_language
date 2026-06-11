@@ -5,10 +5,13 @@
 #include <stdint.h>
 
 #define char_is_alpha(c) \
-	((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
+	(('a' <= c && 'z' >= c) || ('A' <= c && 'Z' >= c))
 
 #define char_is_digit(c) \
-	(c >= '0' && c <= '9')
+	('0' <= c && '9' >= c)
+
+#define char_is_whitespace(c) \
+	(' ' == c || '\t' == c || '\n' == c || '\r' == c || '\0' == c)
 
 
 /**

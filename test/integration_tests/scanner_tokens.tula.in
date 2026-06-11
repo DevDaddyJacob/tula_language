@@ -2,54 +2,60 @@
 /* This line should be ignored
 and this one too */
 
+
+// All keywords
 and
-
 break
-
 constant
 const
 continue
-
 define
 def
 do
-
 else
 emit
-
 false
 for
 function
 func
-
 global
-
 if
 isSet
-
 not
-
 or
-
 return
-
 set
-
 true
-
 unset
-
 variable
 var
-
 while
 
+
+// Identifiers
 my_special_identifier
 
+
+// All data types
 "My Special \"String\"!"
+'a'
+'b'
+'c'
+true
+false
+72b -72b
+72ub
+72s -72s
+72us
+72 -72
+72u
+72l -72l
+72ul
+3.14 -3.14
+3.14d -3.14d
 
-'a''b''c'
 
+// All operators
 (
 )
 [
