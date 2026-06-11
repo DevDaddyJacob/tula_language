@@ -84,8 +84,6 @@
 	def(TOK_CARET,			"^",			NULL,		false,	false,	false,	true)	\
 	def(TOK_SLASH_FWD,		"/",			NULL,		false,	false,	false,	true)	\
 	def(TOK_PERCENT,		"%",			NULL,		false,	false,	false,	true)	\
-	/* def(TOK_QUOTE_SINGLE,	"'",			NULL,		false,	false,	false,	true) 	*/ \
-	/* def(TOK_QUOTE_DOUBLE,	"\"",			NULL,		false,	false,	false,	true)	*/ \
 	def(TOK_GREATER_THAN,	">",			NULL,		false,	false,	false,	true)	\
 	def(TOK_LESS_THAN,		"<",			NULL,		false,	false,	false,	true)	\
 	def(TOK_PLUS_PLUS,		"++",			NULL,		false,	false,	false,	true)	\
