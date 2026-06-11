@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 4.2)
 
 project(tula C)
 
+include(CTest)
+
 ################################################################################
 # Toolchain / compiler detection
 #
@@ -153,3 +155,11 @@ target_compile_definitions(tulad PRIVATE TULA_EXECUTABLE_TYPE=1)
 add_subdirectory(vendor/unity)
 add_subdirectory(test/integration_tests)
 add_subdirectory(test/unit_tests)
+
+add_custom_target(all_tests
+        COMMAND
+        ${CMAKE_CTEST_COMMAND} --output-on-failure
+        DEPENDS
+        unit_tests
+        integration_tests
+)
