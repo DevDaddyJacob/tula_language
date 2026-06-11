@@ -659,6 +659,8 @@ static void scanner_skip_whitespace(const scanner_t* scanner)
 					/* consume the trailing end comment chars */
 					buf_reader_consume(scanner->reader);
 					buf_reader_consume(scanner->reader);
+
+					continue;
 				}
 			}
 
@@ -1046,7 +1048,7 @@ const token_t* scanner_read_next(scanner_t* scanner)
 			)
 			{
 				scanner_skip_whitespace(scanner);
-				break;
+				return scanner_read_next(scanner);
 			}
 
 			CONSUME_TOKEN(scanner_consume_operator(scanner, TOK_SLASH_FWD, 1));
@@ -1102,10 +1104,49 @@ const token_t* scanner_read_next(scanner_t* scanner)
 		DEFAULT_BREAK
 	}
 
+
+	char msg[28] = "Unexpected character: '";
+	switch (nextChar)
+	{
+		case '\t':
+		{
+			msg[23] = '\\';
+			msg[24] = 't';
+			msg[25] = '\'';
+			break;
+		}
+
+		case '\r':
+		{
+			msg[23] = '\\';
+			msg[24] = 'r';
+			msg[25] = '\'';
+			break;
+		}
+
+		case '\n':
+		{
+			msg[23] = '\\';
+			msg[24] = 'n';
+			msg[25] = '\'';
+			break;
+		}
+
+		default:
+		{
+			msg[23] = (char) nextChar;
+			msg[24] = '\'';
+			msg[25] = '\0';
+			break;
+		}
+	}
+
+	msg[26] = '\0';
+
 	CONSUME_TOKEN(token_new_error(
 		scanner->reader->lineNumber,
 		scanner->reader->columnNumber,
-		"Unexpected character"
+		msg
 	));
 
 #undef CONSUME_TOKEN
