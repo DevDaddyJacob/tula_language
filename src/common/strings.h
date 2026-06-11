@@ -1,5 +1,5 @@
-#ifndef TULAC_COMMON_STRINGS_H
-#define TULAC_COMMON_STRINGS_H
+#ifndef TULA_COMMON_STRINGS_H
+#define TULA_COMMON_STRINGS_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -64,4 +64,4 @@ bool str_starts_with_char(const char* str, char target);
 
 bool str_ends_with_char(const char* str, char target, size_t strLen);
 
-#endif /* TULAC_COMMON_STRINGS_H */
+#endif /* TULA_COMMON_STRINGS_H */

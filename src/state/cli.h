@@ -1,5 +1,5 @@
-#ifndef TULAC_STATE_CLI_H
-#define TULAC_STATE_CLI_H
+#ifndef TULA_STATE_CLI_H
+#define TULA_STATE_CLI_H
 
 #include <stdbool.h>
 
@@ -27,4 +27,4 @@ cli_config_t* cli_parse_args(int32_t argc, const char* argv[]);
 
 void cli_destroy(cli_config_t* config);
 
-#endif /* TULAC_STATE_CLI_H */
+#endif /* TULA_STATE_CLI_H */
