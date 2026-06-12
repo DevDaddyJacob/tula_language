@@ -1,8 +1,9 @@
 #ifndef TULA_COMMON_OS_H
 #define TULA_COMMON_OS_H
+
 #include <stdbool.h>
 
-#ifndef IS_OS_DEFINED // NOLINT(*-reserved-identifier)
+#ifndef IS_OS_DEFINED
 	#undef OS_WINDOWS
 	#undef OS_MAC
 	#undef OS_UNIX

@@ -3,9 +3,11 @@
 
 #include <stdbool.h>
 
-#include "../tula.h"
+#include "config.h"
+#include "test.h"
 
 typedef struct tula_cli_config {
+#ifdef TULA_EXE_STANDARD
 	/**
 	 * If the interactive option is selected
 	 */
@@ -15,6 +17,13 @@ typedef struct tula_cli_config {
 	 * The file to run
 	 */
 	char* file;
+#endif /* TULA_EXE_STANDARD */
+
+#ifdef TULA_EXE_DEBUGGING
+	test_mode_t testMode;
+
+	char* inputFile;
+#endif /* TULA_EXE_DEBUGGING */
 } cli_config_t;
 
 

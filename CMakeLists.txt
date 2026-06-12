@@ -110,6 +110,8 @@ add_library(tula_lib STATIC
         src/common/trace.h
         src/common/exit.c
         src/common/exit.h
+        src/test.c
+        src/test.h
 )
 target_include_directories(tula_lib PUBLIC src)
 
