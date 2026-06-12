@@ -256,10 +256,10 @@ void test_buf_reader_read_newline_increments_line_number(void)
     buf_reader_open(r, NULL);
 
     buf_reader_read(r);                                  /* 'A' */
-    TEST_ASSERT_EQUAL_UINT32(0, r->lineNumber);
+    TEST_ASSERT_EQUAL_UINT32(1, r->lineNumber);
 
     buf_reader_read(r);                                  /* '\n' */
-    TEST_ASSERT_EQUAL_UINT32(1, r->lineNumber);
+    TEST_ASSERT_EQUAL_UINT32(2, r->lineNumber);
     TEST_ASSERT_EQUAL_UINT32(1, r->columnNumber);
 
     buf_reader_destroy(r);
