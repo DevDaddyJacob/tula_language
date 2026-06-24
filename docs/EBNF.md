@@ -38,39 +38,13 @@ literal_false = "false" ;
 
 literal_boolean = literal_true | literal_false ;
 
-literal_int8 = digit "b" ;
+literal_integer = digit ["b" | "ub" | "s" | "us" | "u" | "l" | "ul"] ;
 
-literal_uint8 = digit "ub" ; 
+literal_decimal = digit "." digit {digit} ["d"] ;
 
-literal_int16 = digit "s" ;
-
-literal_uint16 = digit "us" ; 
-
-literal_int32 = digit ;
-
-literal_uint32 = digit "u" ; 
-
-literal_int64 = digit "l" ;
-
-literal_uint64 = digit "ul" ; 
-
-literal_float = digit "." digit {digit} ;
-
-literal_double = literal_float "d" ; 
-
-literal_real_number = literal_int8 | literal_uint8 | literal_int16
-                    | literal_uint16 | literal_int32 | literal_uint32
-                    | literal_int64 | literal_uint64 ;
-
-literal_numeric = literal_real_number | literal_float | literal_double ;
+literal_numeric = literal_integer | literal_decimal ;
 
 literal = literal_string | literal_char | literal_boolean | literal_numeric ;
-
-
-keyword = literal_boolean | "define" | "def" | "variable" | "var" | "constant"
-            | "const" | "function" | "func" | "global" | "set" | "unset"
-            | "isSet" | "emit" | "if" | "else" | "while" | "do" | "for"
-            | "break" | "continue" | "return" | "and" | "or" | "not" ;
            
             
 operator_binary = "+" | "-" | "*" | "^" | "/" | "%" | ">" | "<" | "=="
@@ -88,39 +62,25 @@ operator_comparison_binary = ">" | "<" | "==" | "!=" | ">=" | "<=" | "and"
 operator_comparison_uniary = "not" ;
 
 
-array_key_value = literal_real_number ;
+array_definition = "[" [expression {field_separator expression} [field_separator]] "]" ;
 
-array_key = "[" array_key_value "]" ;
-
-array_field = expression ;
-
-array_field_list = array_field {field_separator array_field} [field_separator] ;
-
-array_definition = "[" [array_field_list] "]" ;
+array_accessor = "[" digit "]" ;
 
 
-table_key_value = literal_string | literal_char | literal_real_number ;
+table_field = "[" (literal_string | literal_char | digit) "]" "=" expression ;
 
-table_key = "[" table_key_value "]" ;
+table_definition = "{" [table_field {field_separator table_field} [field_separator]] "}" ;
 
-table_field = table_key "=" expression ;
-
-table_field_list = table_field {field_separator table_field} [field_separator] ;
-                    
-table_definition = "{" [table_field_list] "}" ;
+table_accessor = "[" (literal_string | literal_char | digit) "]" ;
 
 
-function_parameters = "(" {identifier_list} ")" ;
-
-function_body = function_parameters block ;
+function_body = "(" {identifier_list} ")" block ;
 
 function_definition_base = ("function" | "func") identifier function_body ;
 
 function_definition_local = "def" function_definition_base ;
 
 function_definition_global = "def" "global" function_definition_base ;
-
-function_definition = function_definition_local | function_definition_global ;
 
 function_definition_value = ("function" | "func") function_body ;
 
@@ -133,12 +93,6 @@ expression_pre_decrement = "--" identifier ;
 
 expression_post_decrement = identifier "--" ;
 
-expression_inline_crement =  expression_pre_increment
-                            | expression_post_increment
-                            | expression_pre_decrement
-                            | expression_post_decrement
-                            ;
-
 expression_boolean = expression operator_comparison_binary expression
                         | operator_comparison_unary expression ;
 
@@ -147,7 +101,10 @@ expression = literal
             | array_definition
             | table_definition
             | expression_boolean
-            | expression_inline_crement
+            | expression_pre_increment
+            | expression_post_increment
+            | expression_pre_decrement
+            | expression_post_decrement
             ;
             
 expression_list = expression [field_separator expression] ;
@@ -169,22 +126,12 @@ variable_local_unset = "unset" variable_base ;
 
 variable_global_unset = "unset" "global" variable_base ;
 
-variable_definition = variable_local_definition | variable_global_definition ;
 
-variable_set = variable_local_set | variable_global_set ; 
-
-variable_unset = variable_local_unset | variable_global_unset ; 
-            
-
-constant_base = ("constant" | "const") identifier ;
-
-constant_assignment = constant_base "=" expression ;
+constant_assignment = ("constant" | "const") identifier "=" expression ;
 
 constant_local_definition = ("define" | "def") constant_assignment ;
 
 constant_global_definition = ("define" | "def") "global" constant_assignment ;
-
-constant_definition = constant_local_definition | constant_global_definition ;
 
 
 is_set_statement = "isSet" "(" identifier ")" ;
@@ -207,15 +154,17 @@ conditional_iteration_while_statement = conditional_iteration_while_check block 
 
 conditional_iteration_do_statement = "do" block conditional_iteration_while_check ;
 
-conditional_iteration_statement = conditional_iteration_while_statement
-                                    | conditional_iteration_do_statement ;
-
 
 numeric_iteration_initialization = [variable_local_definition] ;
 
 numeric_iteration_condition = [condition_resolvable] ;
 
-numeric_iteration_update = [variable_set | expression_inline_crement] ;
+numeric_iteration_update = [ variable_local_set | variable_global_set 
+                            | expression_pre_increment
+                            | expression_post_increment
+                            | expression_pre_decrement
+                            | expression_post_decrement
+                            ] ;
 
 numeric_iteration_statement = "for" "(" numeric_iteration_initialization
                                 field_separator numeric_iteration_condition 
@@ -225,12 +174,17 @@ numeric_iteration_statement = "for" "(" numeric_iteration_initialization
 
 statement = "break" | "continue" 
             | is_set_statement
-            | function_definition
+            | function_definition_local
+            | function_definition_global
             | function_call_statement
-            | constant_definition
-            | variable_definition
-            | variable_unset
-            | conditional_iteration_statement
+            | constant_local_definition
+            | constant_global_definition
+            | variable_local_definition
+            | variable_global_definition
+            | variable_local_unset
+            | variable_global_unset
+            | conditional_iteration_while_statement
+            | conditional_iteration_do_statement
             | numeric_iteration_statement
             ;
 
