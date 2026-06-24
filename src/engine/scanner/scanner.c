@@ -550,16 +550,16 @@ handle_e:
 			);
 		}
 
-		case 'm':
-		{
+/*		case 'm':*/
+/*		{*/
 			/* keyword "emit" */
-			return try_infer_identifier_type(
-				content, contentLength,
-				2,
-				TOK_EMIT,
-				false
-			);
-		}
+/*			return try_infer_identifier_type(*/
+/*				content, contentLength,*/
+/*				2,*/
+/*				TOK_EMIT,*/
+/*				false*/
+/*			);*/
+/*		}*/
 
 		DEFAULT_BREAK
 	}

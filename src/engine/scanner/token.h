@@ -57,7 +57,7 @@
 	def(TOK_SET,			"set",			NULL,		false,	false,	true,	false)	\
 	def(TOK_UNSET,			"unset",		NULL,		false,	false,	true,	false)	\
 	def(TOK_IS_SET,			"isSet",		NULL,		false,	false,	true,	false)	\
-	def(TOK_EMIT,			"emit",			NULL,		false,	false,	true,	false)	\
+	/*def(TOK_EMIT,			"emit",			NULL,		false,	false,	true,	false)*/\
 	def(TOK_IF,				"if",			NULL,		false,	false,	true,	false)	\
 	def(TOK_ELSE,			"else",			NULL,		false,	false,	true,	false)	\
 	def(TOK_WHILE,			"while",		NULL,		false,	false,	true,	false)	\

@@ -13,7 +13,6 @@ define
 def
 do
 else
-emit
 false
 for
 function
