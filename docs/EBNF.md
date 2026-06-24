@@ -223,7 +223,8 @@ numeric_iteration_statement = "for" "(" numeric_iteration_initialization
                                 block ;
 
 
-statement = is_set_statement
+statement = "break" | "continue" 
+            | is_set_statement
             | function_definition
             | function_call_statement
             | constant_definition
