@@ -9,10 +9,19 @@
  * ==================================================
  * Macros
  * ==================================================
- */
+*/
 
-/* Covers literals up to "18446744073709551615ul" */
-#define SCANNER_INT_MAX_CHARS 22
+/* Longest literal values: "-128b" and "255ub" */
+#define SCANNER_INT_8_MAX_CHARS 5
+
+/* Longest literal values: "-32768s" and "65535us" */
+#define SCANNER_INT_16_MAX_CHARS 7
+
+/* Longest literal values: "-2147483648" and "4294967295u" */
+#define SCANNER_INT_32_MAX_CHARS 11
+
+/* Longest literal values: "-9223372036854775808ul" and "18446744073709551615ul" */
+#define SCANNER_INT_64_MAX_CHARS 22
 
 /* Covers literals up to "-0." + 149 frac digits (2^-149) */
 #define SCANNER_FLOAT_MAX_CHARS 152
@@ -804,14 +813,14 @@ static token_t* scanner_consume_number(scanner_t* scanner)
 
 
 	/* Do a first pass to determine the numeric type */
-	token_type_t type = TOK_ERROR;
+	token_type_t type = TOTAL_TOKENS;
 
 	bool isNegative = false;
 	bool isFloatingPoint = false;
 	uint32_t charsSeeked = 0;
 	int32_t nextChar;
 	while (
-		TOK_ERROR == type
+		TOTAL_TOKENS == type
 		&& (nextChar = buf_reader_peek_n(scanner->reader, charsSeeked++)) != -1
 	)
 	{
@@ -983,12 +992,17 @@ static token_t* scanner_consume_number(scanner_t* scanner)
 
 			default:
 			{
-				UNEXPECTED_CHARACTER_MSG(msg, nextChar)
-				return token_new_error(
-					startLine,
-					startCol + charsSeeked + 1,
-					msg
-				);
+				charsSeeked--;
+
+				if (isFloatingPoint)
+				{
+					type = TOK_FLOAT;
+				}
+				else
+				{
+					type = TOK_INT32;
+				}
+				break;
 			}
 		}
 	}
@@ -999,14 +1013,29 @@ static token_t* scanner_consume_number(scanner_t* scanner)
 	{
 		case TOK_INT8:
 		case TOK_UINT8:
+		{
+			bufferSize = SCANNER_INT_8_MAX_CHARS + 1;
+			break;
+		}
+
 		case TOK_INT16:
 		case TOK_UINT16:
+		{
+			bufferSize = SCANNER_INT_16_MAX_CHARS + 1;
+			break;
+		}
+
 		case TOK_INT32:
 		case TOK_UINT32:
+		{
+			bufferSize = SCANNER_INT_32_MAX_CHARS + 1;
+			break;
+		}
+
 		case TOK_INT64:
 		case TOK_UINT64:
 		{
-			bufferSize = SCANNER_INT_MAX_CHARS + 1;
+			bufferSize = SCANNER_INT_64_MAX_CHARS + 1;
 			break;
 		}
 

@@ -147,7 +147,6 @@ typedef struct tula_arr_token
 	 */
 	size_t capacity;
 
-
 	/**
 	 * \brief	Pointer to the first element of the array.
 	 */
