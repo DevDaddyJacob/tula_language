@@ -88,30 +88,34 @@ endif()
 ################################################################################
 
 add_library(tula_lib STATIC
+        src/common/buffered_reader.c
+        src/common/buffered_reader.h
+        src/common/exit.c
+        src/common/exit.h
+        src/common/os.c
+        src/common/os.h
+        src/common/strings.c
+        src/common/strings.h
+        src/common/trace.c
+        src/common/trace.h
         src/config.h
+#        src/engine/parser/ast.c
+#        src/engine/parser/ast.h
+#        src/engine/parser/parser.c
+#        src/engine/parser/parser.h
+        src/engine/scanner/scanner.c
+        src/engine/scanner/scanner.h
+        src/engine/scanner/token.c
+        src/engine/scanner/token.h
+        src/state/cli.c
+        src/state/cli.h
+        src/state/gstate.c
+        src/state/gstate.h
+        src/test.c
+        src/test.h
         src/tula.h
         src/util.c
         src/util.h
-        src/state/cli.c
-        src/state/cli.h
-        src/common/strings.c
-        src/common/strings.h
-        src/state/gstate.c
-        src/state/gstate.h
-        src/engine/scanner/token.c
-        src/engine/scanner/token.h
-        src/common/buffered_reader.c
-        src/common/buffered_reader.h
-        src/common/os.c
-        src/common/os.h
-        src/engine/scanner/scanner.c
-        src/engine/scanner/scanner.h
-        src/common/trace.c
-        src/common/trace.h
-        src/common/exit.c
-        src/common/exit.h
-        src/test.c
-        src/test.h
 )
 target_include_directories(tula_lib PUBLIC src)
 
