@@ -6,6 +6,8 @@
 
 #include "os.h"
 
+// BUG: CRLF causes drifting column count
+
 /*
  * ==================================================
  * Macros
