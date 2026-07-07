@@ -241,6 +241,8 @@ void arr_token_add(arr_token_t* array, const token_t* value);
 
 
 #ifdef TULA_EXE_DEBUGGING
+extern const char* TOKENS_TYPE_VALUE[TOTAL_TOKENS];
+
 void token_print(const token_t* token);
 
 void arr_token_print(const arr_token_t* array);

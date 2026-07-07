@@ -1,0 +1,15 @@
+def func fib(n) {
+    def var a = 0
+    def var b = 1
+    def var temp = 0
+
+    for (def var i = 0, i < n, i++) {
+        set var temp = a + b
+        set var a = b
+        set var b = temp
+    }
+
+    return a
+}
+
+io.print(fib(10))

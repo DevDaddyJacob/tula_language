@@ -31,6 +31,9 @@
 #define TOKEN_IS_OPERATOR_DEFINER(identifier, _1, _2, _3, _4, _5, isOperator) \
 	[identifier] = isOperator,
 
+#define TOKEN_TYPE_VALUE_DEFINER(identifier, _1, _2, _3, _4, _5, _6) \
+	[identifier] = #identifier,
+
 
 /*
  * ==================================================
@@ -73,6 +76,13 @@ const bool TOKENS_IS_KEYWORD[TOTAL_TOKENS] = {
 const bool TOKENS_IS_OPERATOR[TOTAL_TOKENS] = {
 	DEFINE_TOKENS(TOKEN_IS_OPERATOR_DEFINER)
 };
+
+#ifdef TULA_EXE_DEBUGGING
+const char* TOKENS_TYPE_VALUE[TOTAL_TOKENS] = {
+	DEFINE_TOKENS(TOKEN_TYPE_VALUE_DEFINER)
+};
+#endif
+
 
 
 /*
@@ -215,7 +225,7 @@ void token_print(const token_t* token)
 			"content: \"%s\", " \
 			"contentLength: %zu" \
 		"}",
-		TOKENS_VALUE[token->type],
+		TOKENS_TYPE_VALUE[token->type],
 		token->line,
 		token->column,
 		token->content,

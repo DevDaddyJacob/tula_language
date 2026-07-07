@@ -1,0 +1,10 @@
+def const MAX_ATTEMPTS = 3
+
+def var attempts = 0
+do {
+    set var attempts = attempts + 1
+} while (attempts < MAX_ATTEMPTS)
+
+isSet(attempts)
+unset var attempts
+isSet(attempts)

@@ -1,0 +1,8 @@
+def var ages = {
+    ["alice"] = 30,
+    ["bob"] = 25,
+    ["carol"] = 35,
+}
+
+io.print(ages["alice"])
+io.print(ages["bob"])

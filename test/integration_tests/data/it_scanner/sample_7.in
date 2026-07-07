@@ -1,0 +1,9 @@
+def func sum(vargs) {
+    def var total = 0
+    for (def var i = 0, i < vargs.length, i++) {
+        set var total = total + vargs[i]
+    }
+    return total
+}
+
+io.print(sum(1, 2, 3, 4, 5))

@@ -45,7 +45,7 @@
 		int32_t status = -1; \
 		dynamic_buffer_t stdoutBuff; \
 		dynamic_buffer_t expectedBuff; \
-		read_file(INTEGRATION_TEST_DATA_DIR "/" testName ".out", &expectedBuff); \
+		read_file(testName, &expectedBuff); \
 		execute_tulad(args, &stdoutBuff, &status); \
 		TEST_ASSERT_EQUAL_INT32(0, status); \
 		TEST_ASSERT_EQUAL_STRING(expectedBuff.values, stdoutBuff.values); \
