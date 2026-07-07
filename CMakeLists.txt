@@ -100,10 +100,10 @@ add_library(tula_lib STATIC
         src/common/trace.c
         src/common/trace.h
         src/config.h
-#        src/engine/parser/ast.c
-#        src/engine/parser/ast.h
-#        src/engine/parser/parser.c
-#        src/engine/parser/parser.h
+        src/engine/parser/ast.c
+        src/engine/parser/ast.h
+        src/engine/parser/parser.c
+        src/engine/parser/parser.h
         src/engine/scanner/scanner.c
         src/engine/scanner/scanner.h
         src/engine/scanner/token.c
