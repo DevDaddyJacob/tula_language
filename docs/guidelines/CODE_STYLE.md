@@ -12,7 +12,7 @@ The language target is **C99**. Code must compile clean under MSVC (`/W4`, and
 
 ## 1. Formatting
 
-Formatting is enforced by [`.clang-format`](../.clang-format) (LLVM base). The
+Formatting is enforced by [`.clang-format`](../../.clang-format) (LLVM base). The
 key rules:
 
 - **Indentation: hard tabs**, tab width 4. Never spaces for indentation.
@@ -216,6 +216,17 @@ already exists in the file you are editing.
   (`const size_t destSize`, `const uint32_t line`).
 - Declare loop variables in the `for` statement (`for (size_t i = 0; ...)`);
   C99 mixed declarations are fine.
+- **Explicit narrowing casts.** When storing a wider reader/`peek` result
+  (`int32_t`, which carries the `-1` EOF sentinel) into a `char`, cast
+  explicitly: `buffer[i++] = (char) buf_reader_read(scanner->reader);`.
+- **`goto` is permitted for hand-written state machines.** The scanner's
+  keyword trie (`get_identifier_type` in `scanner.c`) dispatches through
+  `goto` and forward labels rather than deep nesting. Labels are
+  `lower_snake_case` and describe the state (`handle_c:`, `handle_con:`,
+  `end_with_default:`). Use `goto` only for this kind of flat dispatch — not to
+  jump backwards or skip initialization.
+- In `switch` statements with no meaningful default, terminate with the
+  `DEFAULT_BREAK` macro (`default: { break; }`) from `util.h`.
 
 ---
 
@@ -258,7 +269,14 @@ the preferred direction going forward.)
   - Fatal-exit functions are annotated `NO_RETURN`.
 - Free before exiting on error paths that own heap memory (see `cli.c`, which
   frees `params`/`config` before calling `tula_exit_err_*`).
-- Destructors are `NULL`-tolerant no-ops so they can be called unconditionally.
+- **Library code may exit fatally on unrecoverable errors** (out-of-memory,
+  illegal internal state) by calling `tula_exit_err_no_mem()` /
+  `tula_exit_err_internal(...)` directly, rather than propagating the error up.
+  Because the compiler can't see through the `NO_RETURN`, follow such a call
+  with `UNREACHABLE_RETURN(<value>)` to silence "not all paths return" warnings
+  (see `scanner_consume_number`).
+- Destructors are `NULL`-tolerant no-ops so they can be called unconditionally,
+  and they null out owned pointers after freeing (`scanner_destroy`).
 
 ---
 
@@ -277,7 +295,27 @@ the preferred direction going forward.)
 
 ---
 
-## 11. The X-macro table pattern
+## 11. Macros
+
+- **Function-like macros with multiple statements** are wrapped in
+  `do { ... } while (false)` (or `while (0)`) so they behave as a single
+  statement at the call site. See `CONSUME_TOKEN` in `scanner.c` and
+  `EXECUTE_TULAD_EXPECT_OUTPUT` in the integration test helper.
+- **Function-scoped macros** that are only useful inside one function are
+  `#define`d at the top of that function and `#undef`ed at the end, keeping
+  them out of the global namespace — e.g. `CONSUME_TOKEN` inside
+  `scanner_read_next`, and `DEFINE_TEST_MODE_PARSER` inside `cli.c`.
+- **Line-continuation backslashes** in multi-line macros are pushed out and
+  aligned with tabs (they need not be at a fixed column, but keep them visually
+  aligned within a single macro, as in `UNEXPECTED_CHARACTER_MSG`).
+- Parenthesize macro parameters in expansions where precedence matters — the
+  `tula_array_*` helpers in `util.h` wrap each argument (`(capacity)`,
+  `(oldCount)`). (The `char_is_*` predicates in `strings.h` predate this and
+  don't; prefer the parenthesized form in new macros.)
+
+---
+
+## 12. The X-macro table pattern
 
 Enumerations that need parallel data (string names, boolean flags) are defined
 once as an **X-macro list** and expanded multiple ways. This is the canonical
@@ -305,7 +343,7 @@ Each such enum ends with a `TOTAL_*` sentinel used to size the arrays.
 
 ---
 
-## 12. Conditional compilation
+## 13. Conditional compilation
 
 The same sources build two executables via `TULA_EXECUTABLE_TYPE`
 (see `config.h`): `TULA_EXE_STANDARD` (`tula`) and `TULA_EXE_DEBUGGING`
