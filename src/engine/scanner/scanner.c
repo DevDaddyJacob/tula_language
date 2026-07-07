@@ -106,7 +106,7 @@ static token_t* scanner_consume_operator(
 static token_t* scanner_consume_identifier(const scanner_t* scanner);
 
 
-static token_t* scanner_consume_number(scanner_t* scanner);
+static token_t* scanner_consume_number(const scanner_t* scanner);
 
 
 static token_t* scanner_consume_string(const scanner_t* scanner);
@@ -806,7 +806,7 @@ static token_t* scanner_consume_identifier(const scanner_t* scanner)
 }
 
 
-static token_t* scanner_consume_number(scanner_t* scanner)
+static token_t* scanner_consume_number(const scanner_t* scanner)
 {
 	const uint32_t startLine = scanner->reader->lineNumber;
 	const uint32_t startCol = scanner->reader->columnNumber;
@@ -1008,7 +1008,7 @@ static token_t* scanner_consume_number(scanner_t* scanner)
 	}
 
 
-	int32_t bufferSize;
+	uint32_t bufferSize;
 	switch (type)
 	{
 		case TOK_INT8:
@@ -1071,7 +1071,7 @@ static token_t* scanner_consume_number(scanner_t* scanner)
 	memset(buffer, 0, bufferSize);
 
 
-	int32_t i = 0;
+	uint32_t i = 0;
 	nextChar = -1;
 	while (
 		i < charsSeeked

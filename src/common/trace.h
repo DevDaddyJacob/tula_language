@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "../config.h"
+#include "config.h"
 
 #ifndef TULA_TRACE_MAX_FRAMES
 #  define TULA_TRACE_MAX_FRAMES 64

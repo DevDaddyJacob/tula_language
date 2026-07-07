@@ -84,7 +84,7 @@ static int32_t test_scanner(const char* inputFilePath)
 	return TULA_EXIT_GOOD;
 }
 
-int32_t run_test()
+int32_t run_test(void)
 {
 	const global_state_t* state = get_global_state();
 

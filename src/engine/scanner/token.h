@@ -131,7 +131,7 @@ typedef struct tula_token
 	/**
 	 * \brief	The length of the token
 	 */
-	uint32_t contentLength;
+	size_t contentLength;
 } token_t;
 
 
@@ -201,7 +201,7 @@ token_t* token_new(
 	uint32_t line,
 	uint32_t column,
 	const char* content,
-	uint32_t contentLength
+	size_t contentLength
 );
 
 

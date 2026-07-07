@@ -1,15 +1,9 @@
-#include <stdarg.h>
-#include <stdlib.h>
-
 #include "tula.h"
-
-#include <stdio.h>
 
 #include "util.h"
 #include "common/buffered_reader.h"
 #include "common/exit.h"
 #include "common/trace.h"
-#include "engine/scanner/scanner.h"
 #include "state/gstate.h"
 
 
@@ -74,5 +68,6 @@ int main(const int32_t argc, const char* argv[]) {
 	run_test();
 #endif /* TULA_EXE_DEBUGGING */
 
+	teardown();
 	tula_exit(TULA_EXIT_GOOD);
 }

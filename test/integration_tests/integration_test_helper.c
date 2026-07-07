@@ -169,6 +169,7 @@ void execute_tulad(
 	int32_t* outStatus
 )
 {
+	printf("TULAD_EXE_PATH=" TULAD_EXE_PATH "\n");
 	/* Prepare the command */
 	const char* executable = TULAD_EXE_PATH;
 	const size_t executableLength = strlen(executable);

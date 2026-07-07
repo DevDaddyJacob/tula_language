@@ -28,7 +28,7 @@ typedef enum tula_test_mode
 extern const char* TEST_MODE_VALUE[TOTAL_TEST_MODES];
 
 
-int32_t run_test();
+int32_t run_test(void);
 
 #endif /* TULA_EXE_DEBUGGING */
 

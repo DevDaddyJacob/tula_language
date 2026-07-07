@@ -41,7 +41,8 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 # Warning flags — MSVC and GCC/Clang use incompatible syntax
 if(MSVC)
     add_compile_options(
-            /W3         # Equivalent warning level to -Wall
+            /W4
+            /wd4820     # Silence warnings for bit alignment
             /wd4996     # Silence deprecation warnings for POSIX names
     )
 else()
@@ -159,6 +160,29 @@ target_compile_definitions(tulad PRIVATE TULA_EXECUTABLE_TYPE=1)
 ################################################################################
 
 add_subdirectory(vendor/unity)
+
+# Third-party vendor code is not ours to fix, so silence its warnings.
+# Unity turns on /Wall (MSVC) itself, which is extremely noisy (e.g. C5045
+# Spectre notes). We override the warning flags on every target the vendor
+# subdirectory defines rather than editing vendored files, which would be
+# clobbered on the next update.
+get_property(
+        _vendor_targets
+        DIRECTORY vendor/unity
+        PROPERTY BUILDSYSTEM_TARGETS
+)
+
+foreach(_target IN LISTS _vendor_targets)
+    get_target_property(_type ${_target} TYPE)
+    if(NOT _type STREQUAL "INTERFACE_LIBRARY")
+        if(MSVC)
+            target_compile_options(${_target} PRIVATE /W0)
+        else()
+            target_compile_options(${_target} PRIVATE -w)
+        endif()
+    endif()
+endforeach()
+
 add_subdirectory(test/integration_tests)
 add_subdirectory(test/unit_tests)
 

@@ -86,7 +86,7 @@ token_t* token_new(
 	const uint32_t line,
 	const uint32_t column,
 	const char* content,
-	const uint32_t contentLength
+	const size_t contentLength
 )
 {
 	token_t* token = malloc(sizeof(token_t));
@@ -213,7 +213,7 @@ void token_print(const token_t* token)
 			"line: %d, " \
 			"column: %d, " \
 			"content: \"%s\", " \
-			"contentLength: %d" \
+			"contentLength: %zu" \
 		"}",
 		TOKENS_VALUE[token->type],
 		token->line,
@@ -244,7 +244,6 @@ void arr_token_print(const arr_token_t* array)
 		}
 		else
 		{
-			// ReSharper disable once CppPrintfBadFormat
 			printf("%s", NULL);
 		}
 

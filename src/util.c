@@ -77,7 +77,10 @@ int32_t err_print_f(const char* format, ...) {
 
 int32_t err_print_v(const char* format, const va_list vargs) {
 	/* Null check the format */
-	if (format == NULL) return PRINT_FAILED;
+	if (NULL == format)
+	{
+		return PRINT_FAILED;
+	}
 
 
 	/* Print the message into the program's error format */

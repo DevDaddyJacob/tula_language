@@ -42,6 +42,40 @@
 #	include "common/os.h"
 #endif /* IS_OS_DEFINED */
 
+#ifndef C_COMPILER
+#	undef COMPILER_MSVC
+#	undef COMPILER_GCC
+#	undef COMPILER_CLANG
+#	undef COMPILER_CLANG_GCC
+#	undef COMPILER_CLANG_MSVC
+
+#	if defined(__clang__)
+#		define COMPILER_CLANG
+#		if defined(_MSC_VER)
+#			define C_COMPILER 1
+#			define COMPILER_CLANG_GCC
+
+#		elif defined(__GNUC__)
+#			define C_COMPILER 2
+#			define COMPILER_CLANG_MSVC
+
+#		else
+#			error "Unknown clang compatibility mode"
+#		endif
+
+#	elif defined(_MSC_VER)
+#		define C_COMPILER 3
+#		define COMPILER_MSVC
+
+#	elif defined(__GNUC__)
+#		define C_COMPILER 4
+#		define COMPILER_GCC
+
+#	else
+#		error "Unknown or unsupported compiler"
+#	endif
+#endif /* C_COMPILER */
+
 /* ========================================================================= */
 
 

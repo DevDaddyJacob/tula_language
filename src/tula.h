@@ -1,13 +1,21 @@
 #ifndef TULA_LANGUAGE_TULA_H
 #define TULA_LANGUAGE_TULA_H
 
+#include "config.h"
+
 /*
  * ============================================================================
  * Program definitions
  * ============================================================================
  */
 
-#define TULA_PROGRAM_NAME "tula"
+#if defined(TULA_EXE_STANDARD)
+#	define TULA_PROGRAM_NAME "tula"
+#elif defined(TULA_EXE_DEBUGGING)
+#	define TULA_PROGRAM_NAME "tulad"
+#else
+#	error "Unknown executable type"
+#endif
 
 #define TULA_VERSION_MAJOR		"1"
 #define TULA_VERSION_MINOR		"0"
