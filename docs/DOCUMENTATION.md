@@ -14,6 +14,10 @@ Readers of this section of documentation should be able to understand the shape
 and function of the project and it's parts at a high level without having to
 understand or know the code and implementation of the project.
 
+It is organized as a top-level design overview (`DESIGN.md`) that describes the
+whole system and how its parts fit together, plus a dedicated document for each
+individual part of the system.
+
 
 ## Guideline / Developer Documentation
 Located in the `docs/guidelines` directory, it contains documentation about
