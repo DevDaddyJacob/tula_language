@@ -2,7 +2,7 @@
 <token_t> {type: "TOK_FUNC", line: 1, column: 5, content: "func", contentLength: 4}
 <token_t> {type: "TOK_IDENT", line: 1, column: 10, content: "sum", contentLength: 3}
 <token_t> {type: "TOK_PAREN_LEFT", line: 1, column: 13, content: "(", contentLength: 1}
-<token_t> {type: "TOK_VARIABLE", line: 1, column: 14, content: "vargs", contentLength: 5}
+<token_t> {type: "TOK_IDENT", line: 1, column: 14, content: "vargs", contentLength: 5}
 <token_t> {type: "TOK_PAREN_RIGHT", line: 1, column: 19, content: ")", contentLength: 1}
 <token_t> {type: "TOK_BRACE_LEFT", line: 1, column: 21, content: "{", contentLength: 1}
 <token_t> {type: "TOK_DEFINE", line: 2, column: 5, content: "def", contentLength: 3}
@@ -20,7 +20,7 @@
 <token_t> {type: "TOK_COMMA", line: 3, column: 23, content: ",", contentLength: 1}
 <token_t> {type: "TOK_IDENT", line: 3, column: 25, content: "i", contentLength: 1}
 <token_t> {type: "TOK_LESS_THAN", line: 3, column: 27, content: "<", contentLength: 1}
-<token_t> {type: "TOK_VARIABLE", line: 3, column: 29, content: "vargs", contentLength: 5}
+<token_t> {type: "TOK_IDENT", line: 3, column: 29, content: "vargs", contentLength: 5}
 <token_t> {type: "TOK_DOT", line: 3, column: 34, content: ".", contentLength: 1}
 <token_t> {type: "TOK_IDENT", line: 3, column: 35, content: "length", contentLength: 6}
 <token_t> {type: "TOK_COMMA", line: 3, column: 41, content: ",", contentLength: 1}
@@ -34,7 +34,7 @@
 <token_t> {type: "TOK_EQUAL", line: 4, column: 23, content: "=", contentLength: 1}
 <token_t> {type: "TOK_IDENT", line: 4, column: 25, content: "total", contentLength: 5}
 <token_t> {type: "TOK_PLUS", line: 4, column: 31, content: "+", contentLength: 1}
-<token_t> {type: "TOK_VARIABLE", line: 4, column: 33, content: "vargs", contentLength: 5}
+<token_t> {type: "TOK_IDENT", line: 4, column: 33, content: "vargs", contentLength: 5}
 <token_t> {type: "TOK_BRACKET_LEFT", line: 4, column: 38, content: "[", contentLength: 1}
 <token_t> {type: "TOK_IDENT", line: 4, column: 39, content: "i", contentLength: 1}
 <token_t> {type: "TOK_BRACKET_RIGHT", line: 4, column: 40, content: "]", contentLength: 1}

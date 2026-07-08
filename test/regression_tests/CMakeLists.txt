@@ -6,11 +6,13 @@ function(regression_test test_name test_source)
     add_test(NAME ${test_name} COMMAND ${test_name})
 endfunction()
 
-regression_test(rt_0000_example    0000_example.c)
+regression_test(rt_0000_example                 0000_example.c)
+regression_test(rt_0001_scanner_keyword_prefix  0001_scanner_keyword_prefix.c)
 
 add_custom_target(regression_tests
         COMMAND
         ${CMAKE_CTEST_COMMAND} --output-on-failure
         DEPENDS
         rt_0000_example
+        rt_0001_scanner_keyword_prefix
 )
