@@ -1490,17 +1490,12 @@ void parser_destroy(parser_t* parser)
 		return;
 	}
 
-	/*
-	 * Per the engine's ownership model the parser owns its scanner and should
-	 * release it here. That is deferred for now: scanner_destroy ->
-	 * arr_token_destroy corrupts the heap when tearing down a multi-token array
-	 * (see the BUG note in engine/scanner/token.c). Once that is fixed under
-	 * its own commit and regression test, restore the scanner_destroy call
-	 * below. Until then the scanner is left for process exit to reclaim, which
-	 * matches how the scanner test harness already behaves.
-	 */
-	/* scanner_destroy(parser->scanner); */
-	parser->scanner = NULL;
+	/* Per the engine's ownership model the parser owns its scanner. */
+	if (NULL != parser->scanner)
+	{
+		scanner_destroy(parser->scanner);
+		parser->scanner = NULL;
+	}
 
 	if (NULL != parser->ast)
 	{

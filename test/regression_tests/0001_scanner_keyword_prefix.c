@@ -51,15 +51,7 @@ static scanner_t* scanner_for(const char* source)
 
 static void scanner_release(scanner_t* scanner)
 {
-	/*
-	 * Close the reader so the temp file handle is released, then free the
-	 * scanner shell. scanner_destroy is deliberately avoided: destroying a
-	 * populated token array corrupts the heap today (a separate, tracked
-	 * scanner bug). The token array is left for process exit to reclaim, which
-	 * mirrors how parser_destroy currently defers scanner teardown.
-	 */
-	buf_reader_destroy(scanner->reader);
-	free(scanner);
+	scanner_destroy(scanner);
 }
 
 
