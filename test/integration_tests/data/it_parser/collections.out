@@ -1,0 +1,30 @@
+block [1:1]
+  variable-define [1:1] global=false name="empty"
+    value: array [1:17]
+  variable-define [2:1] global=false name="nums"
+    value: array [2:16]
+      element: literal [2:18] type=TOK_INT32 value="1"
+      element: literal [2:21] type=TOK_INT32 value="2"
+      element: literal [2:24] type=TOK_INT32 value="3"
+  variable-define [3:1] global=false name="nested"
+    value: array [3:18]
+      element: array [3:20]
+        element: literal [3:22] type=TOK_INT32 value="1"
+        element: literal [3:25] type=TOK_INT32 value="2"
+      element: array [3:30]
+        element: literal [3:32] type=TOK_INT32 value="3"
+        element: literal [3:35] type=TOK_INT32 value="4"
+  variable-define [4:1] global=false name="table"
+    value: table [4:17]
+      table-entry [5:5]
+        key: literal [5:5] type=TOK_STRING value="foo"
+        value: literal [5:15] type=TOK_STRING value="bar"
+      table-entry [6:5]
+        key: literal [6:5] type=TOK_STRING value="count"
+        value: literal [6:17] type=TOK_INT32 value="5"
+      table-entry [7:5]
+        key: literal [7:5] type=TOK_CHAR value="c"
+        value: literal [7:13] type=TOK_TRUE value="true"
+  variable-define [9:1] global=false name="query"
+    value: is-set [9:17]
+      target: identifier [9:23] name="nums"

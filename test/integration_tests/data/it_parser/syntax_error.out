@@ -1,0 +1,4 @@
+block [1:1]
+  variable-define [1:1] global=false name="ok"
+    value: literal [1:14] type=TOK_INT32 value="1"
+  <error> [2:11] message="Expected ')' after the condition."

@@ -1,0 +1,45 @@
+block [1:1]
+  variable-define [1:1] global=false name="x"
+    value: literal [1:13] type=TOK_INT32 value="7"
+  if [2:1]
+    condition: binary [2:5] op=TOK_LESS_THAN
+      left: identifier [2:5] name="x"
+      right: literal [2:9] type=TOK_INT32 value="0"
+    then: block [2:12]
+      variable-set [3:5] global=false name="x"
+        value: literal [3:17] type=TOK_INT32 value="0"
+    condition: binary [4:12] op=TOK_EQUAL_EQUAL
+      left: identifier [4:12] name="x"
+      right: literal [4:17] type=TOK_INT32 value="0"
+    then: block [4:20]
+      return [5:5]
+    else: block [6:8]
+      expression-statement [7:5]
+        post-increment [7:5]
+          target: identifier [7:5] name="x"
+  while [10:1]
+    condition: binary [10:8] op=TOK_LT_EQUAL
+      left: identifier [10:8] name="x"
+      right: literal [10:13] type=TOK_INT32 value="10"
+    body: block [10:17]
+      expression-statement [11:5]
+        post-decrement [11:5]
+          target: identifier [11:5] name="x"
+  do-while [14:1]
+    condition: binary [16:10] op=TOK_GT_EQUAL
+      left: identifier [16:10] name="x"
+      right: literal [16:15] type=TOK_INT32 value="0"
+    body: block [14:4]
+      expression-statement [15:5]
+        pre-increment [15:5]
+          target: identifier [15:7] name="x"
+  for [18:1]
+    init: variable-define [18:6] global=false name="i"
+      value: literal [18:18] type=TOK_INT32 value="0"
+    condition: binary [18:21] op=TOK_LESS_THAN
+      left: identifier [18:21] name="i"
+      right: literal [18:25] type=TOK_INT32 value="10"
+    update: post-increment [18:29]
+      target: identifier [18:29] name="i"
+    body: block [18:34]
+      continue [19:5]
