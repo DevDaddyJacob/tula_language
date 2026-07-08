@@ -89,7 +89,7 @@ void test_ast_node_type_value_table_is_complete(void)
 
 void test_arr_node_add_grows(void)
 {
-	arr_node_t array;
+	arr_ast_node_t array;
 	arr_node_init(&array);
 
 	for (uint32_t i = 0; i < 20; i++)

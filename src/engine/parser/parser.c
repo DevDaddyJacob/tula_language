@@ -117,7 +117,7 @@ static ast_node_t* parse_table_entry(parser_t* parser);
 
 static ast_node_t* parse_function_value(parser_t* parser);
 
-static ast_node_t* parse_parameters(parser_t* parser, arr_node_t* out);
+static ast_node_t* parse_parameters(parser_t* parser, arr_ast_node_t* out);
 
 
 /*
@@ -1420,7 +1420,7 @@ static ast_node_t* parse_function_value(parser_t* parser)
 }
 
 
-static ast_node_t* parse_parameters(parser_t* parser, arr_node_t* out)
+static ast_node_t* parse_parameters(parser_t* parser, arr_ast_node_t* out)
 {
 	if (!match(parser, TOK_PAREN_LEFT))
 	{

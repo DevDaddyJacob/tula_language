@@ -69,7 +69,7 @@ typedef struct tula_ast_node ast_node_t;
  *			node owns an ordered, variable-length group of children (block
  *			statements, call arguments, array elements, and so on).
  */
-typedef struct tula_arr_node
+typedef struct tula_arr_ast_node
 {
 	/**
 	 * \brief	The amount of elements currently in the array.
@@ -85,7 +85,7 @@ typedef struct tula_arr_node
 	 * \brief	Pointer to the first element of the array.
 	 */
 	ast_node_t** values;
-} arr_node_t;
+} arr_ast_node_t;
 
 
 /**
@@ -93,17 +93,17 @@ typedef struct tula_arr_node
  *
  *			Every node carries its kind and the source position of the construct
  *			it represents (inherited from the tokens it was built from). The
- *			payload for each kind lives in the \ref as union; only the member
- *			that matches \ref type is valid.
+ *			payload for each kind lives in the @c as union; only the member
+ *			that matches @c type is valid.
  *
  *			A node owns every child node and string it references. Releasing a
- *			node via \ref ast_node_destroy recursively releases the whole
+ *			node via @c ast_node_destroy recursively releases the whole
  *			subtree beneath it.
  */
 struct tula_ast_node
 {
 	/**
-	 * \brief	The kind of node, selecting the active \ref as member.
+	 * \brief	The kind of node, selecting the active @c as member.
 	 */
 	ast_node_type_t type;
 
@@ -134,7 +134,7 @@ struct tula_ast_node
 		struct
 		{
 			/** \brief	The statements making up the block. */
-			arr_node_t statements;
+			arr_ast_node_t statements;
 		} block;
 
 		/**
@@ -205,7 +205,7 @@ struct tula_ast_node
 			ast_node_t* callee;
 
 			/** \brief	The argument expressions. */
-			arr_node_t arguments;
+			arr_ast_node_t arguments;
 		} call;
 
 		/**
@@ -247,7 +247,7 @@ struct tula_ast_node
 		struct
 		{
 			/** \brief	The element expressions. */
-			arr_node_t elements;
+			arr_ast_node_t elements;
 		} array;
 
 		/**
@@ -256,7 +256,7 @@ struct tula_ast_node
 		struct
 		{
 			/** \brief	The AST_TABLE_ENTRY nodes making up the table. */
-			arr_node_t entries;
+			arr_ast_node_t entries;
 		} table;
 
 		/**
@@ -284,7 +284,7 @@ struct tula_ast_node
 			char* name;
 
 			/** \brief	The parameter AST_IDENTIFIER nodes. */
-			arr_node_t parameters;
+			arr_ast_node_t parameters;
 
 			/** \brief	The function body block (owned). */
 			ast_node_t* body;
@@ -324,10 +324,10 @@ struct tula_ast_node
 		struct
 		{
 			/** \brief	The branch condition expressions. */
-			arr_node_t conditions;
+			arr_ast_node_t conditions;
 
 			/** \brief	The branch body blocks, parallel to \ref conditions. */
-			arr_node_t bodies;
+			arr_ast_node_t bodies;
 
 			/** \brief	The trailing else block (owned), or NULL if absent. */
 			ast_node_t* elseBody;
@@ -430,14 +430,14 @@ void ast_node_destroy(ast_node_t* node);
  * \brief           Initializes the provided array
  * \param[in]       array: Pointer to the array to initialize
  */
-void arr_node_init(arr_node_t* array);
+void arr_node_init(arr_ast_node_t* array);
 
 
 /**
  * \brief           Releases the provided array and every node it owns
  * \param[in]       array: Pointer to the array whose contents to free
  */
-void arr_node_destroy(arr_node_t* array);
+void arr_node_destroy(arr_ast_node_t* array);
 
 
 /**
@@ -445,7 +445,7 @@ void arr_node_destroy(arr_node_t* array);
  * \param[in]       array: Pointer to the array to write to
  * \param[in]       value: The node pointer to write to the array
  */
-void arr_node_add(arr_node_t* array, ast_node_t* value);
+void arr_node_add(arr_ast_node_t* array, ast_node_t* value);
 
 
 #ifdef TULA_EXE_DEBUGGING

@@ -26,16 +26,6 @@
  * ==================================================
  */
 
-/**
- * \brief           Duplicates a null terminated string onto the heap
- * \param[in]       source: The string to duplicate (a NULL yields a NULL)
- * \return          Returns the newly allocated copy, or NULL if \p source was
- *                  NULL
- * \note            Exits fatally on allocation failure.
- */
-static char* ast_str_dup(const char* source);
-
-
 #ifdef TULA_EXE_DEBUGGING
 /**
  * \brief           Recursively prints a node as an indented tree
@@ -75,28 +65,6 @@ const char* AST_NODE_TYPE_NAME[TOTAL_AST_NODE_TYPES] = {
  * ==================================================
  */
 
-static char* ast_str_dup(const char* source)
-{
-	if (NULL == source)
-	{
-		return NULL;
-	}
-
-	const size_t size = strlen(source) + 1;
-
-	char* copy = malloc(sizeof(char) * size);
-	if (NULL == copy)
-	{
-		tula_exit_err_no_mem();
-		UNREACHABLE_RETURN(NULL);
-	}
-
-	str_copy_safe(copy, source, size);
-
-	return copy;
-}
-
-
 ast_node_t* ast_node_new(
 	const ast_node_type_t type,
 	const uint32_t line,
@@ -128,7 +96,18 @@ ast_node_t* ast_node_new_error(
 )
 {
 	ast_node_t* node = ast_node_new(AST_ERROR, line, column);
-	node->as.error.message = ast_str_dup(message);
+	node->as.error.message = NULL;
+
+	const size_t size = strlen(message) + 1;
+
+	node->as.error.message = malloc(sizeof(char) * size);
+	if (NULL == node->as.error.message)
+	{
+		tula_exit_err_no_mem();
+		UNREACHABLE_RETURN(NULL);
+	}
+
+	str_copy_safe(node->as.error.message, message, size);
 
 	return node;
 }
@@ -311,7 +290,7 @@ void ast_node_destroy(ast_node_t* node)
 }
 
 
-void arr_node_init(arr_node_t* array)
+void arr_node_init(arr_ast_node_t* array)
 {
 	if (NULL == array)
 	{
@@ -324,7 +303,7 @@ void arr_node_init(arr_node_t* array)
 }
 
 
-void arr_node_destroy(arr_node_t* array)
+void arr_node_destroy(arr_ast_node_t* array)
 {
 	if (NULL == array)
 	{
@@ -347,7 +326,7 @@ void arr_node_destroy(arr_node_t* array)
 }
 
 
-void arr_node_add(arr_node_t* array, ast_node_t* value)
+void arr_node_add(arr_ast_node_t* array, ast_node_t* value)
 {
 	if (NULL == array || NULL == value)
 	{
