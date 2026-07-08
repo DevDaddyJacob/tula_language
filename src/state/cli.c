@@ -89,7 +89,7 @@ static void print_help_menu()
 
 #ifdef TULA_EXE_DEBUGGING
 		{
-			"-m, --mode <scanner>",
+			"-m, --mode <scanner|parser>",
 			"defines the testing mode to use",
 		},
 		{

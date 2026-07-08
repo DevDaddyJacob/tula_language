@@ -16,6 +16,7 @@
 #define DEFINE_TEST_MODES(def)			\
 	def(TEST_MODE_VERSION,	"version")	\
 	def(TEST_MODE_SCANNER,	"scanner")	\
+	def(TEST_MODE_PARSER,	"parser")	\
 
 typedef enum tula_test_mode
 {

@@ -179,6 +179,15 @@ void arr_token_destroy(arr_token_t* array)
 		return;
 	}
 
+	/*
+	 * BUG: token_destroy is called on `array->values + i`, an interior pointer
+	 * into the contiguous `values` buffer rather than an individual allocation.
+	 * free()-ing it corrupts the heap once the array holds more than one token,
+	 * and the `values` buffer itself is never released. Destroying a populated
+	 * token array is therefore unsafe today. This needs its own fix + a
+	 * dedicated regression test; until then, callers avoid scanner teardown
+	 * (see parser_destroy in engine/parser/parser.c).
+	 */
 	for (size_t i = 0; i < array->count; i++)
 	{
 		token_destroy(array->values + i);

@@ -157,6 +157,14 @@ static token_type_t try_infer_identifier_type(
 		return TOK_IDENT;
 	}
 
+	/*
+	 * BUG: this only checks that `typeValue` is a prefix of `content`; it never
+	 * verifies the identifier ends where the keyword does. Identifiers that
+	 * merely start with a keyword (e.g. "format" -> "for", "vargs" -> "var") are
+	 * therefore mis-classified as that keyword. A length/boundary check is
+	 * needed here; fix under its own commit with a dedicated scanner regression
+	 * test.
+	 */
 	for (int32_t i = offset; i < strlen(typeValue); i++)
 	{
 		if (i > contentLength)

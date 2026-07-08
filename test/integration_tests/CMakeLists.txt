@@ -24,11 +24,13 @@ function(integration_test test_name test_source)
 endfunction()
 
 integration_test(it_scanner_tokens  it_scanner_tokens.c)
+integration_test(it_parser_ast      it_parser_ast.c)
 
 add_custom_target(integration_tests
         COMMAND
         ${CMAKE_CTEST_COMMAND} --output-on-failure
         DEPENDS
         it_scanner_tokens
+        it_parser_ast
 )
 
