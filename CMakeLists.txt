@@ -184,12 +184,14 @@ foreach(_target IN LISTS _vendor_targets)
 endforeach()
 
 add_subdirectory(test/integration_tests)
+add_subdirectory(test/regression_tests)
 add_subdirectory(test/unit_tests)
 
 add_custom_target(all_tests
         COMMAND
         ${CMAKE_CTEST_COMMAND} --output-on-failure
         DEPENDS
-        unit_tests
         integration_tests
+        regression_tests
+        unit_tests
 )
