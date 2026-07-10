@@ -798,7 +798,7 @@ static token_t* scanner_consume_identifier(const scanner_t* scanner)
 			scanner->reader->lineNumber,
 			scanner->reader->columnNumber,
 			"Identifier too long! Identifiers cannot exceed " \
-				STRINGIFY(TOKEN_MAX_LENGTH) " characters."
+				TO_STRING(TOKEN_MAX_LENGTH) " characters."
 		);
 	}
 
@@ -1161,7 +1161,7 @@ static token_t* scanner_consume_string(const scanner_t* scanner)
 			scanner->reader->lineNumber,
 			scanner->reader->columnNumber,
 			"String too long! Strings cannot exceed " \
-				STRINGIFY(TOKEN_STRING_MAX_LENGTH) " characters."
+				TO_STRING(TOKEN_STRING_MAX_LENGTH) " characters."
 		);
 	}
 

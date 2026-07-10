@@ -1,11 +1,11 @@
 #ifndef TULA_TEST_H
 #define TULA_TEST_H
 
-#include <stdint.h>
-
 #include "config.h"
 
-#ifdef TULA_EXE_DEBUGGING
+#ifdef TULA_EXE_DEBUG
+
+#include <stdint.h>
 
 /*
  * def(
@@ -31,6 +31,6 @@ extern const char* TEST_MODE_VALUE[TOTAL_TEST_MODES];
 
 int32_t run_test(void);
 
-#endif /* TULA_EXE_DEBUGGING */
+#endif /* TULA_EXE_DEBUG */
 
 #endif /* TULA_TEST_H */

@@ -6,19 +6,19 @@
 #include "cli.h"
 
 
-typedef struct tula_global_state {
+struct tula_global_state {
 	int32_t argc;
 	const char** argv;
-	cli_config_t* cli;
-} global_state_t;
+	struct tula_cli_config* cli;
+};
 
 
 void setup_global_state(int32_t argc, const char** argv);
 
 
-void teardown_global_state();
+void teardown_global_state(void);
 
 
-global_state_t* get_global_state();
+struct tula_global_state* get_global_state(void);
 
 #endif /* TULA_STATE_GSTATE_H */

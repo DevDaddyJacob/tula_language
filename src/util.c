@@ -4,7 +4,6 @@
 #include <stdlib.h>
 
 #include "config.h"
-#include "tula.h"
 #include "common/exit.h"
 
 /*
@@ -44,7 +43,10 @@
 
 int32_t err_print_f(const char* format, ...) {
 	/* Null check the format */
-	if (format == NULL) return PRINT_FAILED;
+	if (NULL == format)
+	{
+		return PRINT_FAILED;
+	}
 
 
 	/* Get the variable arguments */
@@ -59,8 +61,7 @@ int32_t err_print_f(const char* format, ...) {
 	/* Release the vargs and return the status */
 	va_end(vargs);
 
-	// ReSharper disable once CppDFAConstantConditions
-	if (charsPrinted > TULA_MAX_BUFFER_SIZE)
+	if (TULA_MAX_BUFFER_SIZE < charsPrinted)
 	{
 		/* Don't ask... */
 		UNREACHABLE_RETURN(PRINT_PARTIAL_SUCCESS);
@@ -75,7 +76,8 @@ int32_t err_print_f(const char* format, ...) {
 }
 
 
-int32_t err_print_v(const char* format, const va_list vargs) {
+/* ReSharper disable once CppParameterMayBeConst */
+int32_t err_print_v(const char* format, va_list vargs) {
 	/* Null check the format */
 	if (NULL == format)
 	{
@@ -108,12 +110,12 @@ int32_t err_print_v(const char* format, const va_list vargs) {
 
 
 	/* Return the status */
-	if (charsPrinted > TULA_MAX_BUFFER_SIZE)
+	if (TULA_MAX_BUFFER_SIZE < charsPrinted)
 	{
 		return PRINT_PARTIAL_SUCCESS;
 	}
 
-	if (charsPrinted <= 0)
+	if (0 >= charsPrinted)
 	{
 		return PRINT_FAILED;
 	}

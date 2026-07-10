@@ -1,15 +1,14 @@
 #include "test.h"
 
+#ifdef TULA_EXE_DEBUG
+
 #include <stdio.h>
 
-#include "tula.h"
 #include "common/buffered_reader.h"
 #include "common/exit.h"
 #include "engine/parser/parser.h"
 #include "engine/scanner/scanner.h"
 #include "state/gstate.h"
-
-#ifdef TULA_EXE_DEBUGGING
 
 /*
  * ==================================================
@@ -26,7 +25,7 @@
  * ==================================================
  */
 
-static int32_t test_version();
+static int32_t test_version(void);
 
 static int32_t test_scanner(const char* inputFilePath);
 
@@ -50,9 +49,9 @@ const char* TEST_MODE_VALUE[TOTAL_TEST_MODES] = {
  * ==================================================
 */
 
-static int32_t test_version()
+static int32_t test_version(void)
 {
-	printf(TULA_RELEASE "\n");
+	printf("Tula v" TULA_RELEASE_VERSION_DETAILED "\n");
 
 	return TULA_EXIT_GOOD;
 }
@@ -110,7 +109,7 @@ static int32_t test_parser(const char* inputFilePath)
 
 int32_t run_test(void)
 {
-	const global_state_t* state = get_global_state();
+	const struct tula_global_state* state = get_global_state();
 
 	switch (state->cli->testMode)
 	{
@@ -137,4 +136,4 @@ int32_t run_test(void)
 }
 
 
-#endif /* TULA_EXE_DEBUGGING */
+#endif /* TULA_EXE_DEBUG */

@@ -40,38 +40,63 @@
  */
 
 /* Token cursor helpers */
+// REVIEW: Better method name (ie "parser_...")
+// REVIEW: Function doxygen documentation
 static void advance(parser_t* parser);
 
+// REVIEW: Better method name (ie "parser_...")
+// REVIEW: Function doxygen documentation
 static bool check(const parser_t* parser, token_type_t type);
 
+// REVIEW: Better method name (ie "parser_...")
+// REVIEW: Function doxygen documentation
 static bool match(parser_t* parser, token_type_t type);
 
+// REVIEW: Better method name (ie "parser_...")
+// REVIEW: Function doxygen documentation
 static bool is_at_end(const parser_t* parser);
 
+// REVIEW: Better method name
+// REVIEW: Function doxygen documentation
 static bool starts_expression(token_type_t type);
 
+// REVIEW: Better method name
+// REVIEW: Function doxygen documentation
 static int32_t binary_precedence(token_type_t type);
 
+// REVIEW: Better method name (ie "parser_...")
+// REVIEW: Function doxygen documentation
 static char* dup_current(const parser_t* parser);
 
+// REVIEW: Better method name (ie "parser_...")
+// REVIEW: Function doxygen documentation
 static ast_node_t* make_error(parser_t* parser, const char* message);
 
+// REVIEW: Better method name (ie "parser_...")
+// REVIEW: Function doxygen documentation
 static ast_node_t* make_identifier(parser_t* parser);
 
 
 /* Grammar — statements */
+// REVIEW: Function doxygen documentation
 static ast_node_t* parse_program(parser_t* parser);
 
+// REVIEW: Function doxygen documentation
 static ast_node_t* parse_block(parser_t* parser);
 
+// REVIEW: Function doxygen documentation
 static ast_node_t* parse_statement(parser_t* parser);
 
+// REVIEW: Function doxygen documentation
 static ast_node_t* parse_define(parser_t* parser);
 
+// REVIEW: Function doxygen documentation
 static ast_node_t* parse_set(parser_t* parser);
 
+// REVIEW: Function doxygen documentation
 static ast_node_t* parse_unset(parser_t* parser);
 
+// REVIEW: Function doxygen documentation
 static ast_node_t* parse_named_assignment(
 	parser_t* parser,
 	ast_node_type_t type,
@@ -80,6 +105,7 @@ static ast_node_t* parse_named_assignment(
 	uint32_t column
 );
 
+// REVIEW: Function doxygen documentation
 static ast_node_t* parse_function_define(
 	parser_t* parser,
 	bool isGlobal,
@@ -87,36 +113,51 @@ static ast_node_t* parse_function_define(
 	uint32_t column
 );
 
+// REVIEW: Function doxygen documentation
 static ast_node_t* parse_if(parser_t* parser);
 
+// REVIEW: Function doxygen documentation
 static ast_node_t* parse_while(parser_t* parser);
 
+// REVIEW: Function doxygen documentation
 static ast_node_t* parse_do_while(parser_t* parser);
 
+// REVIEW: Function doxygen documentation
 static ast_node_t* parse_for(parser_t* parser);
 
+// REVIEW: Function doxygen documentation
 static ast_node_t* parse_return(parser_t* parser);
 
 
 /* Grammar — expressions */
+// REVIEW: Function doxygen documentation
 static ast_node_t* parse_expression(parser_t* parser);
 
+// REVIEW: Function doxygen documentation
 static ast_node_t* parse_binary(parser_t* parser, int32_t minPrecedence);
 
+// REVIEW: Function doxygen documentation
 static ast_node_t* parse_unary(parser_t* parser);
 
+// REVIEW: Function doxygen documentation
 static ast_node_t* parse_postfix(parser_t* parser);
 
+// REVIEW: Function doxygen documentation
 static ast_node_t* parse_primary(parser_t* parser);
 
+// REVIEW: Function doxygen documentation
 static ast_node_t* parse_array(parser_t* parser);
 
+// REVIEW: Function doxygen documentation
 static ast_node_t* parse_table(parser_t* parser);
 
+// REVIEW: Function doxygen documentation
 static ast_node_t* parse_table_entry(parser_t* parser);
 
+// REVIEW: Function doxygen documentation
 static ast_node_t* parse_function_value(parser_t* parser);
 
+// REVIEW: Function doxygen documentation
 static ast_node_t* parse_parameters(parser_t* parser, arr_ast_node_t* out);
 
 
@@ -125,8 +166,6 @@ static ast_node_t* parse_parameters(parser_t* parser, arr_ast_node_t* out);
  * Module Level Variables & Constants
  * ==================================================
  */
-
-/* int magicNumber = 420; */
 
 
 /*
@@ -252,6 +291,7 @@ static int32_t binary_precedence(const token_type_t type)
 static char* dup_current(const parser_t* parser)
 {
 	const char* content = parser->current->content;
+	// REVIEW: Avoid ternary when possible
 	const size_t size = (NULL == content ? 0 : strlen(content)) + 1;
 
 	char* copy = malloc(sizeof(char) * size);
@@ -261,6 +301,7 @@ static char* dup_current(const parser_t* parser)
 		UNREACHABLE_RETURN(NULL);
 	}
 
+	// REVIEW: Avoid ternary when possible
 	str_copy_safe(copy, NULL == content ? "" : content, size);
 
 	return copy;
@@ -284,6 +325,7 @@ static ast_node_t* make_error(parser_t* parser, const char* message)
 		 * When the offending token is itself a scanner error, surface the
 		 * scanner's own message rather than the parser's generic one.
 		 */
+		// REVIEW: Bad multiline conditional
 		if (TOK_ERROR == parser->current->type
 			&& NULL != parser->current->content)
 		{
@@ -312,9 +354,13 @@ static ast_node_t* make_identifier(parser_t* parser)
 
 static ast_node_t* parse_program(parser_t* parser)
 {
-	const uint32_t line = NULL == parser->current ? 1 : parser->current->line;
-	const uint32_t column
-		= NULL == parser->current ? 1 : parser->current->column;
+	uint32_t line = 1;
+	uint32_t column = 1;
+	if (NULL != parser->current)
+	{
+		line = parser->current->line;
+		column = parser->current->column;
+	}
 
 	ast_node_t* root = ast_node_new(AST_BLOCK, line, column);
 
@@ -460,6 +506,7 @@ static ast_node_t* parse_statement(parser_t* parser)
 
 			ast_node_t* statement = ast_node_new(
 				AST_EXPR_STATEMENT,
+				// REVIEW: IDE warning, expression may be NULL
 				expression->line,
 				expression->column
 			);
@@ -937,6 +984,7 @@ static ast_node_t* parse_binary(parser_t* parser, const int32_t minPrecedence)
 		advance(parser);
 
 		/* '^' is right-associative; every other operator is left-associative */
+		// REVIEW: Avoid ternaries when possible
 		const int32_t nextMinimum = TOK_CARET == op
 			? precedence
 			: precedence + 1;
@@ -950,6 +998,7 @@ static ast_node_t* parse_binary(parser_t* parser, const int32_t minPrecedence)
 
 		ast_node_t* binary = ast_node_new(
 			AST_BINARY,
+			// REVIEW: IDE warning, left may be NULL
 			left->line,
 			left->column
 		);
@@ -988,6 +1037,7 @@ static ast_node_t* parse_unary(parser_t* parser)
 	/* Prefix increment / decrement, which apply only to an identifier */
 	if (check(parser, TOK_PLUS_PLUS) || check(parser, TOK_MINUS_MINUS))
 	{
+		// REVIEW: Avoid ternaries when possible
 		const ast_node_type_t type = check(parser, TOK_PLUS_PLUS)
 			? AST_PRE_INCREMENT
 			: AST_PRE_DECREMENT;
@@ -1133,9 +1183,11 @@ static ast_node_t* parse_postfix(parser_t* parser)
 		}
 
 		/* Postfix increment / decrement, which apply only to an identifier */
+		// REVIEW: Bad multiline conditional
 		if ((check(parser, TOK_PLUS_PLUS) || check(parser, TOK_MINUS_MINUS))
 			&& AST_IDENTIFIER == node->type)
 		{
+			// REVIEW: Avoid ternaries
 			const ast_node_type_t type = check(parser, TOK_PLUS_PLUS)
 				? AST_POST_INCREMENT
 				: AST_POST_DECREMENT;

@@ -1,7 +1,6 @@
 #ifndef TULA_LANGUAGE_UTIL_H
 #define TULA_LANGUAGE_UTIL_H
 
-#include <stdarg.h>
 #include <stdint.h>
 
 #include "config.h"
@@ -35,8 +34,8 @@
 
 #define DEFAULT_BREAK default: { break; }
 
-#define TO_STRING(x) #x
-#define STRINGIFY(x) TO_STRING(x)
+#define STRINGIFY(x) #x
+#define TO_STRING(x) STRINGIFY(x)
 
 #define NO_RETURN __declspec(noreturn)
 

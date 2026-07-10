@@ -26,7 +26,7 @@
  * ==================================================
  */
 
-#ifdef TULA_EXE_DEBUGGING
+#ifdef TULA_EXE_DEBUG
 /**
  * \brief           Recursively prints a node as an indented tree
  * \param[in]       node: The node to print
@@ -39,7 +39,7 @@ static void ast_node_print_indented(
 	const char* label,
 	uint32_t depth
 );
-#endif /* TULA_EXE_DEBUGGING */
+#endif /* TULA_EXE_DEBUG */
 
 
 /*
@@ -52,11 +52,11 @@ const char* AST_NODE_TYPE_VALUE[TOTAL_AST_NODE_TYPES] = {
 	DEFINE_AST_NODE_TYPES(AST_NODE_TYPE_VALUE_DEFINER)
 };
 
-#ifdef TULA_EXE_DEBUGGING
+#ifdef TULA_EXE_DEBUG
 const char* AST_NODE_TYPE_NAME[TOTAL_AST_NODE_TYPES] = {
 	DEFINE_AST_NODE_TYPES(AST_NODE_TYPE_NAME_DEFINER)
 };
-#endif /* TULA_EXE_DEBUGGING */
+#endif /* TULA_EXE_DEBUG */
 
 
 /*
@@ -276,7 +276,7 @@ void ast_node_destroy(ast_node_t* node)
 			break;
 		}
 
-		case AST_BREAK:
+		case AST_BREAK: /* NOLINT(*-branch-clone) */
 		case AST_CONTINUE:
 		{
 			/* No owned children */
@@ -312,6 +312,7 @@ void arr_node_destroy(arr_ast_node_t* array)
 
 	for (size_t i = 0; i < array->count; i++)
 	{
+		// REVIEW: IDE warning, array->values may be NULL
 		ast_node_destroy(array->values[i]);
 	}
 
@@ -353,7 +354,7 @@ void arr_node_add(arr_ast_node_t* array, ast_node_t* value)
 }
 
 
-#ifdef TULA_EXE_DEBUGGING
+#ifdef TULA_EXE_DEBUG
 static void ast_node_print_indented(
 	const ast_node_t* node,
 	const char* label,
@@ -688,7 +689,7 @@ static void ast_node_print_indented(
 			break;
 		}
 
-		case AST_BREAK:
+		case AST_BREAK: /* NOLINT(*-branch-clone) */
 		case AST_CONTINUE:
 		{
 			printf("\n");
@@ -708,4 +709,4 @@ void ast_node_print(const ast_node_t* node)
 {
 	ast_node_print_indented(node, NULL, 0);
 }
-#endif /* TULA_EXE_DEBUGGING */
+#endif /* TULA_EXE_DEBUG */

@@ -77,7 +77,7 @@ const bool TOKENS_IS_OPERATOR[TOTAL_TOKENS] = {
 	DEFINE_TOKENS(TOKEN_IS_OPERATOR_DEFINER)
 };
 
-#ifdef TULA_EXE_DEBUGGING
+#ifdef TULA_EXE_DEBUG
 const char* TOKENS_TYPE_VALUE[TOTAL_TOKENS] = {
 	DEFINE_TOKENS(TOKEN_TYPE_VALUE_DEFINER)
 };
@@ -229,7 +229,7 @@ void arr_token_add(arr_token_t* array, const token_t* value)
 }
 
 
-#ifdef TULA_EXE_DEBUGGING
+#ifdef TULA_EXE_DEBUG
 void token_print(const token_t* token)
 {
 	printf(
@@ -269,7 +269,7 @@ void arr_token_print(const arr_token_t* array)
 		}
 		else
 		{
-			printf("%s", NULL);
+			printf("%s", (char*)NULL);
 		}
 
 		if (i + 1 < array->capacity)

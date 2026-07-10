@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Build All Exe" type="CompoundRunConfigurationType">
+    <toRun name="tula" type="CMakeRunConfiguration" />
+    <toRun name="tulac" type="CMakeRunConfiguration" />
+    <toRun name="tulad" type="CMakeRunConfiguration" />
+    <toRun name="tular" type="CMakeRunConfiguration" />
+    <method v="2" />
+  </configuration>
+</component>

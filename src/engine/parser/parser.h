@@ -10,7 +10,7 @@
 /**
  * \brief	The parser — the second stage of the engine.
  *
- *			It pulls tokens from a \ref scanner_t and assembles them, guided by
+ *			It pulls tokens from a @c scanner_t and assembles them, guided by
  *			the language grammar, into an Abstract Syntax Tree. Following the
  *			engine's top-down ownership discipline, a parser owns both the
  *			scanner that feeds it and the AST it produces; destroying the parser
@@ -25,7 +25,7 @@ typedef struct tula_parser
 
 	/**
 	 * \brief	The root of the produced AST (owned), or NULL until
-	 *			\ref parser_parse has run.
+	 *			@c parser_parse has run.
 	 */
 	ast_node_t* ast;
 

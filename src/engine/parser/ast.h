@@ -326,7 +326,7 @@ struct tula_ast_node
 			/** \brief	The branch condition expressions. */
 			arr_ast_node_t conditions;
 
-			/** \brief	The branch body blocks, parallel to \ref conditions. */
+			/** \brief	The branch body blocks, parallel to @c conditions. */
 			arr_ast_node_t bodies;
 
 			/** \brief	The trailing else block (owned), or NULL if absent. */
@@ -398,7 +398,7 @@ extern const char* AST_NODE_TYPE_VALUE[TOTAL_AST_NODE_TYPES];
  * \param[in]       column: The source column the construct starts at
  * \return          Returns a pointer to the new node
  * \note            Every embedded child pointer is NULL and every embedded
- *                  \ref arr_node_t is empty; the caller fills in the members
+ *                  @c arr_node_t is empty; the caller fills in the members
  *                  relevant to \p type. Exits fatally on allocation failure.
  */
 ast_node_t* ast_node_new(ast_node_type_t type, uint32_t line, uint32_t column);
@@ -448,7 +448,7 @@ void arr_node_destroy(arr_ast_node_t* array);
 void arr_node_add(arr_ast_node_t* array, ast_node_t* value);
 
 
-#ifdef TULA_EXE_DEBUGGING
+#ifdef TULA_EXE_DEBUG
 extern const char* AST_NODE_TYPE_NAME[TOTAL_AST_NODE_TYPES];
 
 void ast_node_print(const ast_node_t* node);

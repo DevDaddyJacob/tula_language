@@ -240,7 +240,7 @@ void arr_token_destroy(arr_token_t* array);
 void arr_token_add(arr_token_t* array, const token_t* value);
 
 
-#ifdef TULA_EXE_DEBUGGING
+#ifdef TULA_EXE_DEBUG
 extern const char* TOKENS_TYPE_VALUE[TOTAL_TOKENS];
 
 void token_print(const token_t* token);
