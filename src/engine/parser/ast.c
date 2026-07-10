@@ -310,14 +310,14 @@ void arr_node_destroy(arr_ast_node_t* array)
 		return;
 	}
 
-	for (size_t i = 0; i < array->count; i++)
-	{
-		// REVIEW: IDE warning, array->values may be NULL
-		ast_node_destroy(array->values[i]);
-	}
-
+	/* A NULL backing buffer means there is nothing to release */
 	if (NULL != array->values)
 	{
+		for (size_t i = 0; i < array->count; i++)
+		{
+			ast_node_destroy(array->values[i]);
+		}
+
 		tula_array_free(ast_node_t*, array->values, array->capacity);
 	}
 
