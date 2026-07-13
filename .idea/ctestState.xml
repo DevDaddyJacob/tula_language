@@ -3,7 +3,8 @@
   <component name="CidrCTestProjectState">
     <ctestState>
       <lineNumber testId="path:test/CMakeLists.txt test:test_all" value="18" />
-      <lineNumber testId="path:test/integration_tests/CMakeLists.txt test:it_scanner_tokens" value="16" />
+      <lineNumber testId="path:test/regression_tests/CMakeLists.txt test:regression_test_0000_example" value="5" />
+      <lineNumber testId="path:test/regression_tests/CMakeLists.txt test:rt_0000_example" value="5" />
     </ctestState>
   </component>
 </project>

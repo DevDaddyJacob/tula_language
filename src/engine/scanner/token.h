@@ -131,7 +131,7 @@ typedef struct tula_token
 	/**
 	 * \brief	The length of the token
 	 */
-	uint32_t contentLength;
+	size_t contentLength;
 } token_t;
 
 
@@ -146,7 +146,6 @@ typedef struct tula_arr_token
 	 * \brief	The amount of elements the array can currently accommodate.
 	 */
 	size_t capacity;
-
 
 	/**
 	 * \brief	Pointer to the first element of the array.
@@ -202,7 +201,7 @@ token_t* token_new(
 	uint32_t line,
 	uint32_t column,
 	const char* content,
-	uint32_t contentLength
+	size_t contentLength
 );
 
 
@@ -241,7 +240,9 @@ void arr_token_destroy(arr_token_t* array);
 void arr_token_add(arr_token_t* array, const token_t* value);
 
 
-#ifdef TULA_EXE_DEBUGGING
+#ifdef TULA_EXE_DEBUG
+extern const char* TOKENS_TYPE_VALUE[TOTAL_TOKENS];
+
 void token_print(const token_t* token);
 
 void arr_token_print(const arr_token_t* array);

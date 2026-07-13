@@ -4,9 +4,94 @@
 #include <string.h>
 
 #include "cli.h"
-#include "tula.h"
+#include "config.h"
 #include "common/exit.h"
 #include "common/strings.h"
+
+/*
+ * ==================================================
+ * Macros
+ * ==================================================
+ */
+
+/*
+ * def(
+ *		identifier,			<-	The identifier used to define the element
+ *		executable,			<-	The executable macro the option is included in
+ *		usage,				<-	The usage of the args
+ *		description,		<-	The description of the arg
+ *	)
+ */
+#define DEFINE_CLI_ARGS(def)													\
+	def(																		\
+		OPTION_TEST_MODE,														\
+		TULA_EXE_DEBUG_VALUE,													\
+		"-m, --mode <scanner|parser>",											\
+		"defines the testing mode to use"										\
+	)																			\
+	def(																		\
+		OPTION_INPUT_FILE,														\
+		TULA_EXE_DEBUG_VALUE,													\
+		"-i, --input-file <file>",												\
+		"the path of the input file to use"										\
+	)																			\
+	def(																		\
+		OPTION_INTERACTIVE,														\
+		TULA_EXE_FULL_VALUE,													\
+		"-i, --interactive",													\
+		"enters the REPL mode (Read-Evaluate-Print-Loop)"						\
+	)																			\
+	def(																		\
+		OPTION_HELP,															\
+		TULA_EXE_ALL_VALUE,														\
+		"-h, --help",															\
+		"prints this menu"														\
+	)																			\
+	def(																		\
+		OPTION_VERSION_SHORT,													\
+		TULA_EXE_ALL_VALUE,														\
+		"-v",																	\
+		"prints the language version"											\
+	)																			\
+	def(																		\
+		OPTION_VERSION_FULL,													\
+		TULA_EXE_ALL_VALUE,														\
+		"--version",															\
+		"prints the detailed version"											\
+	)																			\
+	def(																		\
+		OPTION_END_OF_OPTIONS,													\
+		TULA_EXE_ALL_VALUE,														\
+		"--, --end-of-options",													\
+		"indicates the end of the options"										\
+	)																			\
+
+
+#define CLI_ARG_IS_ENABLED(macroPrefix, flag) \
+	CLI_ARG_IS_ENABLED_(macroPrefix, flag)
+
+#define CLI_ARG_IS_ENABLED_(macroPrefix, flag) \
+	macroPrefix##flag
+
+
+#define CLI_ARGS_ENUM_DEFINER_0(_0)
+#define CLI_ARGS_ENUM_DEFINER_1(identifier) identifier,
+
+#define CLI_ARGS_ENUM_DEFINER(identifier, exe, _2, _3) \
+	CLI_ARG_IS_ENABLED(CLI_ARGS_ENUM_DEFINER_, exe)(identifier)
+
+
+#define CLI_ARGS_HELP_TABLE_DEFINER_0(_0, _1)
+#define CLI_ARGS_HELP_TABLE_DEFINER_1(usage, desc) { usage, desc },
+
+#define CLI_ARGS_HELP_TABLE_DEFINER(identifier, exe, usage, desc) \
+	CLI_ARG_IS_ENABLED(CLI_ARGS_HELP_TABLE_DEFINER_, exe)(usage, desc)
+
+
+#define CLI_ARGS_TOTAL_OPTIONS_DEFINER(_0, exe, _2, _3) + exe		/* NOLINT(*-macro-parentheses) */
+
+#define TOTAL_CLI_OPTIONS (0 DEFINE_CLI_ARGS(CLI_ARGS_TOTAL_OPTIONS_DEFINER))
+
 
 /*
  * ==================================================
@@ -14,43 +99,36 @@
  * ==================================================
  */
 
-typedef struct tula_cli_params {
+/* ReSharper disable once CppClassNeverUsed */
+struct tula_cli_params {
     int pointer;
     int argc;
     const char** argv;
-} cli_params_t;
+};
 
 
 typedef enum tula_option_type {
     OPTION_UNKNOWN,         /** Not an option */
-    OPTION_INVALID,         /** Invalid option */
-    OPTION_END_OF_OPTIONS,  /** -- or --end-of-options */
-    OPTION_HELP,            /** -h or --help */
-    OPTION_VERSION,         /** -v or --version */
-
-#ifdef TULA_EXE_STANDARD
-    OPTION_INTERACTIVE,     /** -i or --interactive */
-#endif /* TULA_EXE_STANDARD */
-
-#ifdef TULA_EXE_DEBUGGING
-    OPTION_INPUT_FILE,		/** -i or --input-file */
-    OPTION_TEST_MODE,		/** -m or --mode */
-#endif /* TULA_EXE_DEBUGGING */
+	OPTION_INVALID,         /** Invalid option */
+	DEFINE_CLI_ARGS(CLI_ARGS_ENUM_DEFINER)
 } option_type_t;
 
 
 
-static void print_help_menu();
+static void print_help_menu(void);
 
-static bool has_next(const cli_params_t* params);
+static bool has_next(const struct tula_cli_params* params);
 
-static const char* peek_argument(const cli_params_t* params);
+static const char* peek_argument(const struct tula_cli_params* params);
 
-static const char* consume_argument(cli_params_t* params);
+static const char* consume_argument(struct tula_cli_params* params);
 
 static option_type_t parse_option_type(const char* arg);
 
-static bool consume_next_option(cli_params_t* params, cli_config_t* config);
+static bool consume_next_option(
+	struct tula_cli_params* params,
+	struct tula_cli_config* config
+);
 
 
 /*
@@ -69,58 +147,21 @@ static bool consume_next_option(cli_params_t* params, cli_config_t* config);
 
 static void print_help_menu()
 {
-#ifdef TULA_EXE_STANDARD
-#	define TOTAL_OPTIONS 4
-#endif /* TULA_EXE_STANDARD */
-
-#ifdef TULA_EXE_DEBUGGING
-#	define TOTAL_OPTIONS 5
-#endif /* TULA_EXE_DEBUGGING */
-
-
-	// ReSharper disable once CppTooWideScope
-	const char* options[TOTAL_OPTIONS][2] ={
-#ifdef TULA_EXE_STANDARD
-		{
-			"-i, --interactive",
-			"enters the REPL mode (Read-Evaluate-Print-Loop)",
-		},
-#endif /* TULA_EXE_STANDARD */
-
-#ifdef TULA_EXE_DEBUGGING
-		{
-			"-m, --mode <scanner>",
-			"defines the testing mode to use",
-		},
-		{
-			"-i, --input-file <file>",
-			"the path of the input file to use",
-		},
-#endif /* TULA_EXE_DEBUGGING */
-        {
-            "-h, --help",
-            "prints this menu",
-        },
-        {
-            "-v, --version",
-            "prints the version of the program",
-        },
-        {
-            "--, --end-of-options",
-            "indicates the end of the options",
-        }
-    };
+	const char* options[TOTAL_CLI_OPTIONS][2] = {
+		DEFINE_CLI_ARGS(CLI_ARGS_HELP_TABLE_DEFINER)
+	};
+	UNUSED(options);
 
     fprintf(
         stdout,
         "Usage: " TULA_PROGRAM_NAME " [OPTIONS]... "
-#ifdef TULA_EXE_STANDARD
+#ifdef TULA_EXE_FULL
         "[FILE]"
 #endif
         "\n\nOptions:\n"
     );
 
-    for (int i = 0; i < TOTAL_OPTIONS; i++) {
+    for (int i = 0; i < TOTAL_CLI_OPTIONS; i++) {
         fprintf(
             stdout,
             "\t%s\n\t\t%s\n\n",
@@ -128,13 +169,10 @@ static void print_help_menu()
             options[i][1]
         );
     }
-
-#undef TOTAL_OPTIONS
-    tula_exit(TULA_EXIT_GOOD);
 }
 
 
-static bool has_next(const cli_params_t* params)
+static bool has_next(const struct tula_cli_params* params)
 {
     if (params->pointer >= params->argc)
     {
@@ -144,7 +182,7 @@ static bool has_next(const cli_params_t* params)
     return true;
 }
 
-static const char* peek_argument(const cli_params_t* params)
+static const char* peek_argument(const struct tula_cli_params* params)
 {
     if (!has_next(params))
     {
@@ -155,7 +193,7 @@ static const char* peek_argument(const cli_params_t* params)
 }
 
 
-static const char* consume_argument(cli_params_t* params)
+static const char* consume_argument(struct tula_cli_params* params)
 {
     if (!has_next(params))
     {
@@ -198,10 +236,10 @@ static option_type_t parse_option_type(const char* arg)
 
                 	if (str_equals_partial(arg, "version", 7, 2))
                 	{
-						return OPTION_VERSION;
+                		return OPTION_VERSION_FULL;
                 	}
 
-#ifdef TULA_EXE_DEBUGGING
+#ifdef TULA_EXE_DEBUG
                 	if (str_equals_partial(arg, "mode", 4, 2))
                 	{
                 		return OPTION_TEST_MODE;
@@ -211,7 +249,7 @@ static option_type_t parse_option_type(const char* arg)
                 	{
                 		return OPTION_INPUT_FILE;
                 	}
-#endif /* TULA_EXE_DEBUGGING */
+#endif /* TULA_EXE_DEBUG */
 
                 	return OPTION_INVALID;
 				}
@@ -220,21 +258,21 @@ static option_type_t parse_option_type(const char* arg)
 
         case 'i':
         {
-#ifdef TULA_EXE_STANDARD
+#ifdef TULA_EXE_FULL
         	return OPTION_INTERACTIVE;
-#endif /* TULA_EXE_STANDARD */
+#endif /* TULA_EXE_FULL */
 
-#ifdef TULA_EXE_DEBUGGING
+#ifdef TULA_EXE_DEBUG
         	return OPTION_INPUT_FILE;
-#endif /* TULA_EXE_DEBUGGING */
+#endif /* TULA_EXE_DEBUG */
         }
 
-#ifdef TULA_EXE_DEBUGGING
+#ifdef TULA_EXE_DEBUG
     	case 'm':
         {
         	return OPTION_TEST_MODE;
         }
-#endif /* TULA_EXE_DEBUGGING */
+#endif /* TULA_EXE_DEBUG */
 
         case 'h':
 		{
@@ -243,7 +281,7 @@ static option_type_t parse_option_type(const char* arg)
 
         case 'v':
 		{
-			return OPTION_VERSION;
+			return OPTION_VERSION_SHORT;
 		}
 
         default:
@@ -255,57 +293,56 @@ static option_type_t parse_option_type(const char* arg)
 }
 
 
-static bool consume_next_option(cli_params_t* params, cli_config_t* config)
+static bool consume_next_option(
+	struct tula_cli_params* params,
+	struct tula_cli_config* config
+)
 {
-    option_type_t optionType;
-
     if (!has_next(params))
     {
     	return false;
     }
 
-    switch (optionType = parse_option_type(peek_argument(params)))
+    switch (parse_option_type(peek_argument(params)))
     {
-        case OPTION_INVALID:
-        case OPTION_HELP:
-        case OPTION_VERSION:
+    	case OPTION_UNKNOWN:
     	{
-            const char* arg = peek_argument(params);
-            free(params);
-            free(config);
+    		return false;
+    	}
 
-            switch (optionType)
-            {
-                case OPTION_INVALID:
-            	{
-                    exit_err_bad_usage_f(
-                    	"'%s' is not a recognized option.",
-                    	arg
-                    );
-                }
-
-                case OPTION_HELP:
-            	{
-                    print_help_menu();
-                    break;
-                }
-
-                case OPTION_VERSION:
-            	{
-                    printf(TULA_RELEASE "\n");
-                    tula_exit(TULA_EXIT_GOOD);
-                }
-
-                UNREACHABLE_DEFAULT(break);
-            }
-
-            UNREACHABLE_RETURN(false);
-        }
-
-        case OPTION_UNKNOWN:
+    	case OPTION_INVALID:
     	{
-            return false;
-        }
+    		exit_err_bad_usage_f(
+				"'%s' is not a recognized option.",
+				peek_argument(params)
+			);
+    	}
+
+    	case OPTION_HELP:
+    	{
+    		print_help_menu();
+    		goto cleanup_exit_good;
+    	}
+
+    	case OPTION_VERSION_SHORT:
+    	{
+    		printf("Tula v" TULA_LANGUAGE_VERSION "\n");
+    		goto cleanup_exit_good;
+    	}
+
+    	case OPTION_VERSION_FULL:
+    	{
+    		printf(
+    			"Tula v" TULA_RELEASE_VERSION_DETAILED
+    				"\n  - Executable Type:\t\t" TO_STRING(TULA_EXECUTABLE_TYPE)
+    					" (" TULA_PROGRAM_NAME ")"
+    				"\n  - Language Version:\t\t" TULA_LANGUAGE_VERSION
+    				"\n  - Release Version:\t\t" TULA_RELEASE_VERSION
+    				"\n  - Release Hash:\t\t" TULA_COMMIT_HASH_FULL
+    				"\n"
+    		);
+    		goto cleanup_exit_good;
+    	}
 
         case OPTION_END_OF_OPTIONS:
     	{
@@ -313,7 +350,69 @@ static bool consume_next_option(cli_params_t* params, cli_config_t* config)
             return false;
     	}
 
-#ifdef TULA_EXE_STANDARD
+#ifdef TULA_EXE_DEBUG
+    	case OPTION_INPUT_FILE:
+    	{
+    		consume_argument(params);
+
+    		if (has_next(params))
+    		{
+    			const char* arg = consume_argument(params);
+    			const uint8_t is_quotted = ('"' == arg[0] || '\'' == arg[0])
+					&& (
+						str_ends_with_char(arg, '"', strlen(arg))
+						|| str_ends_with_char(arg, '\'', strlen(arg))
+					);
+
+    			const size_t raw_len = strlen(arg);
+    			const size_t str_len = is_quotted
+					? (raw_len > 2 ? raw_len - 1 : 1)
+					: raw_len + 1;
+
+
+    			/* Allocate memory for the file */
+    			config->inputFile = (char*)malloc(sizeof(char) * str_len);
+    			if (NULL == config->inputFile)
+    			{
+    				free(params);
+    				free(config);
+
+    				tula_exit_err_no_mem();
+    			}
+
+
+    			/* Copy the memory of the argument to the config */
+    			str_copy_safe(
+					config->inputFile,
+					is_quotted ? arg + 1 : arg,
+					str_len
+				);
+    		}
+
+    		return true;
+    	}
+
+    	case OPTION_TEST_MODE:
+    	{
+    		consume_argument(params);
+
+    		const char* arg = consume_argument(params);
+
+#define DEFINE_TEST_MODE_PARSER(identifier, value) \
+	if (str_equals(arg, value, sizeof(value) - 1)) \
+	{ \
+		config->testMode = (identifier); \
+		return true; \
+	}
+
+    		DEFINE_TEST_MODES(DEFINE_TEST_MODE_PARSER)
+#undef DEFINE_TEST_MODE_PARSER
+
+			return true;
+    	}
+#endif /* TULA_EXE_DEBUG */
+
+#ifdef TULA_EXE_FULL
     	case OPTION_INTERACTIVE:
         {
         	consume_argument(params);
@@ -321,84 +420,34 @@ static bool consume_next_option(cli_params_t* params, cli_config_t* config)
 
         	return true;
         }
-#endif /* TULA_EXE_STANDARD */
-
-#ifdef TULA_EXE_DEBUGGING
-    	case OPTION_INPUT_FILE:
-        {
-        	consume_argument(params);
-
-        	if (has_next(params))
-        	{
-        		const char* arg = consume_argument(params);
-        		const uint8_t is_quotted = ('"' == arg[0] || '\'' == arg[0])
-					&& (
-						str_ends_with_char(arg, '"', strlen(arg))
-						|| str_ends_with_char(arg, '\'', strlen(arg))
-					);
-
-        		const size_t raw_len = strlen(arg);
-        		const size_t str_len = is_quotted
-					? (raw_len > 2 ? raw_len - 1 : 1)
-					: raw_len + 1;
-
-
-        		/* Allocate memory for the file */
-        		config->inputFile = (char*)malloc(sizeof(char) * str_len);
-        		if (NULL == config->inputFile)
-        		{
-        			free(params);
-        			free(config);
-
-        			tula_exit_err_no_mem();
-        		}
-
-
-        		/* Copy the memory of the argument to the config */
-        		str_copy_safe(
-        			config->inputFile,
-        			is_quotted ? arg + 1 : arg,
-        			str_len
-        		);
-        	}
-
-        	return true;
-        }
-
-    	case OPTION_TEST_MODE:
-        {
-        	consume_argument(params);
-
-        	const char* arg = consume_argument(params);
-
-#define DEFINE_TEST_MODE_PARSER(identifier, value) \
-	if (str_equals(arg, value, sizeof(value) - 1)) \
-    { \
-		config->testMode = (identifier); \
-		return true; \
-    }
-        	DEFINE_TEST_MODES(DEFINE_TEST_MODE_PARSER)
-#undef DEFINE_TEST_MODE_PARSER
-
-        	return true;
-        }
-#endif /* TULA_EXE_DEBUGGING */
+#endif /* TULA_EXE_FULL */
     }
 
     return true; /* Unreachable? */
+
+cleanup_exit_good:
+	free(params);
+	free(config);
+	tula_exit(TULA_EXIT_GOOD);
 }
 
 
-cli_config_t* cli_parse_args(const int argc, const char** argv)
+struct tula_cli_config* cli_parse_args(const int argc, const char** argv)
 {
+	if (1 == argc)
+	{
+		print_help_menu();
+		tula_exit(TULA_EXIT_GOOD);
+	}
+
 	/* Allocate memory for params & config */
-    cli_params_t* params = malloc(sizeof(cli_params_t));
+    struct tula_cli_params* params = malloc(sizeof(struct tula_cli_params));
     if (NULL == params)
     {
         tula_exit_err_no_mem();
     }
 
-    cli_config_t* config = malloc(sizeof(cli_config_t));
+    struct tula_cli_config* config = malloc(sizeof(struct tula_cli_config));
     if (NULL == config)
     {
         free(params);
@@ -414,22 +463,22 @@ cli_config_t* cli_parse_args(const int argc, const char** argv)
 
 
 	/* Default the config */
-#ifdef TULA_EXE_STANDARD
+#ifdef TULA_EXE_FULL
 	config->file = NULL;
 	config->interactive = false;
-#endif /* TULA_EXE_STANDARD */
+#endif /* TULA_EXE_FULL */
 
-#ifdef TULA_EXE_DEBUGGING
+#ifdef TULA_EXE_DEBUG
 	config->testMode = TEST_MODE_VERSION;
 	config->inputFile = false;
-#endif /* TULA_EXE_DEBUGGING */
+#endif /* TULA_EXE_DEBUG */
 
 
     /* Consume the options */
     while (consume_next_option(params, config)) { }
 
 
-#ifdef TULA_EXE_STANDARD
+#ifdef TULA_EXE_FULL
 	/* If we still have next args, store it as the file */
     if (has_next(params))
     {
@@ -460,35 +509,35 @@ cli_config_t* cli_parse_args(const int argc, const char** argv)
 		/* Copy the memory of the argument to the config */
 		str_copy_safe(config->file, is_quotted ? arg + 1 : arg, str_len);
 	}
-#endif /* TULA_EXE_STANDARD */
+#endif /* TULA_EXE_FULL */
 
     free(params);
 	return config;
 }
 
 
-void cli_destroy(cli_config_t* config)
+void cli_destroy(struct tula_cli_config* config)
 {
     if (config == NULL)
     {
     	return;
     }
 
-#ifdef TULA_EXE_STANDARD
-	if (config->file != NULL)
-	{
-		free(config->file);
-		config->file = NULL;
-	}
-#endif /* TULA_EXE_STANDARD */
-
-#ifdef TULA_EXE_DEBUGGING
+#ifdef TULA_EXE_DEBUG
 	if (config->inputFile != NULL)
 	{
 		free(config->inputFile);
 		config->inputFile = NULL;
 	}
-#endif /* TULA_EXE_DEBUGGING */
+#endif /* TULA_EXE_DEBUG */
+
+#ifdef TULA_EXE_FULL
+	if (config->file != NULL)
+	{
+		free(config->file);
+		config->file = NULL;
+	}
+#endif /* TULA_EXE_FULL */
 
     free(config);
 }

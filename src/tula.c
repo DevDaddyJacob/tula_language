@@ -1,15 +1,7 @@
-#include <stdarg.h>
-#include <stdlib.h>
-
-#include "tula.h"
-
-#include <stdio.h>
-
 #include "util.h"
 #include "common/buffered_reader.h"
 #include "common/exit.h"
 #include "common/trace.h"
-#include "engine/scanner/scanner.h"
 #include "state/gstate.h"
 
 
@@ -35,7 +27,7 @@ static void setup(int32_t argc, const char* argv[]);
 /**
  * TBD
  */
-static void teardown();
+static void teardown(void);
 
 
 /*
@@ -57,7 +49,7 @@ static void setup(const int32_t argc, const char* argv[])
 }
 
 
-static void teardown()
+static void teardown(void)
 {
 	teardown_global_state();
 }
@@ -66,13 +58,14 @@ static void teardown()
 int main(const int32_t argc, const char* argv[]) {
 	setup(argc, argv);
 
+#ifdef TULA_EXE_DEBUG
+	run_test();
+#endif /* TULA_EXE_DEBUG */
+
 #ifdef TULA_EXE_STANDARD
 	// TBD
 #endif /* TULA_EXE_STANDARD */
 
-#ifdef TULA_EXE_DEBUGGING
-	run_test();
-#endif /* TULA_EXE_DEBUGGING */
-
+	teardown();
 	tula_exit(TULA_EXIT_GOOD);
 }

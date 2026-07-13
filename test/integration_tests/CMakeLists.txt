@@ -4,25 +4,33 @@ add_library(integration_test_lib STATIC
 )
 
 target_compile_definitions(integration_test_lib PRIVATE
-        TULAD_EXE_PATH="${CMAKE_BINARY_DIR}/tulad.exe"
-        INTEGRATION_TEST_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+        TULAD_EXE_PATH="$<TARGET_FILE:tulad>"
+        INTEGRATION_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data")
 
 function(integration_test test_name test_source)
     add_executable(${test_name} ${test_source})
+
     target_link_libraries(${test_name} PRIVATE integration_test_lib unity)
+
     target_compile_definitions(${test_name} PRIVATE
-            TULAD_EXE_PATH="${CMAKE_BINARY_DIR}/tulad.exe"
-            INTEGRATION_TEST_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+            TULAD_EXE_PATH="$<TARGET_FILE:tulad>"
+            INTEGRATION_TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data")
+
+    # The test shells out to the tulad binary at runtime, so make sure it is
+    # built first — nothing else forces that ordering.
+    add_dependencies(${test_name} tulad)
 
     add_test(NAME ${test_name} COMMAND ${test_name})
 endfunction()
 
 integration_test(it_scanner_tokens  it_scanner_tokens.c)
+integration_test(it_parser_ast      it_parser_ast.c)
 
 add_custom_target(integration_tests
         COMMAND
         ${CMAKE_CTEST_COMMAND} --output-on-failure
         DEPENDS
         it_scanner_tokens
+        it_parser_ast
 )
 

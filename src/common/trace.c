@@ -1,7 +1,6 @@
 #include "trace.h"
 
 #include "strings.h"
-#include "tula.h"
 
 #ifdef OS_POSIX_COMPLIANT
 #	include <execinfo.h>
@@ -72,6 +71,7 @@ static HANDLE           trace_process;
 
 static int32_t trace_format_frame(
 	char* buff,
+	/* ReSharper disable once CppDFAConstantParameter */
 	const size_t len,
 	const int32_t idx,
 	const stack_frame_t* frame
@@ -356,10 +356,10 @@ void trace_print(const stack_trace_t* stackTrace, FILE* destHandle)
 int32_t trace_sprint(
 	const stack_trace_t* stackTrace,
 	char* buf,
-	size_t bufLen
+	const size_t bufLen
 )
 {
-	if (NULL == buf || bufLen == 0)
+	if (NULL == buf || 0 == bufLen)
 	{
 		return 0;
 	}

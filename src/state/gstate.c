@@ -5,20 +5,6 @@
 #include "cli.h"
 #include "common/exit.h"
 
-/*
- * ==================================================
- * Macros
- * ==================================================
- */
-
-/* #define XYZ "ABC" */
-
-/*
- * ==================================================
- * Typedefs & Prototypes
- * ==================================================
- */
-
 
 /*
  * ==================================================
@@ -26,7 +12,7 @@
  * ==================================================
  */
 
-static global_state_t* GLOBAL_STATE = NULL;
+static struct tula_global_state* GLOBAL_STATE = NULL;
 
 
 /*
@@ -43,10 +29,14 @@ void setup_global_state(const int32_t argc, const char** argv)
 	}
 
 	/* Initialize the state in heap */
-	GLOBAL_STATE = (global_state_t*)malloc(sizeof(global_state_t));
+	GLOBAL_STATE = (struct tula_global_state*)malloc(
+		sizeof(struct tula_global_state)
+	);
+
 	if (NULL == GLOBAL_STATE)
 	{
 		tula_exit_err_no_mem();
+		UNREACHABLE_RETURN();
 	}
 
 
@@ -66,14 +56,14 @@ void setup_global_state(const int32_t argc, const char** argv)
 
 void teardown_global_state()
 {
-	if (GLOBAL_STATE == NULL)
+	if (NULL == GLOBAL_STATE)
 	{
 		return;
 	}
 
 
 	/* Destroy the cli config */
-	if (GLOBAL_STATE->cli != NULL)
+	if (NULL != GLOBAL_STATE->cli)
 	{
 		cli_destroy(GLOBAL_STATE->cli);
 		GLOBAL_STATE->cli = NULL;
@@ -85,11 +75,12 @@ void teardown_global_state()
 }
 
 
-global_state_t* get_global_state()
+struct tula_global_state* get_global_state()
 {
 	if (NULL == GLOBAL_STATE)
 	{
 		tula_exit_err_early_state_access();
+		UNREACHABLE_RETURN(NULL);
 	}
 
 	return GLOBAL_STATE;

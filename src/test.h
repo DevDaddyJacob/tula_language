@@ -1,11 +1,11 @@
 #ifndef TULA_TEST_H
 #define TULA_TEST_H
 
-#include <stdint.h>
-
 #include "config.h"
 
-#ifdef TULA_EXE_DEBUGGING
+#ifdef TULA_EXE_DEBUG
+
+#include <stdint.h>
 
 /*
  * def(
@@ -16,6 +16,7 @@
 #define DEFINE_TEST_MODES(def)			\
 	def(TEST_MODE_VERSION,	"version")	\
 	def(TEST_MODE_SCANNER,	"scanner")	\
+	def(TEST_MODE_PARSER,	"parser")	\
 
 typedef enum tula_test_mode
 {
@@ -28,8 +29,8 @@ typedef enum tula_test_mode
 extern const char* TEST_MODE_VALUE[TOTAL_TEST_MODES];
 
 
-int32_t run_test();
+int32_t run_test(void);
 
-#endif /* TULA_EXE_DEBUGGING */
+#endif /* TULA_EXE_DEBUG */
 
 #endif /* TULA_TEST_H */

@@ -1,0 +1,8 @@
+def var x = 2 + 3 * 4
+def global var greeting = "hello"
+def const LIMIT = 100
+set var x = x - 1
+set global var greeting = "world"
+unset var x
+def var flag = not true
+def var deep = 2 ^ 3 ^ 2

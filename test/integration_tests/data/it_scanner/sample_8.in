@@ -1,0 +1,10 @@
+def var n_int8 = 72b
+def var n_uint8 = 72ub
+def var n_int16 = 72s
+def var n_uint16 = 72us
+def var n_int32 = 72
+def var n_uint32 = 72u
+def var n_int64 = 72l
+def var n_uint64 = 72ul
+def var n_float = 3.14
+def var n_double = 3.14d

@@ -1,0 +1,8 @@
+def var numbers = [ 10, 20, 30, 40, 50 ]
+def var total = 0
+
+for (def var i = 0, i < numbers.length, i++) {
+    set var total = total + numbers[i]
+}
+
+io.print(total)

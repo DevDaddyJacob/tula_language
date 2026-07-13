@@ -1,7 +1,6 @@
 #ifndef TULA_LANGUAGE_UTIL_H
 #define TULA_LANGUAGE_UTIL_H
 
-#include <stdarg.h>
 #include <stdint.h>
 
 #include "config.h"
@@ -12,19 +11,31 @@
  * ============================================================================
  */
 
-#define UNREACHABLE_HINT __assume(0)
+#if defined(COMPILER_MSVC)
+#	define UNREACHABLE_HINT            __assume(0)
+#	define UNREACHABLE_RETURN(value)   __assume(0)
+#	define UNREACHABLE_DEFAULT(value)  default: __assume(0)
 
-#define UNREACHABLE_RETURN(value) \
-do { UNREACHABLE_HINT; return value; } while(0)
-#define UNREACHABLE_DEFAULT(value)  default: UNREACHABLE_HINT; value
-#define UNREACHABLE(value)          UNREACHABLE_HINT
+#elif defined(COMPILER_GCC) || defined(COMPILER_CLANG)
+#	define UNREACHABLE_HINT            __builtin_unreachable()
+#	define UNREACHABLE_RETURN(value)   __builtin_unreachable()
+#	define UNREACHABLE_DEFAULT(value)  default: __builtin_unreachable()
+
+#else
+#	define UNREACHABLE_HINT            ((void)0)
+#	define UNREACHABLE_RETURN(value)   return (value)
+#	define UNREACHABLE_DEFAULT(value)  default: value
+
+#endif
+
+#define UNREACHABLE(value) UNREACHABLE_HINT
 
 #define UNUSED(value) (void)(value)
 
 #define DEFAULT_BREAK default: { break; }
 
-#define TO_STRING(x) #x
-#define STRINGIFY(x) TO_STRING(x)
+#define STRINGIFY(x) #x
+#define TO_STRING(x) STRINGIFY(x)
 
 #define NO_RETURN __declspec(noreturn)
 

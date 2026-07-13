@@ -31,6 +31,9 @@
 #define TOKEN_IS_OPERATOR_DEFINER(identifier, _1, _2, _3, _4, _5, isOperator) \
 	[identifier] = isOperator,
 
+#define TOKEN_TYPE_VALUE_DEFINER(identifier, _1, _2, _3, _4, _5, _6) \
+	[identifier] = #identifier,
+
 
 /*
  * ==================================================
@@ -74,6 +77,13 @@ const bool TOKENS_IS_OPERATOR[TOTAL_TOKENS] = {
 	DEFINE_TOKENS(TOKEN_IS_OPERATOR_DEFINER)
 };
 
+#ifdef TULA_EXE_DEBUG
+const char* TOKENS_TYPE_VALUE[TOTAL_TOKENS] = {
+	DEFINE_TOKENS(TOKEN_TYPE_VALUE_DEFINER)
+};
+#endif
+
+
 
 /*
  * ==================================================
@@ -86,7 +96,7 @@ token_t* token_new(
 	const uint32_t line,
 	const uint32_t column,
 	const char* content,
-	const uint32_t contentLength
+	const size_t contentLength
 )
 {
 	token_t* token = malloc(sizeof(token_t));
@@ -169,9 +179,24 @@ void arr_token_destroy(arr_token_t* array)
 		return;
 	}
 
-	for (size_t i = 0; i < array->count; i++)
+	if (NULL != array->values)
 	{
-		token_destroy(array->values + i);
+		/*
+		 * Tokens are stored by value in the contiguous `values` buffer (see
+		 * arr_token_add), so only each element's owned `content` string is an
+		 * individual allocation. Release those, then free the single `values`
+		 * buffer once, and finally the array shell. Never free `values + i`:
+		 * that is an interior pointer into `values` and would corrupt the heap.
+		 */
+		for (size_t i = 0; i < array->count; i++)
+		{
+			if (NULL != array->values[i].content)
+			{
+				free(array->values[i].content);
+			}
+		}
+
+		free(array->values);
 	}
 
 	free(array);
@@ -204,7 +229,7 @@ void arr_token_add(arr_token_t* array, const token_t* value)
 }
 
 
-#ifdef TULA_EXE_DEBUGGING
+#ifdef TULA_EXE_DEBUG
 void token_print(const token_t* token)
 {
 	printf(
@@ -213,9 +238,9 @@ void token_print(const token_t* token)
 			"line: %d, " \
 			"column: %d, " \
 			"content: \"%s\", " \
-			"contentLength: %d" \
+			"contentLength: %zu" \
 		"}",
-		TOKENS_VALUE[token->type],
+		TOKENS_TYPE_VALUE[token->type],
 		token->line,
 		token->column,
 		token->content,
@@ -244,8 +269,7 @@ void arr_token_print(const arr_token_t* array)
 		}
 		else
 		{
-			// ReSharper disable once CppPrintfBadFormat
-			printf("%s", NULL);
+			printf("%s", (char*)NULL);
 		}
 
 		if (i + 1 < array->capacity)

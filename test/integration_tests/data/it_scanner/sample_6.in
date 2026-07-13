@@ -1,0 +1,11 @@
+def func makeCounter() {
+    def var count = 0
+    return func() {
+        set var count = count + 1
+        return count
+    }
+}
+
+def var counter = makeCounter()
+io.print(counter())
+io.print(counter())

@@ -1,6 +1,8 @@
 #ifndef TULA_COMMON_EXIT_H
 #define TULA_COMMON_EXIT_H
 
+/* ReSharper disable once CppUnusedIncludeDirective | False Positive */
+#include <stdarg.h>
 #include <stdint.h>
 
 #include "util.h"

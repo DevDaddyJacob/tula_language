@@ -64,14 +64,19 @@ operator_comparison_uniary = "not" ;
 
 array_definition = "[" [expression {field_separator expression} [field_separator]] "]" ;
 
-array_accessor = "[" digit "]" ;
-
 
 table_field = "[" (literal_string | literal_char | digit) "]" "=" expression ;
 
 table_definition = "{" [table_field {field_separator table_field} [field_separator]] "}" ;
 
-table_accessor = "[" (literal_string | literal_char | digit) "]" ;
+
+member_accessor = "." identifier ;
+
+index_accessor = "[" expression "]" ;
+
+call_accessor = "(" [expression_list] ")" ;
+
+accessor = member_accessor | index_accessor | call_accessor ;
 
 
 function_body = "(" {identifier_list} ")" block ;
@@ -96,18 +101,22 @@ expression_post_decrement = identifier "--" ;
 expression_boolean = expression operator_comparison_binary expression
                         | operator_comparison_unary expression ;
 
+expression_accessor = expression accessor {accessor} ;
+
 expression = literal
+            | identifier
             | function_definition_value
             | array_definition
             | table_definition
             | expression_boolean
+            | expression_accessor
             | expression_pre_increment
             | expression_post_increment
             | expression_pre_decrement
             | expression_post_decrement
             ;
             
-expression_list = expression [field_separator expression] ;
+expression_list = expression {field_separator expression} ;
             
 
 variable_base = ("variable" | "var") identifier ;
@@ -136,7 +145,8 @@ constant_global_definition = ("define" | "def") "global" constant_assignment ;
 
 is_set_statement = "isSet" "(" identifier ")" ;
 
-function_call_statement = identifier "(" [expression_list] ")" ;
+function_call_statement = identifier {member_accessor | index_accessor}
+                            "(" [expression_list] ")" ;
 
 
 condition_resolvable = expression_boolean | function_call_statement ;

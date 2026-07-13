@@ -3,6 +3,33 @@ cmake_minimum_required(VERSION 4.2)
 project(tula C)
 
 include(CTest)
+find_package(Git REQUIRED)
+
+
+################################################################################
+# Version definition
+################################################################################
+
+string(TIMESTAMP BUILD_TIMESTAMP "%Y-%m-%d %H:%M:%S" UTC)
+
+execute_process(
+        COMMAND ${GIT_EXECUTABLE} log -1 --format=%h
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_COMMIT_HASH_SHORT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+execute_process(
+        COMMAND ${GIT_EXECUTABLE} log -1 --format=%H
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_COMMIT_HASH_FULL
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+set(VERSION_MAJOR   1)
+set(VERSION_MINOR   0)
+set(VERSION_PATCH   0)
+
 
 ################################################################################
 # Toolchain / compiler detection
@@ -41,12 +68,34 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 # Warning flags — MSVC and GCC/Clang use incompatible syntax
 if(MSVC)
     add_compile_options(
-            /W3         # Equivalent warning level to -Wall
+            /W4
+            /wd4820     # Silence warnings for bit alignment
             /wd4996     # Silence deprecation warnings for POSIX names
     )
 else()
     add_compile_options(-Wall -Wextra)
 endif()
+
+
+if(BUILD_RELEASE)
+    message(STATUS "Building for release")
+
+    # treat warnings as errors
+    if(MSVC)
+        add_compile_options(/WX)
+    else()
+        add_compile_options(-Werror)
+    endif()
+endif()
+
+
+# Add version macros
+add_compile_definitions(TULA_VERSION_MAJOR="${VERSION_MAJOR}")
+add_compile_definitions(TULA_VERSION_MINOR="${VERSION_MINOR}")
+add_compile_definitions(TULA_VERSION_PATCH="${VERSION_PATCH}")
+add_compile_definitions(TULA_COMMIT_HASH_SHORT="${GIT_COMMIT_HASH_SHORT}")
+add_compile_definitions(TULA_COMMIT_HASH_FULL="${GIT_COMMIT_HASH_FULL}")
+
 
 # Enable Unity memory extension before adding the subdirectory
 set(UNITY_EXTENSION_MEMORY ON CACHE BOOL "" FORCE)
@@ -84,70 +133,58 @@ endif()
 
 
 ################################################################################
-# Define the library for the tula program
+# Define the sources & library for the tula program
 ################################################################################
 
-add_library(tula_lib STATIC
-        src/config.h
-        src/tula.h
-        src/util.c
-        src/util.h
-        src/state/cli.c
-        src/state/cli.h
-        src/common/strings.c
-        src/common/strings.h
-        src/state/gstate.c
-        src/state/gstate.h
-        src/engine/scanner/token.c
-        src/engine/scanner/token.h
+set(TULA_SOURCES
         src/common/buffered_reader.c
-        src/common/buffered_reader.h
-        src/common/os.c
-        src/common/os.h
-        src/engine/scanner/scanner.c
-        src/engine/scanner/scanner.h
-        src/common/trace.c
-        src/common/trace.h
         src/common/exit.c
-        src/common/exit.h
+        src/common/os.c
+        src/common/strings.c
+        src/common/trace.c
+        src/engine/parser/ast.c
+        src/engine/parser/parser.c
+        src/engine/scanner/scanner.c
+        src/engine/scanner/token.c
+        src/state/cli.c
+        src/state/gstate.c
         src/test.c
-        src/test.h
+        src/util.c
 )
-target_include_directories(tula_lib PUBLIC src)
 
-# Stack trace link requirements propagate to every target via PUBLIC so
-# tula, tulad, and all test targets inherit them automatically.
-if(DEFINED STACKTRACE_LIBS)
-    target_link_libraries(tula_lib PUBLIC ${STACKTRACE_LIBS})
-endif()
+function(decorate_tula_target target_name exe_type)
+    target_include_directories(${target_name} PRIVATE src)
+    target_compile_definitions(${target_name} PRIVATE
+            TULA_EXECUTABLE_TYPE=${exe_type})
 
-if(DEFINED STACKTRACE_LINK_OPTIONS)
-    target_link_options(tula_lib PUBLIC ${STACKTRACE_LINK_OPTIONS})
-endif()
+    # Stack trace link requirements propagate to every target via PUBLIC so
+    # tula, tulad, and all test targets inherit them automatically.
+    if(DEFINED STACKTRACE_LIBS)
+        target_link_libraries(${target_name} PRIVATE ${STACKTRACE_LIBS})
+    endif()
 
+    if(DEFINED STACKTRACE_LINK_OPTIONS)
+        target_link_options(${target_name} PRIVATE ${STACKTRACE_LINK_OPTIONS})
+    endif()
+endfunction()
 
-################################################################################
-# Define the standard tula cli executable (named "tula")
-################################################################################
-
-add_executable(tula src/tula.c)
-target_link_libraries(tula PRIVATE tula_lib)
-target_compile_definitions(tula PRIVATE TULA_EXECUTABLE_TYPE=0)
-
-if(MSVC)
-    target_compile_options(tula PRIVATE /WX)    # treat warnings as errors
-else()
-    target_compile_options(tula PRIVATE -Werror)
-endif()
+add_library(tula_lib STATIC ${TULA_SOURCES})
+decorate_tula_target(tula_lib 1)
 
 
 ################################################################################
-# Define the debugging tula cli executable (named "tulad")
+# Define the various Tula executables
 ################################################################################
 
-add_executable(tulad src/tula.c)
-target_link_libraries(tulad PRIVATE tula_lib)
-target_compile_definitions(tulad PRIVATE TULA_EXECUTABLE_TYPE=1)
+function(add_tula_executable target_name exe_type)
+    add_executable(${target_name} ${TULA_SOURCES} src/tula.c)
+    decorate_tula_target(${target_name} ${exe_type})
+endfunction()
+
+add_tula_executable(tulad    0)
+add_tula_executable(tula     1)
+add_tula_executable(tulac    2)
+add_tula_executable(tular    3)
 
 
 ################################################################################
@@ -155,13 +192,38 @@ target_compile_definitions(tulad PRIVATE TULA_EXECUTABLE_TYPE=1)
 ################################################################################
 
 add_subdirectory(vendor/unity)
+
+# Third-party vendor code is not ours to fix, so silence its warnings.
+# Unity turns on /Wall (MSVC) itself, which is extremely noisy (e.g. C5045
+# Spectre notes). We override the warning flags on every target the vendor
+# subdirectory defines rather than editing vendored files, which would be
+# clobbered on the next update.
+get_property(
+        _vendor_targets
+        DIRECTORY vendor/unity
+        PROPERTY BUILDSYSTEM_TARGETS
+)
+
+foreach(_target IN LISTS _vendor_targets)
+    get_target_property(_type ${_target} TYPE)
+    if(NOT _type STREQUAL "INTERFACE_LIBRARY")
+        if(MSVC)
+            target_compile_options(${_target} PRIVATE /W0)
+        else()
+            target_compile_options(${_target} PRIVATE -w)
+        endif()
+    endif()
+endforeach()
+
 add_subdirectory(test/integration_tests)
+add_subdirectory(test/regression_tests)
 add_subdirectory(test/unit_tests)
 
 add_custom_target(all_tests
         COMMAND
         ${CMAKE_CTEST_COMMAND} --output-on-failure
         DEPENDS
-        unit_tests
         integration_tests
+        regression_tests
+        unit_tests
 )

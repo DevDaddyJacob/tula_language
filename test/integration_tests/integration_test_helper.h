@@ -40,6 +40,17 @@
 #define STDOUT_BUFF_SIZE 5120
 
 
+#define EXECUTE_TULAD_EXPECT_OUTPUT(testName, args) \
+	do { \
+		int32_t status = -1; \
+		dynamic_buffer_t stdoutBuff; \
+		dynamic_buffer_t expectedBuff; \
+		read_file(testName, &expectedBuff); \
+		execute_tulad(args, &stdoutBuff, &status); \
+		TEST_ASSERT_EQUAL_INT32(0, status); \
+		TEST_ASSERT_EQUAL_STRING(expectedBuff.values, stdoutBuff.values); \
+	} while (0)
+
 
 typedef struct tula_dynamic_buffer
 {

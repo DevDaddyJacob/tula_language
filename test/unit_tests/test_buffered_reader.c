@@ -241,10 +241,11 @@ void test_buf_reader_read_advances_column_number(void)
     buf_reader_t* r = buf_reader_new(TEMP_FILE);
     buf_reader_open(r, NULL);
 
-    buf_reader_read(r);
     TEST_ASSERT_EQUAL_UINT32(1, r->columnNumber);
     buf_reader_read(r);
     TEST_ASSERT_EQUAL_UINT32(2, r->columnNumber);
+    buf_reader_read(r);
+    TEST_ASSERT_EQUAL_UINT32(3, r->columnNumber);
 
     buf_reader_destroy(r);
 }

@@ -1,0 +1,13 @@
+def global func addAll(a, b, c) {
+    return a + b + c
+}
+
+def func greet() {
+    return "hi"
+}
+
+def var anon = func(value) {
+    return not value
+}
+
+def var result = addAll(1, 2, 3)
