@@ -98,8 +98,8 @@ expression_pre_decrement = "--" identifier ;
 
 expression_post_decrement = identifier "--" ;
 
-expression_boolean = expression operator_comparison_binary expression
-                        | operator_comparison_unary expression ;
+expression_boolean = (expression operator_comparison_binary expression)
+                        | (operator_comparison_unary expression) ;
 
 expression_accessor = expression accessor {accessor} ;
 
