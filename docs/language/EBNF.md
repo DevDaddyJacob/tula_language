@@ -9,14 +9,17 @@ EBNF Syntax Notes:
 - `(...)` grouping
 - `? ... ?` special sequence
 - `"..."` terminal / literal string
+- `(* ... *)` comment
 - concatenation is inferred by 2 terms next to each other
 
 
 ---
 
 ```
+(* currently unused, possible for removal once finalized *)
 char_white_space = ? white space characters ? ;
 
+(* currently unused, possible for removal once finalized *)
 char_inline_white_space = char_white_space - "\n" ;
 
 char_all = ? all visible characters ? ;
@@ -103,6 +106,8 @@ function_definition_global = "def" "global" function_definition_base ;
 function_definition_value = ("function" | "func") function_body ;
 
 
+expression_is_set = "isSet" "(" identifier ")" ;
+
 expression_pre_increment = "++" identifier ;
 
 expression_post_increment = identifier "++" ;
@@ -123,6 +128,7 @@ expression = literal
             | table_definition
             | expression_boolean
             | expression_accessor
+            | expression_is_set
             | expression_pre_increment
             | expression_post_increment
             | expression_pre_decrement
@@ -156,13 +162,15 @@ constant_local_definition = ("define" | "def") constant_assignment ;
 constant_global_definition = ("define" | "def") "global" constant_assignment ;
 
 
-is_set_statement = "isSet" "(" identifier ")" ;
-
 function_call_statement = identifier {member_accessor | index_accessor}
                             "(" [expression_list] ")" ;
 
 
-condition_resolvable = expression_boolean | function_call_statement ;
+(* A condition may be any expression, but it must be of boolean type; there is
+   no truthy/falsy coercion. The type rule is enforced during semantic analysis,
+   not by the grammar: a non-boolean condition whose type is statically known
+   (e.g. if ("foo")) is a compile-time error, otherwise it is a runtime error. *)
+condition_resolvable = expression ;
 
 
 comparison_statement_single = "if" "(" condition_resolvable ")" block ;
@@ -196,7 +204,7 @@ numeric_iteration_statement = "for" "(" numeric_iteration_initialization
 
 
 statement = "break" | "continue" 
-            | is_set_statement
+            | expression_is_set
             | function_definition_local
             | function_definition_global
             | function_call_statement
