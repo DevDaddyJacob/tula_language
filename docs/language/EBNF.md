@@ -163,6 +163,12 @@ expression_primary = literal
 expression_list = expression {field_separator expression} ;
             
 
+(*
+    Assignment is always keyword-gated: "=" only appears inside a
+    variable_assignment or constant_assignment, always introduced by def/define
+    (definition) or set (reassignment). There is no bare "x = expr" statement -
+    to assign you write, e.g., "def var x = expr" or "set var x = expr".
+*)
 variable_base = ("variable" | "var") identifier ;
 
 variable_assignment = variable_base "=" expression ;
