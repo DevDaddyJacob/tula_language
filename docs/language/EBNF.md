@@ -1,5 +1,19 @@
 # Tula BNF Grammar Syntax
 
+EBNF Syntax Notes:
+- `=` definition
+- `;` termination
+- `|` alternation / "or"
+- `[...]` optional
+- `{...}` repetition
+- `(...)` grouping
+- `? ... ?` special sequence
+- `"..."` terminal / literal string
+- concatenation is inferred by 2 terms next to each other
+
+
+---
+
 ```
 char_white_space = ? white space characters ? ;
 
@@ -17,13 +31,13 @@ char_numeric = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
 
 char_alpha_numeric = char_alpha | char_numeric ;
 
-digit = char_numeric {char_numeric} ;
+digits = char_numeric {char_numeric} ;
 
 
 field_separator = "," ;
 
 
-identifier = char_alpha | "_" {char_alpha_numeric | "_"} ;
+identifier = (char_alpha | "_") {char_alpha_numeric | "_"} ;
 
 identifier_list = identifier {field_separator identifier} ;
 
@@ -38,34 +52,33 @@ literal_false = "false" ;
 
 literal_boolean = literal_true | literal_false ;
 
-literal_integer = digit ["b" | "ub" | "s" | "us" | "u" | "l" | "ul"] ;
+literal_integer = digits ["b" | "ub" | "s" | "us" | "u" | "l" | "ul"] ;
 
-literal_decimal = digit "." digit {digit} ["d"] ;
+literal_decimal = digits "." digits ["d"] ;
 
 literal_numeric = literal_integer | literal_decimal ;
 
 literal = literal_string | literal_char | literal_boolean | literal_numeric ;
-           
-            
-operator_binary = "+" | "-" | "*" | "^" | "/" | "%" | ">" | "<" | "=="
-                    | "!=" | ">=" | "<=" | "and" | "or" ;
-            
-operator_uniary = "not" | "++" | "--" ;
-            
-operator = operator_binary | operator_uniary ;
+
 
 operator_arithmetic = "+" | "-" | "*" | "^" | "/" | "%" ;
             
 operator_comparison_binary = ">" | "<" | "==" | "!=" | ">=" | "<=" | "and"
                             | "or" ;
 
-operator_comparison_uniary = "not" ;
+operator_comparison_unary = "not" ;
+            
+operator_binary = operator_arithmetic | operator_comparison_binary ;
+            
+operator_unary = operator_comparison_unary | "++" | "--" ;
+            
+operator = operator_binary | operator_unary ;
 
 
 array_definition = "[" [expression {field_separator expression} [field_separator]] "]" ;
 
 
-table_field = "[" (literal_string | literal_char | digit) "]" "=" expression ;
+table_field = "[" (literal_string | literal_char | digits) "]" "=" expression ;
 
 table_definition = "{" [table_field {field_separator table_field} [field_separator]] "}" ;
 
@@ -79,7 +92,7 @@ call_accessor = "(" [expression_list] ")" ;
 accessor = member_accessor | index_accessor | call_accessor ;
 
 
-function_body = "(" {identifier_list} ")" block ;
+function_body = "(" [identifier_list] ")" block ;
 
 function_definition_base = ("function" | "func") identifier function_body ;
 
@@ -191,6 +204,8 @@ statement = "break" | "continue"
             | constant_global_definition
             | variable_local_definition
             | variable_global_definition
+            | variable_local_set
+            | variable_global_set
             | variable_local_unset
             | variable_global_unset
             | conditional_iteration_while_statement
