@@ -116,24 +116,49 @@ expression_pre_decrement = "--" identifier ;
 
 expression_post_decrement = identifier "--" ;
 
-expression_boolean = (expression operator_comparison_binary expression)
-                        | (operator_comparison_unary expression) ;
+(*
+    Expression precedence tiers, ordered loosest (top) to tightest (bottom).
+    Each binary tier is left-associative and uses {...} repetition, which the
+    parser folds left. expression_exponent is the exception: it is written
+    right-recursively so right-associativity is enforced by the grammar itself
+    rather than left to the parser.
+*)
+expression = expression_logical_or ;
 
-expression_accessor = expression accessor {accessor} ;
+expression_logical_or = expression_logical_and {"or" expression_logical_and} ;
 
-expression = literal
-            | identifier
-            | function_definition_value
-            | array_definition
-            | table_definition
-            | expression_boolean
-            | expression_accessor
-            | expression_is_set
-            | expression_pre_increment
-            | expression_post_increment
-            | expression_pre_decrement
-            | expression_post_decrement
-            ;
+expression_logical_and = expression_equality {"and" expression_equality} ;
+
+expression_equality = expression_comparison
+                        {("==" | "!=") expression_comparison} ;
+
+expression_comparison = expression_additive
+                        {(">" | "<" | ">=" | "<=") expression_additive} ;
+
+expression_additive = expression_multiplicative
+                        {("+" | "-") expression_multiplicative} ;
+
+expression_multiplicative = expression_exponent
+                                {("*" | "/" | "%") expression_exponent} ;
+
+expression_exponent = expression_unary ["^" expression_exponent] ;
+
+expression_unary = operator_comparison_unary expression_unary
+                   | expression_pre_increment
+                   | expression_pre_decrement
+                   | expression_postfix ;
+
+expression_postfix = expression_primary {accessor}
+                     | expression_post_increment
+                     | expression_post_decrement ;
+
+expression_primary = literal
+                     | identifier
+                     | expression_is_set
+                     | function_definition_value
+                     | array_definition
+                     | table_definition
+                     | "(" expression ")" ;
             
 expression_list = expression {field_separator expression} ;
             
@@ -166,10 +191,13 @@ function_call_statement = identifier {member_accessor | index_accessor}
                             "(" [expression_list] ")" ;
 
 
-(* A condition may be any expression, but it must be of boolean type; there is
-   no truthy/falsy coercion. The type rule is enforced during semantic analysis,
-   not by the grammar: a non-boolean condition whose type is statically known
-   (e.g. if ("foo")) is a compile-time error, otherwise it is a runtime error. *)
+(*
+    A condition may be any expression, but it must be of boolean type; there is
+    no truthy/falsy coercion. The type rule is enforced during semantic
+    analysis, not by the grammar: a non-boolean condition whose type is
+    statically known (e.g. if ("foo")) is a compile-time error, otherwise it is
+    a runtime error.
+*)
 condition_resolvable = expression ;
 
 
