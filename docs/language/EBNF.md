@@ -187,8 +187,14 @@ constant_local_definition = ("define" | "def") constant_assignment ;
 constant_global_definition = ("define" | "def") "global" constant_assignment ;
 
 
-function_call_statement = identifier {member_accessor | index_accessor}
-                            "(" [expression_list] ")" ;
+(*
+    A function_call_statement is a postfix expression constrained to end in a
+    call_accessor. Requiring the trailing call structurally (rather than by a
+    note) means bare identifiers and accessor chains without a call are not
+    statements, while reusing expression_primary and accessor keeps it in step
+    with the expression tiers and allows chained calls (e.g. f()(), a.b().c()).
+*)
+function_call_statement = expression_primary {accessor} call_accessor ;
 
 
 (*
