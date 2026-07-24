@@ -81,7 +81,13 @@ operator = operator_binary | operator_unary ;
 array_definition = "[" [expression {field_separator expression} [field_separator]] "]" ;
 
 
-table_field = "[" (literal_string | literal_char | digits) "]" "=" expression ;
+(*
+    A table key is any expression (matching index_accessor's "[" expression "]"
+    form) but must resolve to a string, char, or integer type. As with
+    conditions, the type rule is enforced during semantic analysis, not by the
+    grammar: statically when the key type is known, otherwise at runtime.
+*)
+table_field = "[" expression "]" "=" expression ;
 
 table_definition = "{" [table_field {field_separator table_field} [field_separator]] "}" ;
 
