@@ -142,6 +142,7 @@ set(TULA_SOURCES
         src/common/os.c
         src/common/strings.c
         src/common/trace.c
+        src/engine/codegen/opcode.c
         src/engine/parser/ast.c
         src/engine/parser/parser.c
         src/engine/scanner/scanner.c

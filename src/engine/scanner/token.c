@@ -1,4 +1,3 @@
-// ReSharper disable CppPrintfBadFormat
 #include "token.h"
 
 #include <stdio.h>
