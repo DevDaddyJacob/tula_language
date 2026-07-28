@@ -8,7 +8,8 @@ EBNF Syntax Notes:
 - `{...}` repetition
 - `(...)` grouping
 - `? ... ?` special sequence
-- `"..."` terminal / literal string
+- `"..."` & `'...'` terminal / literal string (the single quote is used
+  exclusively for representing a double-quote char)
 - `(* ... *)` comment
 - concatenation is inferred by 2 terms next to each other
 
@@ -16,13 +17,13 @@ EBNF Syntax Notes:
 ---
 
 ```
-(* currently unused, possible for removal once finalized *)
 char_white_space = ? white space characters ? ;
 
-(* currently unused, possible for removal once finalized *)
-char_inline_white_space = char_white_space - "\n" ;
-
 char_all = ? all visible characters ? ;
+
+char_escaped = "\" char_all ;
+
+char_any = char_white_space | char_all | char_escaped ;
 
 char_alpha = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K"
             | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V"
@@ -45,9 +46,9 @@ identifier = (char_alpha | "_") {char_alpha_numeric | "_"} ;
 identifier_list = identifier {field_separator identifier} ;
 
 
-literal_string = '"' {char_all - '"'} '"' ;
+literal_string = '"' {char_any - ('"' | ? newline ?)} '"' ;
 
-literal_char = "'" (char_all - "'" | "\'") "'" ;
+literal_char = "'" (char_any - ("'" | ? newline ?)) "'" ;
 
 literal_true = "true" ;
 
@@ -55,27 +56,26 @@ literal_false = "false" ;
 
 literal_boolean = literal_true | literal_false ;
 
-literal_integer = digits ["b" | "ub" | "s" | "us" | "u" | "l" | "ul"] ;
+literal_integer_signed = ["-"] digits ["b" | "s" | "l"] ;
 
-literal_decimal = digits "." digits ["d"] ;
+literal_integer_unsigned = digits ("ub" | "us" | "u" | "ul") ;
+
+literal_integer = literal_integer_signed | literal_integer_unsigned ;
+
+literal_decimal = ["-"] [digits] "." digits ["d"] ;
 
 literal_numeric = literal_integer | literal_decimal ;
 
 literal = literal_string | literal_char | literal_boolean | literal_numeric ;
 
 
-operator_arithmetic = "+" | "-" | "*" | "^" | "/" | "%" ;
-            
-operator_comparison_binary = ">" | "<" | "==" | "!=" | ">=" | "<=" | "and"
-                            | "or" ;
+operator_equality = "==" | "!=" ;
 
-operator_comparison_unary = "not" ;
-            
-operator_binary = operator_arithmetic | operator_comparison_binary ;
-            
-operator_unary = operator_comparison_unary | "++" | "--" ;
-            
-operator = operator_binary | operator_unary ;
+operator_comparison = ">" | "<" | ">=" | "<=" ;
+
+operator_additive = "+" | "-" ;
+
+operator_multiplicative = "*" | "/" | "%" ;
 
 
 array_definition = "[" [expression {field_separator expression} [field_separator]] "]" ;
@@ -112,15 +112,17 @@ function_definition_global = "def" "global" function_definition_base ;
 function_definition_value = ("function" | "func") function_body ;
 
 
-expression_is_set = "isSet" "(" identifier ")" ;
+expression_identifier = identifier {member_accessor | index_accessor} ;
 
-expression_pre_increment = "++" identifier ;
+expression_is_set = "isSet" "(" expression_identifier ")" ;
 
-expression_post_increment = identifier "++" ;
+expression_pre_increment = "++" expression_identifier ;
 
-expression_pre_decrement = "--" identifier ;
+expression_post_increment = expression_identifier "++" ;
 
-expression_post_decrement = identifier "--" ;
+expression_pre_decrement = "--" expression_identifier ;
+
+expression_post_decrement = expression_identifier "--" ;
 
 (*
     Expression precedence tiers, ordered loosest (top) to tightest (bottom).
@@ -136,23 +138,23 @@ expression_logical_or = expression_logical_and {"or" expression_logical_and} ;
 expression_logical_and = expression_equality {"and" expression_equality} ;
 
 expression_equality = expression_comparison
-                        {("==" | "!=") expression_comparison} ;
+                        {operator_equality expression_comparison} ;
 
 expression_comparison = expression_additive
-                        {(">" | "<" | ">=" | "<=") expression_additive} ;
+                        {operator_comparison expression_additive} ;
 
 expression_additive = expression_multiplicative
-                        {("+" | "-") expression_multiplicative} ;
+                        {operator_additive expression_multiplicative} ;
 
 expression_multiplicative = expression_exponent
-                                {("*" | "/" | "%") expression_exponent} ;
+                            {operator_multiplicative expression_exponent} ;
 
 expression_exponent = expression_unary ["^" expression_exponent] ;
 
-expression_unary = operator_comparison_unary expression_unary
-                   | expression_pre_increment
-                   | expression_pre_decrement
-                   | expression_postfix ;
+expression_unary = ("not" expression_unary)
+                    | expression_pre_increment
+                    | expression_pre_decrement
+                    | expression_postfix ;
 
 expression_postfix = expression_primary {accessor}
                      | expression_post_increment
@@ -249,6 +251,9 @@ numeric_iteration_statement = "for" "(" numeric_iteration_initialization
                                 block ;
 
 
+return_statement = "return" [expression] ;
+
+
 statement = "break" | "continue" 
             | expression_is_set
             | function_definition_local
@@ -265,12 +270,14 @@ statement = "break" | "continue"
             | conditional_iteration_while_statement
             | conditional_iteration_do_statement
             | numeric_iteration_statement
+            | comparison_statement
+            | return_statement
             ;
 
 
-return_statement = "return" [expression] ;
+block = "{" {statement} "}" ;
 
 
-block = "{" {statement} [return_statement] "}" ;
+program = {statement} ;
 
 ```
