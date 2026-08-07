@@ -90,18 +90,18 @@ void test_ast_node_type_value_table_is_complete(void)
 void test_arr_node_add_grows(void)
 {
 	arr_ast_node_t array;
-	arr_node_init(&array);
+	arr_ast_node_init(&array);
 
 	for (uint32_t i = 0; i < 20; i++)
 	{
-		arr_node_add(&array, ast_node_new(AST_BREAK, i, 0));
+		arr_ast_node_add(&array, ast_node_new(AST_BREAK, i, 0));
 	}
 
 	TEST_ASSERT_EQUAL_size_t(20, array.count);
 	TEST_ASSERT_TRUE(array.capacity >= array.count);
 	TEST_ASSERT_EQUAL_UINT32(19, array.values[19]->line);
 
-	arr_node_destroy(&array);
+	arr_ast_node_destroy(&array);
 }
 
 

@@ -41,8 +41,10 @@ digits = char_numeric {char_numeric} ;
 field_separator = "," ;
 
 
+(* AST Type *)
 identifier = (char_alpha | "_") {char_alpha_numeric | "_"} ;
 
+(* AST Type *)
 identifier_list = identifier {field_separator identifier} ;
 
 
@@ -66,6 +68,7 @@ literal_decimal = ["-"] [digits] "." digits ["d"] ;
 
 literal_numeric = literal_integer | literal_decimal ;
 
+(* AST Type *)
 literal = literal_string | literal_char | literal_boolean | literal_numeric ;
 
 
@@ -78,7 +81,11 @@ operator_additive = "+" | "-" ;
 operator_multiplicative = "*" | "/" | "%" ;
 
 
-array_definition = "[" [expression {field_separator expression} [field_separator]] "]" ;
+(* AST Type *)
+array_definition = "[" [
+                      expression {field_separator expression}
+                      [field_separator]
+                      ] "]" ;
 
 
 (*
@@ -87,15 +94,20 @@ array_definition = "[" [expression {field_separator expression} [field_separator
     conditions, the type rule is enforced during semantic analysis, not by the
     grammar: statically when the key type is known, otherwise at runtime.
 *)
+(* AST Type *)
 table_field = "[" expression "]" "=" expression ;
 
+(* AST Type *)
 table_definition = "{" [table_field {field_separator table_field} [field_separator]] "}" ;
 
 
+(* AST Type *)
 member_accessor = "." identifier ;
 
+(* AST Type *)
 index_accessor = "[" expression "]" ;
 
+(* AST Type *)
 call_accessor = "(" [expression_list] ")" ;
 
 accessor = member_accessor | index_accessor | call_accessor ;
@@ -105,15 +117,20 @@ function_body = "(" [identifier_list] ")" block ;
 
 function_definition_base = ("function" | "func") identifier function_body ;
 
+(* AST Type (combined with global def) *)
 function_definition_local = "def" function_definition_base ;
 
+(* AST Type (combined with local def) *)
 function_definition_global = "def" "global" function_definition_base ;
 
+(* AST Type *)
 function_definition_value = ("function" | "func") function_body ;
 
 
+(* AST Type *)
 expression_identifier = identifier {member_accessor | index_accessor} ;
 
+(* AST Type *)
 expression_is_set = "isSet" "(" expression_identifier ")" ;
 
 expression_pre_increment = "++" expression_identifier ;
@@ -131,35 +148,46 @@ expression_post_decrement = expression_identifier "--" ;
     right-recursively so right-associativity is enforced by the grammar itself
     rather than left to the parser.
 *)
+(* AST Type *)
 expression = expression_logical_or ;
 
+(* AST Type *)
 expression_logical_or = expression_logical_and {"or" expression_logical_and} ;
 
+(* AST Type *)
 expression_logical_and = expression_equality {"and" expression_equality} ;
 
+(* AST Type *)
 expression_equality = expression_comparison
                         {operator_equality expression_comparison} ;
 
+(* AST Type *)
 expression_comparison = expression_additive
                         {operator_comparison expression_additive} ;
 
+(* AST Type *)
 expression_additive = expression_multiplicative
                         {operator_additive expression_multiplicative} ;
 
+(* AST Type *)
 expression_multiplicative = expression_exponent
                             {operator_multiplicative expression_exponent} ;
 
+(* AST Type *)
 expression_exponent = expression_unary ["^" expression_exponent] ;
 
+(* AST Type *)
 expression_unary = ("not" expression_unary)
                     | expression_pre_increment
                     | expression_pre_decrement
                     | expression_postfix ;
 
-expression_postfix = expression_primary {accessor}
+(* AST Type *)
+expression_postfix = expression_primary [{accessor}]
                      | expression_post_increment
                      | expression_post_decrement ;
 
+(* AST Type *)
 expression_primary = literal
                      | identifier
                      | expression_is_set
@@ -168,6 +196,7 @@ expression_primary = literal
                      | table_definition
                      | "(" expression ")" ;
             
+(* AST Type *)
 expression_list = expression {field_separator expression} ;
             
 
@@ -181,23 +210,31 @@ variable_base = ("variable" | "var") identifier ;
 
 variable_assignment = variable_base "=" expression ;
 
+(* AST Type (grouped with global def) *)
 variable_local_definition = ("define" | "def") variable_assignment ;
 
+(* AST Type (grouped with local def) *)
 variable_global_definition = ("define" | "def") "global" variable_assignment ;
 
+(* AST Type (grouped with global set) *)
 variable_local_set = "set" variable_assignment ;
 
+(* AST Type (grouped with local set) *)
 variable_global_set = "set" "global" variable_assignment ;
 
+(* AST Type (grouped with global unset) *)
 variable_local_unset = "unset" variable_base ;
 
+(* AST Type (grouped with local unset) *)
 variable_global_unset = "unset" "global" variable_base ;
 
 
 constant_assignment = ("constant" | "const") identifier "=" expression ;
 
+(* AST Type (grouped with global def) *)
 constant_local_definition = ("define" | "def") constant_assignment ;
 
+(* AST Type (grouped with local def) *)
 constant_global_definition = ("define" | "def") "global" constant_assignment ;
 
 
@@ -208,6 +245,7 @@ constant_global_definition = ("define" | "def") "global" constant_assignment ;
     statements, while reusing expression_primary and accessor keeps it in step
     with the expression tiers and allows chained calls (e.g. f()(), a.b().c()).
 *)
+(* AST Type *)
 function_call_statement = expression_primary {accessor} call_accessor ;
 
 
@@ -223,14 +261,17 @@ condition_resolvable = expression ;
 
 comparison_statement_single = "if" "(" condition_resolvable ")" block ;
 
+(* AST Type *)
 comparison_statement = comparison_statement_single
                         {"else" comparison_statement_single} ["else" block] ;
 
 
 conditional_iteration_while_check =  "while" "(" condition_resolvable ")" ;
 
+(* AST Type (combined with do_while) *)
 conditional_iteration_while_statement = conditional_iteration_while_check block ;
 
+(* AST Type (combined with while) *)
 conditional_iteration_do_statement = "do" block conditional_iteration_while_check ;
 
 
@@ -245,12 +286,14 @@ numeric_iteration_update = [ variable_local_set | variable_global_set
                             | expression_post_decrement
                             ] ;
 
+(* AST Type *)
 numeric_iteration_statement = "for" "(" numeric_iteration_initialization
                                 field_separator numeric_iteration_condition 
                                 field_separator numeric_iteration_update ")"
                                 block ;
 
 
+(* AST Type *)
 return_statement = "return" [expression] ;
 
 
@@ -275,9 +318,11 @@ statement = "break" | "continue"
             ;
 
 
+(* AST Type *)
 block = "{" {statement} "}" ;
 
 
+(* AST Type *)
 program = {statement} ;
 
 ```

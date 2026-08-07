@@ -15,38 +15,46 @@
  *		value,			<-	The string of the textual representation of the type
  *	)
  */
-#define DEFINE_AST_NODE_TYPES(def)						\
-	def(AST_ERROR,				"<error>")				\
-	def(AST_BLOCK,				"block")				\
-	def(AST_LITERAL,			"literal")				\
-	def(AST_IDENTIFIER,			"identifier")			\
-	def(AST_BINARY,				"binary")				\
-	def(AST_UNARY,				"unary")				\
-	def(AST_PRE_INCREMENT,		"pre-increment")		\
-	def(AST_POST_INCREMENT,		"post-increment")		\
-	def(AST_PRE_DECREMENT,		"pre-decrement")		\
-	def(AST_POST_DECREMENT,		"post-decrement")		\
-	def(AST_CALL,				"call")					\
-	def(AST_MEMBER,				"member-access")		\
-	def(AST_INDEX,				"index-access")			\
-	def(AST_IS_SET,				"is-set")				\
-	def(AST_ARRAY,				"array")				\
-	def(AST_TABLE,				"table")				\
-	def(AST_TABLE_ENTRY,		"table-entry")			\
-	def(AST_FUNCTION,			"function-value")		\
-	def(AST_VAR_DEFINE,			"variable-define")		\
-	def(AST_VAR_SET,			"variable-set")			\
-	def(AST_VAR_UNSET,			"variable-unset")		\
-	def(AST_CONST_DEFINE,		"constant-define")		\
-	def(AST_FUNC_DEFINE,		"function-define")		\
-	def(AST_IF,					"if")					\
-	def(AST_WHILE,				"while")				\
-	def(AST_DO_WHILE,			"do-while")				\
-	def(AST_FOR,				"for")					\
-	def(AST_BREAK,				"break")				\
-	def(AST_CONTINUE,			"continue")				\
-	def(AST_RETURN,				"return")				\
-	def(AST_EXPR_STATEMENT,		"expression-statement")	\
+#define DEFINE_AST_NODE_TYPES(def)										\
+	def(AST_ERROR,					"<error>")							\
+	def(AST_PROGRAM,				"program")							\
+	def(AST_BLOCK,					"block")							\
+	def(AST_STATEMENT,				"statement")						\
+	def(AST_STMT_RETURN,			"return")							\
+	def(AST_STMT_NUM_ITER,			"numeric-iteration")				\
+	def(AST_STMT_COND_ITER,			"conditional-iteration")			\
+	def(AST_STMT_COMP,				"comparison-statement")				\
+	def(AST_STMT_FUNC_CALL,			"function-call-statement")			\
+	def(AST_STMT_CONST_DEF,			"constant-definition-statement")	\
+	def(AST_STMT_VAR_DEF,			"variable-definition-statement")	\
+	def(AST_STMT_VAR_SET,			"variable-set-statement")			\
+	def(AST_STMT_VAR_UNSET,			"variable-unset-statement")			\
+	def(AST_STMT_IS_SET,			"is-set-statement")					\
+	def(AST_STMT_BREAK,				"break-statement")					\
+	def(AST_STMT_CONTINUE,			"continue-statement")				\
+	def(AST_CONDITION,				"condition")						\
+	def(AST_EXPR_IDENT,				"expression-identifier")			\
+	def(AST_EXPR,					"expression")						\
+	def(AST_EXPR_LOGI_OR,			"expression-logical-or")			\
+	def(AST_EXPR_LOGI_AND,			"expression-logical-and")			\
+	def(AST_EXPR_EQU,				"expression-equality")				\
+	def(AST_EXPR_COMP,				"expression-comparison")			\
+	def(AST_EXPR_ADD,				"expression-additive")				\
+	def(AST_EXPR_MULT,				"expression-multiplicative")		\
+	def(AST_EXPR_EXPO,				"expression-exponent")				\
+	def(AST_EXPR_UNARY,				"expression-unary")					\
+	def(AST_EXPR_POSTFIX,			"expression-postfix")				\
+	def(AST_EXPR_PRIMARY,			"expression-primary")				\
+	def(AST_FUNC_DEF,				"function-definition")				\
+	def(AST_FUNC_DEF_VAL,			"function-definition-value")		\
+	def(AST_ACCESSOR_MEMBER,		"accessor-member")					\
+	def(AST_ACCESSOR_INDEX,			"accessor-index")					\
+	def(AST_ACCESSOR_CALL,			"accessor-call")					\
+	def(AST_TABLE_DEF,				"table-definition")					\
+	def(AST_TABLE_FIELD,			"table-field")						\
+	def(AST_ARRAY_DEF,				"array-definition")					\
+	def(AST_LITERAL,				"literal")							\
+	def(AST_IDENTIFIER,				"identifier")						\
 
 
 /**
@@ -119,267 +127,454 @@ struct tula_ast_node
 
 	union
 	{
-		/**
-		 * \brief	AST_ERROR — a syntax error surfaced as data.
-		 */
+		/** \brief	@c AST_ERROR */
 		struct
 		{
 			/** \brief	The human readable error message (owned). */
 			char* message;
 		} error;
 
-		/**
-		 * \brief	AST_BLOCK — an ordered group of statements.
-		 */
+		/** \brief	@c AST_PROGRAM */
+		struct
+		{
+			/** \brief	The statements making up the program. */
+			arr_ast_node_t statements;
+		} program;
+
+		/** \brief	@c AST_BLOCK */
 		struct
 		{
 			/** \brief	The statements making up the block. */
 			arr_ast_node_t statements;
 		} block;
 
-		/**
-		 * \brief	AST_LITERAL — a primitive literal value.
-		 */
+		/** \brief	@c AST_STATEMENT */
 		struct
 		{
-			/** \brief	The primitive token type (e.g. TOK_INT32, TOK_STRING). */
-			token_type_t literalType;
+			/** \brief	The statement (@c AST_STMT_*). */
+			ast_node_t* statement;
+		} statement;
 
-			/** \brief	The raw textual content of the literal (owned). */
-			char* value;
-		} literal;
-
-		/**
-		 * \brief	AST_IDENTIFIER — a reference to a named entity.
-		 */
+		/** \brief	@c AST_STMT_RETURN */
 		struct
 		{
-			/** \brief	The identifier's name (owned). */
-			char* name;
-		} identifier;
+			/** \brief	The returned value expression (owned), or @c NULL. */
+			ast_node_t* value;
+		} returnStmt;
 
-		/**
-		 * \brief	AST_BINARY — an operator combining two sub-expressions.
-		 */
+		/** \brief	@c AST_STMT_NUM_ITER */
 		struct
 		{
-			/** \brief	The operator token type (e.g. TOK_PLUS, TOK_AND). */
-			token_type_t op;
+			/** \brief	The local definition (@c AST_STMT_VAR_DEF) */
+			ast_node_t* initialization;
 
-			/** \brief	The left-hand operand (owned). */
-			ast_node_t* left;
+			/** \brief	The condition (@c AST_CONDITION) */
+			ast_node_t* condition;
 
-			/** \brief	The right-hand operand (owned). */
-			ast_node_t* right;
-		} binary;
+			/** \brief	The code block  (@c AST_BLOCK) */
+			ast_node_t* block;
+		} numericIteration;
 
-		/**
-		 * \brief	AST_UNARY — a prefix operator applied to one operand.
-		 */
+		/** \brief	@c AST_STMT_COND_ITER */
 		struct
 		{
-			/** \brief	The operator token type (e.g. TOK_NOT). */
-			token_type_t op;
+			/** \brief	If the loop is a do-while */
+			bool doMode;
 
-			/** \brief	The operand (owned). */
-			ast_node_t* operand;
-		} unary;
+			/** \brief	The condition (@c AST_CONDITION) */
+			ast_node_t* condition;
 
-		/**
-		 * \brief	AST_PRE_INCREMENT / AST_POST_INCREMENT /
-		 *			AST_PRE_DECREMENT / AST_POST_DECREMENT — an increment or
-		 *			decrement of an identifier.
-		 */
+			/** \brief	The code block  (@c AST_BLOCK) */
+			ast_node_t* block;
+		} conditionalIteration;
+
+		/** \brief	@c AST_STMT_COMP */
 		struct
 		{
-			/** \brief	The identifier being incremented or decremented. */
-			ast_node_t* target;
-		} incdec;
+			/** \brief	The condition (@c AST_CONDITION) */
+			ast_node_t* condition;
 
-		/**
-		 * \brief	AST_CALL — a function call.
-		 */
+			/** \brief	The code block (@c AST_BLOCK) */
+			ast_node_t* block;
+
+			/** \brief	The else node (@c AST_STMT_COMP), or @c NULL */
+			ast_node_t* elseNode;
+		} comparison;
+
+		/** \brief	@c AST_STMT_FUNC_CALL */
 		struct
 		{
-			/** \brief	The identifier naming the callee (owned). */
+			/**
+			 * \brief	The callee (@c AST_IDENTIFIER, @c AST_ACCESSOR_CALL,
+			 *			@c AST_ACCESSOR_INDEX, @c AST_ACCESSOR_MEMBER, or
+			 *			@c AST_EXPR_PRIMARY)
+			 */
 			ast_node_t* callee;
 
-			/** \brief	The argument expressions. */
-			arr_ast_node_t arguments;
-		} call;
+			/** \brief	The arguments (@c AST_EXPR) */
+			arr_ast_node_t elseNode;
+		} functionCall;
 
-		/**
-		 * \brief	AST_MEMBER — a "object.name" member access.
-		 */
+		/** \brief	@c AST_STMT_CONST_DEF */
 		struct
 		{
-			/** \brief	The expression being accessed (owned). */
-			ast_node_t* object;
+			/** \brief	If the constant is a global constant */
+			bool isGlobal;
 
-			/** \brief	The accessed member's name (owned). */
-			char* name;
-		} member;
+			/** \brief	The constant identifier (@c AST_IDENTIFIER) */
+			ast_node_t* identifier;
 
-		/**
-		 * \brief	AST_INDEX — a "object[subscript]" index access.
-		 */
+			/** \brief	The constant expression (@c AST_EXPR) */
+			ast_node_t* expression;
+		} constantDef;
+
+		/** \brief	@c AST_STMT_VAR_DEF */
 		struct
 		{
-			/** \brief	The expression being indexed (owned). */
-			ast_node_t* object;
+			/** \brief	If the variable is a global variable */
+			bool isGlobal;
 
-			/** \brief	The index expression (owned). */
-			ast_node_t* subscript;
-		} index;
+			/** \brief	The variable identifier (@c AST_IDENTIFIER) */
+			ast_node_t* identifier;
 
-		/**
-		 * \brief	AST_IS_SET — an "isSet(identifier)" query.
-		 */
+			/** \brief	The variable expression (@c AST_EXPR) */
+			ast_node_t* expression;
+		} variableDef;
+
+		/** \brief	@c AST_STMT_VAR_SET */
 		struct
 		{
-			/** \brief	The identifier being queried (owned). */
-			ast_node_t* target;
+			/** \brief	If the variable is a global variable */
+			bool isGlobal;
+
+			/** \brief	The variable identifier (@c AST_IDENTIFIER) */
+			ast_node_t* identifier;
+
+			/** \brief	The variable expression (@c AST_EXPR) */
+			ast_node_t* expression;
+		} variableSet;
+
+		/** \brief	@c AST_STMT_VAR_UNSET */
+		struct
+		{
+			/** \brief	If the variable is a global variable */
+			bool isGlobal;
+
+			/** \brief	The variable identifier (@c AST_IDENTIFIER) */
+			ast_node_t* identifier;
+		} variableUnset;
+
+		/** \brief	@c AST_STMT_IS_SET */
+		struct
+		{
+			/** \brief	The variable identifier (@c AST_IDENTIFIER) */
+			ast_node_t* identifier;
 		} isSet;
 
-		/**
-		 * \brief	AST_ARRAY — an array literal.
-		 */
+		/** \brief	@c AST_CONDITION */
 		struct
 		{
-			/** \brief	The element expressions. */
-			arr_ast_node_t elements;
-		} array;
+			/** \brief	The expression (@c AST_EXPR) */
+			ast_node_t* expression;
+		} condition;
 
-		/**
-		 * \brief	AST_TABLE — a table literal.
-		 */
+		/** \brief	@c AST_EXPR_IDENT */
 		struct
 		{
-			/** \brief	The AST_TABLE_ENTRY nodes making up the table. */
-			arr_ast_node_t entries;
-		} table;
+			/** \brief	The expression identifier (@c AST_IDENTIFIER) */
+			ast_node_t* identifier;
 
-		/**
-		 * \brief	AST_TABLE_ENTRY — a single "[key] = value" pair.
-		 */
+			/**
+			 *	\brief	The expression accessors (@c AST_ACCESSOR_MEMBER, or
+			 *			@c AST_ACCESSOR_INDEX)
+			 */
+			arr_ast_node_t accessors;
+		} expressionIdentifier;
+
+		/** \brief	@c AST_EXPR */
 		struct
 		{
-			/** \brief	The key expression (owned). */
-			ast_node_t* key;
+			/** \brief	The logical or expression (@c AST_EXPR_LOGI_OR) */
+			ast_node_t* lhs;
+		} expression;
 
-			/** \brief	The value expression (owned). */
-			ast_node_t* value;
-		} tableEntry;
-
-		/**
-		 * \brief	AST_FUNCTION — an anonymous function value.
-		 *			AST_FUNC_DEFINE — a named function definition.
-		 */
+		/** \brief	@c AST_EXPR_LOGI_OR */
 		struct
 		{
-			/** \brief	Whether the definition targets the global scope. */
+			/**
+			 *	\brief	The left logical and expression (@c AST_EXPR_LOGI_AND)
+			 */
+			ast_node_t* lhs;
+
+			/**
+			 *	\brief	The right logical and expression (@c AST_EXPR_LOGI_AND),
+			 *			or @c NULL
+			 */
+			ast_node_t* rhs;
+		} expressionLogicalOr;
+
+		/** \brief	@c AST_EXPR_LOGI_AND */
+		struct
+		{
+			/** \brief	The left equality expression (@c AST_EXPR_EQU) */
+			ast_node_t* lhs;
+
+			/**
+			 *	\brief	The right equality expression (@c AST_EXPR_EQU),
+			 *			or @c NULL
+			 */
+			ast_node_t* rhs;
+		} expressionLogicalAnd;
+
+		/** \brief	@c AST_EXPR_EQU */
+		struct
+		{
+			/** \brief	The left comparison expression (@c AST_EXPR_COMP) */
+			ast_node_t* lhs;
+
+			/**
+			 *	\brief	The operator token type (@c TOK_EQUAL_EQUAL or
+			 *			@c TOK_EXCLAM_EQUAL), or @c TOK_NONE
+			 */
+			token_type_t op;
+
+			/**
+			 *	\brief	The right comparison expression (@c AST_EXPR_COMP),
+			 *			or @c NULL
+			 */
+			ast_node_t* rhs;
+		} expressionEquality;
+
+		/** \brief	@c AST_EXPR_COMP */
+		struct
+		{
+			/** \brief	The left additive expression (@c AST_EXPR_ADD) */
+			ast_node_t* lhs;
+
+			/**
+			 *	\brief	The operator token type (@c TOK_GREATER_THAN,
+			 *			@c TOK_LESS_THAN, @c TOK_GT_EQUAL, or @c TOK_LT_EQUAL),
+			 *			or @c TOK_NONE
+			 */
+			token_type_t op;
+
+			/**
+			 *	\brief	The right additive expression (@c AST_EXPR_ADD),
+			 *			or @c NULL
+			 */
+			ast_node_t* rhs;
+		} expressionComparison;
+
+		/** \brief	@c AST_EXPR_ADD */
+		struct
+		{
+			/**
+			 *	\brief	The left multiplicative expression (@c AST_EXPR_MULT)
+			 */
+			ast_node_t* lhs;
+
+			/**
+			 *	\brief	The operator token type (@c TOK_PLUS, or @c TOK_MINUS),
+			 *			or @c TOK_NONE
+			 */
+			token_type_t op;
+
+			/**
+			 *	\brief	The right multiplicative expression (@c AST_EXPR_MULT),
+			 *			or @c NULL
+			 */
+			ast_node_t* rhs;
+		} expressionAdditive;
+
+		/** \brief	@c AST_EXPR_MULT */
+		struct
+		{
+			/**
+			 *	\brief	The left exponent expression (@c AST_EXPR_EXPO)
+			 */
+			ast_node_t* lhs;
+
+			/**
+			 *	\brief	The operator token type (@c TOK_STAR, or
+			 *			@c TOK_SLASH_FWD), or @c TOK_NONE
+			 */
+			token_type_t op;
+
+			/**
+			 *	\brief	The right exponent expression (@c AST_EXPR_EXPO),
+			 *			or @c NULL
+			 */
+			ast_node_t* rhs;
+		} expressionMultiplicative;
+
+		/** \brief	@c AST_EXPR_EXPO */
+		struct
+		{
+			/**
+			 *	\brief	The left unary expression (@c AST_EXPR_UNARY)
+			 */
+			ast_node_t* lhs;
+
+			/**
+			 *	\brief	The right exponent expression (@c AST_EXPR_EXPO),
+			 *			or @c NULL
+			 */
+			ast_node_t* rhs;
+		} expressionExponent;
+
+		/** \brief	@c AST_EXPR_UNARY */
+		struct
+		{
+			/**
+			 *	\brief	The operator token type (@c TOK_NOT, @c TOK_PLUS_PLUS,
+			 *			or @c TOK_MINUS_MINUS), or @c TOK_NONE
+			 */
+			token_type_t op;
+
+			/**
+			 *	\brief	The right expression (@c AST_EXPR_UNARY,
+			 *			@c AST_EXPR_IDENT, or @c AST_EXPR_POSTFIX)
+			 */
+			ast_node_t* rhs;
+		} expressionUnary;
+
+		/** \brief	@c AST_EXPR_POSTFIX */
+		struct
+		{
+			/**
+			 *	\brief	The left primary expression (@c AST_EXPR_PRIMARY)
+			 */
+			ast_node_t* lhs;
+
+			/**
+			 *	\brief	The operator token type (@c TOK_PLUS_PLUS, or
+			 *			@c TOK_MINUS_MINUS), or @c TOK_NONE
+			 */
+			token_type_t op;
+
+			/**
+			 *	\brief	The right accessor expressions (@c AST_ACCESSOR_MEMBER,
+			 *			@c AST_ACCESSOR_INDEX, or @c AST_ACCESSOR_CALL), or
+			 *			@c NULL
+			*/
+			arr_ast_node_t* accessors;
+		} expressionPostfix;
+
+		/** \brief	@c AST_EXPR_PRIMARY */
+		struct
+		{
+			/**
+			 *	\brief	The expression (@c AST_LITERAL, @c AST_IDENTIFIER,
+			 *			@c AST_STMT_IS_SET, @c AST_FUNC_DEF_VAL, @c AST_ARRAY_DEF,
+			 *			@c AST_TABLE_FIELD, or @c AST_EXPR)
+			*/
+			ast_node_t* expression;
+		} expressionPrimary;
+
+		/** \brief	@c AST_FUNC_DEF */
+		struct
+		{
+			/** \brief	Whether the definition targets the global scope */
 			bool isGlobal;
 
-			/** \brief	The function's name (owned), or NULL when anonymous. */
+			/** \brief	The function's name (owned) */
 			char* name;
 
-			/** \brief	The parameter AST_IDENTIFIER nodes. */
+			/** \brief	The function def value node (@c AST_FUNC_DEF_VAL) */
+			ast_node_t* body;
+		} functionDef;
+
+		/** \brief	@c AST_FUNC_DEF_VAL */
+		struct
+		{
+			/** \brief	The parameter nodes (@c AST_IDENTIFIER) */
 			arr_ast_node_t parameters;
 
-			/** \brief	The function body block (owned). */
+			/** \brief	The function body block node (@c AST_BLOCK) */
 			ast_node_t* body;
-		} function;
+		} functionDefValue;
 
-		/**
-		 * \brief	AST_VAR_DEFINE / AST_VAR_SET / AST_CONST_DEFINE — a
-		 *			definition or assignment of a variable or constant.
-		 */
+		/** \brief	@c AST_ACCESSOR_MEMBER */
 		struct
 		{
-			/** \brief	Whether the definition targets the global scope. */
-			bool isGlobal;
+			/** \brief	The identifier (@c AST_IDENTIFIER) */
+			ast_node_t* identifier;
+		} accessorMember;
 
-			/** \brief	The variable or constant name (owned). */
-			char* name;
-
-			/** \brief	The assigned value expression (owned). */
-			ast_node_t* value;
-		} variable;
-
-		/**
-		 * \brief	AST_VAR_UNSET — an "unset" of a variable.
-		 */
+		/** \brief	@c AST_ACCESSOR_INDEX */
 		struct
 		{
-			/** \brief	Whether the unset targets the global scope. */
-			bool isGlobal;
-
-			/** \brief	The variable name (owned). */
-			char* name;
-		} unset;
-
-		/**
-		 * \brief	AST_IF — an if / else-if / else chain.
-		 */
-		struct
-		{
-			/** \brief	The branch condition expressions. */
-			arr_ast_node_t conditions;
-
-			/** \brief	The branch body blocks, parallel to @c conditions. */
-			arr_ast_node_t bodies;
-
-			/** \brief	The trailing else block (owned), or NULL if absent. */
-			ast_node_t* elseBody;
-		} conditional;
-
-		/**
-		 * \brief	AST_WHILE / AST_DO_WHILE — a conditional loop.
-		 */
-		struct
-		{
-			/** \brief	The loop condition expression (owned). */
-			ast_node_t* condition;
-
-			/** \brief	The loop body block (owned). */
-			ast_node_t* body;
-		} loop;
-
-		/**
-		 * \brief	AST_FOR — a numeric for loop.
-		 */
-		struct
-		{
-			/** \brief	The initializer statement (owned), or NULL. */
-			ast_node_t* initializer;
-
-			/** \brief	The condition expression (owned), or NULL. */
-			ast_node_t* condition;
-
-			/** \brief	The update statement (owned), or NULL. */
-			ast_node_t* update;
-
-			/** \brief	The loop body block (owned). */
-			ast_node_t* body;
-		} forLoop;
-
-		/**
-		 * \brief	AST_RETURN — a return statement.
-		 */
-		struct
-		{
-			/** \brief	The returned value expression (owned), or NULL. */
-			ast_node_t* value;
-		} ret;
-
-		/**
-		 * \brief	AST_EXPR_STATEMENT — an expression used as a statement.
-		 */
-		struct
-		{
-			/** \brief	The wrapped expression (owned). */
+			/** \brief	The expression (@c AST_EXPR) */
 			ast_node_t* expression;
-		} exprStatement;
+		} accessorIndex;
+
+		/** \brief	@c AST_ACCESSOR_CALL */
+		struct
+		{
+			/** \brief	The expressions (@c AST_EXPR) */
+			arr_ast_node_t expressions;
+		} accessorCall;
+
+		/** \brief	@c AST_TABLE_DEF */
+		struct
+		{
+			/** \brief	The table fields (@c AST_TABLE_FIELD) */
+			arr_ast_node_t fields;
+		} tableDef;
+
+		/** \brief	@c AST_TABLE_FIELD */
+		struct
+		{
+			/** \brief	The field key (@c AST_EXPR) */
+			ast_node_t* key;
+
+			/** \brief	The field value (@c AST_EXPR) */
+			ast_node_t* value;
+		} tableField;
+
+		/** \brief	@c AST_ARRAY_DEF */
+		struct
+		{
+			/** \brief	The array elements (@c AST_EXPR) */
+			arr_ast_node_t elements;
+		} arrayDef;
+
+		/** \brief	@c AST_LITERAL */
+		struct
+		{
+			/**
+			 *	\brief	The token type (@c TOK_INT8, @c TOK_UINT8, @c TOK_INT16,
+			 *			@c TOK_UINT16, @c TOK_INT32, @c TOK_UINT32,
+			 *			@c TOK_INT64, @c TOK_UINT64, @c TOK_FLOAT,
+			 *			@c TOK_DOUBLE, @c TOK_CHAR, @c TOK_STRING,
+			 *			@c TOK_TRUE, or @c TOK_FALSE)
+			 */
+			token_type_t type;
+
+			union
+			{
+				char dummy;
+				int8_t t_int8;
+				uint8_t t_uint8;
+				int16_t t_int16;
+				uint16_t t_uint16;
+				int32_t t_int32;
+				uint32_t t_uint32;
+				int64_t t_int64;
+				uint64_t t_uint64;
+				float t_float;
+				double t_double;
+				char t_char;
+				char* t_string;
+			} value;
+		} literal;
+
+		/** \brief	@c AST_IDENTIFIER */
+		struct
+		{
+			/** \brief	name of the identifier (owned) */
+			char* name;
+		} identifier;
 	} as;
 };
 
@@ -430,14 +625,14 @@ void ast_node_destroy(ast_node_t* node);
  * \brief           Initializes the provided array
  * \param[in]       array: Pointer to the array to initialize
  */
-void arr_node_init(arr_ast_node_t* array);
+void arr_ast_node_init(arr_ast_node_t* array);
 
 
 /**
  * \brief           Releases the provided array and every node it owns
  * \param[in]       array: Pointer to the array whose contents to free
  */
-void arr_node_destroy(arr_ast_node_t* array);
+void arr_ast_node_destroy(arr_ast_node_t* array);
 
 
 /**
@@ -445,14 +640,14 @@ void arr_node_destroy(arr_ast_node_t* array);
  * \param[in]       array: Pointer to the array to write to
  * \param[in]       value: The node pointer to write to the array
  */
-void arr_node_add(arr_ast_node_t* array, ast_node_t* value);
+void arr_ast_node_add(arr_ast_node_t* array, ast_node_t* value);
 
 
 #ifdef TULA_EXE_DEBUG
 extern const char* AST_NODE_TYPE_NAME[TOTAL_AST_NODE_TYPES];
 
 void ast_node_print(const ast_node_t* node);
-#endif /* TULA_EXE_DEBUGGING */
+#endif /* TULA_EXE_DEBUG */
 
 
 #endif /* TULA_ENGINE_PARSER_AST_H */

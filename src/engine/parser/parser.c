@@ -11,26 +11,10 @@
  * ==================================================
  * Macros
  * ==================================================
- */
+*/
 
-/**
- * \brief	Whether a parse result represents a syntax error. Combining parse
- *			functions test their children with this and, on a hit, release any
- *			siblings and propagate the error node upward so exactly one error
- *			bubbles out of the tree.
- */
-#define IS_ERR(node) (NULL != (node) && AST_ERROR == (node)->type)
+#define IS_AST_ERR(node) (NULL != (node) && AST_ERROR == (node)->type)
 
-
-/* Binary operator precedence levels, lowest to highest binding */
-#define PREC_NONE			0
-#define PREC_OR				1
-#define PREC_AND			2
-#define PREC_EQUALITY		3
-#define PREC_COMPARISON		4
-#define PREC_TERM			5
-#define PREC_FACTOR			6
-#define PREC_POWER			7
 
 
 /*
@@ -66,7 +50,7 @@ static bool parser_check(const parser_t* parser, token_type_t type);
  * \return          Returns true and advances the cursor on a match, otherwise
  *                  returns false and leaves the cursor untouched
  */
-static bool parser_match(parser_t* parser, token_type_t type);
+static bool parser_check_and_advance(parser_t* parser, token_type_t type);
 
 
 /**
@@ -76,24 +60,6 @@ static bool parser_match(parser_t* parser, token_type_t type);
  *                  or when no current token exists
  */
 static bool parser_is_at_end(const parser_t* parser);
-
-
-/**
- * \brief           Tests whether a token type can begin an expression
- * \param[in]       type: The token type to test
- * \return          Returns true when a primary expression may start with a
- *                  token of \p type
- */
-static bool parser_starts_expression(token_type_t type);
-
-
-/**
- * \brief           Looks up the binding precedence of a binary operator token
- * \param[in]       type: The token type to look up
- * \return          Returns the operator's precedence level, or PREC_NONE when
- *                  \p type is not a binary operator
- */
-static int32_t parser_binary_precedence(token_type_t type);
 
 
 /**
@@ -118,249 +84,119 @@ static char* parser_dup_current(const parser_t* parser);
 static ast_node_t* parser_make_error(parser_t* parser, const char* message);
 
 
-/**
- * \brief           Builds an AST_IDENTIFIER node from the current token and
- *                  advances past it
- * \param[in]       parser: The parser positioned on the identifier token
- * \return          Returns a newly allocated AST_IDENTIFIER node
- */
-static ast_node_t* parser_make_identifier(parser_t* parser);
+static bool ast_program(parser_t* parser, ast_node_t** out);
 
 
-/* Grammar — statements */
-
-/**
- * \brief           Parses the entire token stream into a root AST_BLOCK
- * \param[in]       parser: The parser to run
- * \return          Returns the root block node
- */
-static ast_node_t* parse_program(parser_t* parser);
+static bool ast_block(parser_t* parser, ast_node_t** out);
 
 
-/**
- * \brief           Parses a brace-delimited block of statements
- * \param[in]       parser: The parser positioned on the opening '{'
- * \return          Returns an AST_BLOCK node, or an AST_ERROR node on a syntax
- *                  error
- */
-static ast_node_t* parse_block(parser_t* parser);
+static bool ast_statement(parser_t* parser, ast_node_t** out);
 
 
-/**
- * \brief           Parses a single statement
- * \param[in]       parser: The parser positioned at the statement start
- * \return          Returns the statement node, or an AST_ERROR node on a syntax
- *                  error
- */
-static ast_node_t* parse_statement(parser_t* parser);
+static bool ast_stmt_return(parser_t* parser, ast_node_t** out);
 
 
-/**
- * \brief           Parses a 'define' statement (variable, constant, or
- *                  function)
- * \param[in]       parser: The parser positioned on the 'define' keyword
- * \return          Returns the defining node, or an AST_ERROR node on a syntax
- *                  error
- */
-static ast_node_t* parse_define(parser_t* parser);
+static bool ast_stmt_num_iter(parser_t* parser, ast_node_t** out);
 
 
-/**
- * \brief           Parses a 'set' statement
- * \param[in]       parser: The parser positioned on the 'set' keyword
- * \return          Returns an AST_VAR_SET node, or an AST_ERROR node on a syntax
- *                  error
- */
-static ast_node_t* parse_set(parser_t* parser);
+static bool ast_stmt_cond_iter(parser_t* parser, ast_node_t** out);
 
 
-/**
- * \brief           Parses an 'unset' statement
- * \param[in]       parser: The parser positioned on the 'unset' keyword
- * \return          Returns an AST_VAR_UNSET node, or an AST_ERROR node on a
- *                  syntax error
- */
-static ast_node_t* parse_unset(parser_t* parser);
+static bool ast_stmt_comp(parser_t* parser, ast_node_t** out);
 
 
-/**
- * \brief           Parses the shared '<name> = <expression>' tail of a define
- *                  or set statement
- * \param[in]       parser: The parser positioned on the name identifier
- * \param[in]       type: The node type to produce for the assignment
- * \param[in]       isGlobal: Whether the 'global' modifier was present
- * \param[in]       line: The source line of the owning statement
- * \param[in]       column: The source column of the owning statement
- * \return          Returns the assignment node, or an AST_ERROR node on a
- *                  syntax error
- */
-static ast_node_t* parse_named_assignment(
-	parser_t* parser,
-	ast_node_type_t type,
-	bool isGlobal,
-	uint32_t line,
-	uint32_t column
-);
+static bool ast_stmt_func_call(parser_t* parser, ast_node_t** out);
 
 
-/**
- * \brief           Parses the named-function tail of a 'define function'
- *                  statement
- * \param[in]       parser: The parser positioned on the function name
- * \param[in]       isGlobal: Whether the 'global' modifier was present
- * \param[in]       line: The source line of the owning statement
- * \param[in]       column: The source column of the owning statement
- * \return          Returns an AST_FUNC_DEFINE node, or an AST_ERROR node on a
- *                  syntax error
- */
-static ast_node_t* parse_function_define(
-	parser_t* parser,
-	bool isGlobal,
-	uint32_t line,
-	uint32_t column
-);
+static bool ast_stmt_const_def(parser_t* parser, ast_node_t** out);
 
 
-/**
- * \brief           Parses an if / else-if / else chain
- * \param[in]       parser: The parser positioned on the 'if' keyword
- * \return          Returns an AST_IF node, or an AST_ERROR node on a syntax
- *                  error
- */
-static ast_node_t* parse_if(parser_t* parser);
+static bool ast_stmt_var_def(parser_t* parser, ast_node_t** out);
 
 
-/**
- * \brief           Parses a 'while' loop
- * \param[in]       parser: The parser positioned on the 'while' keyword
- * \return          Returns an AST_WHILE node, or an AST_ERROR node on a syntax
- *                  error
- */
-static ast_node_t* parse_while(parser_t* parser);
+static bool ast_stmt_var_set(parser_t* parser, ast_node_t** out);
 
 
-/**
- * \brief           Parses a 'do ... while' loop
- * \param[in]       parser: The parser positioned on the 'do' keyword
- * \return          Returns an AST_DO_WHILE node, or an AST_ERROR node on a
- *                  syntax error
- */
-static ast_node_t* parse_do_while(parser_t* parser);
+static bool ast_stmt_var_unset(parser_t* parser, ast_node_t** out);
 
 
-/**
- * \brief           Parses a 'for' loop
- * \param[in]       parser: The parser positioned on the 'for' keyword
- * \return          Returns an AST_FOR node, or an AST_ERROR node on a syntax
- *                  error
- */
-static ast_node_t* parse_for(parser_t* parser);
+static bool ast_stmt_is_set(parser_t* parser, ast_node_t** out);
 
 
-/**
- * \brief           Parses a 'return' statement
- * \param[in]       parser: The parser positioned on the 'return' keyword
- * \return          Returns an AST_RETURN node, or an AST_ERROR node on a syntax
- *                  error
- */
-static ast_node_t* parse_return(parser_t* parser);
+static bool ast_stmt_break(parser_t* parser, ast_node_t** out);
 
 
-/* Grammar — expressions */
-
-/**
- * \brief           Parses a full expression
- * \param[in]       parser: The parser positioned at the expression start
- * \return          Returns the expression node, or an AST_ERROR node on a
- *                  syntax error
- */
-static ast_node_t* parse_expression(parser_t* parser);
+static bool ast_stmt_continue(parser_t* parser, ast_node_t** out);
 
 
-/**
- * \brief           Parses a binary expression via precedence climbing
- * \param[in]       parser: The parser positioned at the expression start
- * \param[in]       minPrecedence: The lowest operator precedence to fold at
- *                  this level
- * \return          Returns the expression node, or an AST_ERROR node on a
- *                  syntax error
- */
-static ast_node_t* parse_binary(parser_t* parser, int32_t minPrecedence);
+static bool ast_condition(parser_t* parser, ast_node_t** out);
 
 
-/**
- * \brief           Parses a prefix-unary expression
- * \param[in]       parser: The parser positioned at the expression start
- * \return          Returns the expression node, or an AST_ERROR node on a
- *                  syntax error
- */
-static ast_node_t* parse_unary(parser_t* parser);
+static bool ast_expr_ident(parser_t* parser, ast_node_t** out);
 
 
-/**
- * \brief           Parses postfix accessors, calls, and increment/decrement
- *                  operators onto a primary expression
- * \param[in]       parser: The parser positioned at the expression start
- * \return          Returns the expression node, or an AST_ERROR node on a
- *                  syntax error
- */
-static ast_node_t* parse_postfix(parser_t* parser);
+static bool ast_expr(parser_t* parser, ast_node_t** out);
 
 
-/**
- * \brief           Parses a primary expression (literal, identifier, grouping,
- *                  array, table, function value, or isSet query)
- * \param[in]       parser: The parser positioned at the expression start
- * \return          Returns the expression node, or an AST_ERROR node on a
- *                  syntax error
- */
-static ast_node_t* parse_primary(parser_t* parser);
+static bool ast_expr_logi_or(parser_t* parser, ast_node_t** out);
 
 
-/**
- * \brief           Parses an array literal
- * \param[in]       parser: The parser positioned on the opening '['
- * \return          Returns an AST_ARRAY node, or an AST_ERROR node on a syntax
- *                  error
- */
-static ast_node_t* parse_array(parser_t* parser);
+static bool ast_expr_logi_and(parser_t* parser, ast_node_t** out);
 
 
-/**
- * \brief           Parses a table literal
- * \param[in]       parser: The parser positioned on the opening '{'
- * \return          Returns an AST_TABLE node, or an AST_ERROR node on a syntax
- *                  error
- */
-static ast_node_t* parse_table(parser_t* parser);
+static bool ast_expr_equ(parser_t* parser, ast_node_t** out);
 
 
-/**
- * \brief           Parses a single '[key] = value' table entry
- * \param[in]       parser: The parser positioned on the entry's opening '['
- * \return          Returns an AST_TABLE_ENTRY node, or an AST_ERROR node on a
- *                  syntax error
- */
-static ast_node_t* parse_table_entry(parser_t* parser);
+static bool ast_expr_comp(parser_t* parser, ast_node_t** out);
 
 
-/**
- * \brief           Parses an anonymous function value
- * \param[in]       parser: The parser positioned on the 'function' keyword
- * \return          Returns an AST_FUNCTION node, or an AST_ERROR node on a
- *                  syntax error
- */
-static ast_node_t* parse_function_value(parser_t* parser);
+static bool ast_expr_add(parser_t* parser, ast_node_t** out);
 
 
-/**
- * \brief           Parses a parenthesised parameter list of identifiers
- * \param[in]       parser: The parser positioned on the opening '('
- * \param[out]      out: The array to append the parsed parameter nodes to
- * \return          Returns NULL on success, or an AST_ERROR node on a syntax
- *                  error
- */
-static ast_node_t* parse_parameters(parser_t* parser, arr_ast_node_t* out);
+static bool ast_expr_mult(parser_t* parser, ast_node_t** out);
+
+
+static bool ast_expr_expo(parser_t* parser, ast_node_t** out);
+
+
+static bool ast_expr_unary(parser_t* parser, ast_node_t** out);
+
+
+static bool ast_expr_postfix(parser_t* parser, ast_node_t** out);
+
+
+static bool ast_expr_primary(parser_t* parser, ast_node_t** out);
+
+
+static bool ast_func_def(parser_t* parser, ast_node_t** out);
+
+
+static bool ast_func_def_value(parser_t* parser, ast_node_t** out);
+
+
+static bool ast_accessor_member(parser_t* parser, ast_node_t** out);
+
+
+static bool ast_accessor_index(parser_t* parser, ast_node_t** out);
+
+
+static bool ast_accessor_call(parser_t* parser, ast_node_t** out);
+
+
+static bool ast_table_def(parser_t* parser, ast_node_t** out);
+
+
+static bool ast_table_field(parser_t* parser, ast_node_t** out);
+
+
+static bool ast_array_def(parser_t* parser, ast_node_t** out);
+
+
+static bool ast_literal(parser_t* parser, ast_node_t** out);
+
+
+static bool ast_identifier(parser_t* parser, ast_node_t** out);
+
 
 
 /*
@@ -388,7 +224,7 @@ static bool parser_check(const parser_t* parser, const token_type_t type)
 }
 
 
-static bool parser_match(parser_t* parser, const token_type_t type)
+static bool parser_check_and_advance(parser_t* parser, const token_type_t type)
 {
 	if (!parser_check(parser, type))
 	{
@@ -434,59 +270,6 @@ static bool parser_starts_expression(const token_type_t type)
 	}
 
 	return false;
-}
-
-
-static int32_t parser_binary_precedence(const token_type_t type)
-{
-	switch (type)
-	{
-		case TOK_OR:
-		{
-			return PREC_OR;
-		}
-
-		case TOK_AND:
-		{
-			return PREC_AND;
-		}
-
-		case TOK_EQUAL_EQUAL:
-		case TOK_EXCLAM_EQUAL:
-		{
-			return PREC_EQUALITY;
-		}
-
-		case TOK_GREATER_THAN:
-		case TOK_LESS_THAN:
-		case TOK_GT_EQUAL:
-		case TOK_LT_EQUAL:
-		{
-			return PREC_COMPARISON;
-		}
-
-		case TOK_PLUS:
-		case TOK_MINUS:
-		{
-			return PREC_TERM;
-		}
-
-		case TOK_STAR:
-		case TOK_SLASH_FWD:
-		case TOK_PERCENT:
-		{
-			return PREC_FACTOR;
-		}
-
-		case TOK_CARET:
-		{
-			return PREC_POWER;
-		}
-
-		DEFAULT_BREAK
-	}
-
-	return PREC_NONE;
 }
 
 
@@ -567,7 +350,7 @@ static ast_node_t* parser_make_identifier(parser_t* parser)
 }
 
 
-static ast_node_t* parse_program(parser_t* parser)
+static bool ast_program(parser_t* parser, ast_node_t** out)
 {
 	uint32_t line = 1;
 	uint32_t column = 1;
@@ -577,1177 +360,515 @@ static ast_node_t* parse_program(parser_t* parser)
 		column = parser->current->column;
 	}
 
-	ast_node_t* root = ast_node_new(AST_BLOCK, line, column);
 
-	/* Consume top-level statements until the stream ends */
+	/* Create / init the output node */
+	*out = ast_node_new(AST_PROGRAM, line, column);
+	arr_ast_node_init(&(*out)->as.program.statements);
+
+
+	/* Consume statements */
+	bool hadError = false;
+	ast_node_t* statement = NULL;
 	while (!parser_is_at_end(parser))
 	{
-		ast_node_t* statement = parse_statement(parser);
-		arr_node_add(&root->as.block.statements, statement);
-
-		if (IS_ERR(statement))
+		if (ast_statement(parser, &statement))
 		{
-			break;
+			arr_ast_node_add(&(*out)->as.program.statements, statement);
+			statement = NULL;
+			continue;
 		}
+
+		/*
+		 * If the statement ast is not an error but failed, this ast
+		 * becomes an error
+		 */
+		if (!IS_AST_ERR(statement))
+		{
+			ast_node_destroy(*out);
+
+			*out = parser_make_error(
+				parser,
+				"Internal Parser Failure: program statements parse failed"
+			);
+		}
+
+		hadError = true;
+
+		break;
 	}
+
+
+	/* Ensure we didn't return an internal error */
+	if (AST_ERROR == (*out)->type)
+	{
+		return false;
+	}
+
 
 	/* Surface a trailing scanner error as data in the tree */
 	if (!parser->hadError && parser_check(parser, TOK_ERROR))
 	{
-		arr_node_add(
-			&root->as.block.statements,
-			parser_make_error(parser, "Unexpected token.")
+		arr_ast_node_add(
+			&(*out)->as.block.statements,
+			parser_make_error(parser, "Syntax Error: unexpected token.")
 		);
 	}
 
-	return root;
+	return hadError;
 }
 
 
-static ast_node_t* parse_block(parser_t* parser)
+static bool ast_block(parser_t* parser, ast_node_t** out)
 {
+	/* Find the opening { */
 	if (!parser_check(parser, TOK_BRACE_LEFT))
 	{
-		return parser_make_error(parser, "Expected '{' to begin a block.");
+		*out = parser_make_error(
+			parser,
+			"Syntax Error: expected '{' while parsing block."
+		);
+
+		return false;
 	}
 
-	ast_node_t* block = ast_node_new(
+
+	/* Create / init the output node */
+	*out = ast_node_new(
 		AST_BLOCK,
 		parser->current->line,
 		parser->current->column
 	);
+	arr_ast_node_init(&(*out)->as.block.statements);
+
+
+	/* Consume the { token */
 	parser_advance(parser);
 
-	/* Consume statements until the closing brace */
-	while (!parser_check(parser, TOK_BRACE_RIGHT) && !parser_is_at_end(parser))
+
+	/* Consume statements */
+	bool hadError = false;
+	ast_node_t* statement = NULL;
+	while (!parser_is_at_end(parser))
 	{
-		ast_node_t* statement = parse_statement(parser);
-		if (IS_ERR(statement))
+		if (ast_statement(parser, &statement))
 		{
-			ast_node_destroy(block);
-			return statement;
+			arr_ast_node_add(&(*out)->as.block.statements, statement);
+			statement = NULL;
+			continue;
 		}
 
-		arr_node_add(&block->as.block.statements, statement);
+		/*
+		 * If the statement ast is not an error but failed, this ast
+		 * becomes an error
+		 */
+		if (!IS_AST_ERR(statement))
+		{
+			ast_node_destroy(*out);
+
+			*out = parser_make_error(
+				parser,
+				"Internal Parser Failure: block statements parse failed"
+			);
+		}
+
+		hadError = true;
+
+		break;
 	}
 
-	if (!parser_match(parser, TOK_BRACE_RIGHT))
+
+	/* Ensure we didn't return an internal error */
+	if (AST_ERROR == (*out)->type)
 	{
-		ast_node_destroy(block);
-		return parser_make_error(parser, "Expected '}' to close a block.");
+		return false;
 	}
 
-	return block;
+
+	/* Surface a trailing scanner error as data in the tree */
+	if (!parser->hadError && parser_check(parser, TOK_ERROR))
+	{
+		arr_ast_node_add(
+			&(*out)->as.block.statements,
+			parser_make_error(parser, "Syntax Error: unexpected token.")
+		);
+	}
+
+
+	/* Find the closing } */
+	if (!parser_check_and_advance(parser, TOK_BRACE_RIGHT))
+	{
+		ast_node_destroy(*out);
+
+		*out = parser_make_error(
+			parser,
+			"Syntax Error: expected '}' while parsing block."
+		);
+
+		return false;
+	}
+
+	return hadError;
 }
 
 
-static ast_node_t* parse_statement(parser_t* parser)
+static bool ast_statement(parser_t* parser, ast_node_t** out)
 {
+	*out = ast_node_new(
+		AST_STATEMENT,
+		parser->current->line,
+		parser->current->column
+	);
+
+	/* TODO: Add from EBNF "function_call_statement" */
 	switch (parser->current->type)
 	{
-		case TOK_DEFINE:
-		{
-			return parse_define(parser);
-		}
-
-		case TOK_SET:
-		{
-			return parse_set(parser);
-		}
-
-		case TOK_UNSET:
-		{
-			return parse_unset(parser);
-		}
-
-		case TOK_IF:
-		{
-			return parse_if(parser);
-		}
-
-		case TOK_WHILE:
-		{
-			return parse_while(parser);
-		}
-
-		case TOK_DO:
-		{
-			return parse_do_while(parser);
-		}
-
-		case TOK_FOR:
-		{
-			return parse_for(parser);
-		}
-
-		case TOK_RETURN:
-		{
-			return parse_return(parser);
-		}
-
 		case TOK_BREAK:
 		{
-			ast_node_t* node = ast_node_new(
-				AST_BREAK,
+			(*out)->as.statement.statement = ast_node_new(
+				AST_STMT_BREAK,
 				parser->current->line,
 				parser->current->column
 			);
+
+			/* consume the break token */
 			parser_advance(parser);
-			return node;
+
+			return true;
 		}
 
 		case TOK_CONTINUE:
 		{
-			ast_node_t* node = ast_node_new(
-				AST_CONTINUE,
+			(*out)->as.statement.statement = ast_node_new(
+				AST_STMT_CONTINUE,
 				parser->current->line,
 				parser->current->column
 			);
-			parser_advance(parser);
-			return node;
-		}
 
-		default:
-		{
-			/*
-			 * Anything else is an expression used as a statement — a function
-			 * call, an increment/decrement, an isSet query, and so on.
-			 */
-			ast_node_t* expression = parse_expression(parser);
-			if (IS_ERR(expression) || NULL == expression)
-			{
-				return expression;
-			}
-
-			ast_node_t* statement = ast_node_new(
-				AST_EXPR_STATEMENT,
-				expression->line,
-				expression->column
-			);
-			statement->as.exprStatement.expression = expression;
-			return statement;
-		}
-	}
-}
-
-
-static ast_node_t* parse_define(parser_t* parser)
-{
-	const uint32_t line = parser->current->line;
-	const uint32_t column = parser->current->column;
-	parser_advance(parser); /* consume 'define' */
-
-	const bool isGlobal = parser_match(parser, TOK_GLOBAL);
-
-	if (parser_match(parser, TOK_VARIABLE))
-	{
-		return parse_named_assignment(
-			parser,
-			AST_VAR_DEFINE,
-			isGlobal,
-			line,
-			column
-		);
-	}
-
-	if (parser_match(parser, TOK_CONSTANT))
-	{
-		return parse_named_assignment(
-			parser,
-			AST_CONST_DEFINE,
-			isGlobal,
-			line,
-			column
-		);
-	}
-
-	if (parser_match(parser, TOK_FUNC))
-	{
-		return parse_function_define(parser, isGlobal, line, column);
-	}
-
-	return parser_make_error(
-		parser,
-		"Expected 'variable', 'constant', or 'function' after 'define'."
-	);
-}
-
-
-static ast_node_t* parse_set(parser_t* parser)
-{
-	const uint32_t line = parser->current->line;
-	const uint32_t column = parser->current->column;
-	parser_advance(parser); /* consume 'set' */
-
-	const bool isGlobal = parser_match(parser, TOK_GLOBAL);
-
-	if (!parser_match(parser, TOK_VARIABLE))
-	{
-		return parser_make_error(parser, "Expected 'variable' after 'set'.");
-	}
-
-	return parse_named_assignment(
-		parser,
-		AST_VAR_SET,
-		isGlobal,
-		line,
-		column
-	);
-}
-
-
-static ast_node_t* parse_unset(parser_t* parser)
-{
-	const uint32_t line = parser->current->line;
-	const uint32_t column = parser->current->column;
-	parser_advance(parser); /* consume 'unset' */
-
-	const bool isGlobal = parser_match(parser, TOK_GLOBAL);
-
-	if (!parser_match(parser, TOK_VARIABLE))
-	{
-		return parser_make_error(parser, "Expected 'variable' after 'unset'.");
-	}
-
-	if (!parser_check(parser, TOK_IDENT))
-	{
-		return parser_make_error(
-			parser,
-			"Expected a variable name after 'unset'."
-		);
-	}
-
-	ast_node_t* node = ast_node_new(AST_VAR_UNSET, line, column);
-	node->as.unset.isGlobal = isGlobal;
-	node->as.unset.name = parser_dup_current(parser);
-	parser_advance(parser);
-
-	return node;
-}
-
-
-static ast_node_t* parse_named_assignment(
-	parser_t* parser,
-	const ast_node_type_t type,
-	const bool isGlobal,
-	const uint32_t line,
-	const uint32_t column
-)
-{
-	if (!parser_check(parser, TOK_IDENT))
-	{
-		return parser_make_error(parser, "Expected an identifier name.");
-	}
-
-	char* name = parser_dup_current(parser);
-	parser_advance(parser);
-
-	if (!parser_match(parser, TOK_EQUAL))
-	{
-		free(name);
-		return parser_make_error(parser, "Expected '=' after the name.");
-	}
-
-	ast_node_t* value = parse_expression(parser);
-	if (IS_ERR(value))
-	{
-		free(name);
-		return value;
-	}
-
-	ast_node_t* node = ast_node_new(type, line, column);
-	node->as.variable.isGlobal = isGlobal;
-	node->as.variable.name = name;
-	node->as.variable.value = value;
-
-	return node;
-}
-
-
-static ast_node_t* parse_function_define(
-	parser_t* parser,
-	const bool isGlobal,
-	const uint32_t line,
-	const uint32_t column
-)
-{
-	if (!parser_check(parser, TOK_IDENT))
-	{
-		return parser_make_error(parser, "Expected a function name.");
-	}
-
-	ast_node_t* node = ast_node_new(AST_FUNC_DEFINE, line, column);
-	node->as.function.isGlobal = isGlobal;
-	node->as.function.name = parser_dup_current(parser);
-	parser_advance(parser);
-
-	ast_node_t* paramsError = parse_parameters(
-		parser,
-		&node->as.function.parameters
-	);
-	if (IS_ERR(paramsError))
-	{
-		ast_node_destroy(node);
-		return paramsError;
-	}
-
-	ast_node_t* body = parse_block(parser);
-	if (IS_ERR(body))
-	{
-		ast_node_destroy(node);
-		return body;
-	}
-
-	node->as.function.body = body;
-	return node;
-}
-
-
-static ast_node_t* parse_if(parser_t* parser)
-{
-	const uint32_t line = parser->current->line;
-	const uint32_t column = parser->current->column;
-	parser_advance(parser); /* consume 'if' */
-
-	ast_node_t* node = ast_node_new(AST_IF, line, column);
-
-	/* Parse the leading branch and any 'else if' branches */
-	for (;;)
-	{
-		if (!parser_match(parser, TOK_PAREN_LEFT))
-		{
-			ast_node_destroy(node);
-			return parser_make_error(parser, "Expected '(' after 'if'.");
-		}
-
-		ast_node_t* condition = parse_expression(parser);
-		if (IS_ERR(condition))
-		{
-			ast_node_destroy(node);
-			return condition;
-		}
-
-		if (!parser_match(parser, TOK_PAREN_RIGHT))
-		{
-			ast_node_destroy(condition);
-			ast_node_destroy(node);
-			return parser_make_error(
-				parser,
-				"Expected ')' after the condition."
-			);
-		}
-
-		ast_node_t* body = parse_block(parser);
-		if (IS_ERR(body))
-		{
-			ast_node_destroy(condition);
-			ast_node_destroy(node);
-			return body;
-		}
-
-		arr_node_add(&node->as.conditional.conditions, condition);
-		arr_node_add(&node->as.conditional.bodies, body);
-
-		/* An 'else' either starts another branch or ends the chain */
-		if (!parser_match(parser, TOK_ELSE))
-		{
-			break;
-		}
-
-		if (parser_match(parser, TOK_IF))
-		{
-			continue;
-		}
-
-		ast_node_t* elseBody = parse_block(parser);
-		if (IS_ERR(elseBody))
-		{
-			ast_node_destroy(node);
-			return elseBody;
-		}
-
-		node->as.conditional.elseBody = elseBody;
-		break;
-	}
-
-	return node;
-}
-
-
-static ast_node_t* parse_while(parser_t* parser)
-{
-	const uint32_t line = parser->current->line;
-	const uint32_t column = parser->current->column;
-	parser_advance(parser); /* consume 'while' */
-
-	if (!parser_match(parser, TOK_PAREN_LEFT))
-	{
-		return parser_make_error(parser, "Expected '(' after 'while'.");
-	}
-
-	ast_node_t* condition = parse_expression(parser);
-	if (IS_ERR(condition))
-	{
-		return condition;
-	}
-
-	if (!parser_match(parser, TOK_PAREN_RIGHT))
-	{
-		ast_node_destroy(condition);
-		return parser_make_error(parser, "Expected ')' after the condition.");
-	}
-
-	ast_node_t* body = parse_block(parser);
-	if (IS_ERR(body))
-	{
-		ast_node_destroy(condition);
-		return body;
-	}
-
-	ast_node_t* node = ast_node_new(AST_WHILE, line, column);
-	node->as.loop.condition = condition;
-	node->as.loop.body = body;
-
-	return node;
-}
-
-
-static ast_node_t* parse_do_while(parser_t* parser)
-{
-	const uint32_t line = parser->current->line;
-	const uint32_t column = parser->current->column;
-	parser_advance(parser); /* consume 'do' */
-
-	ast_node_t* body = parse_block(parser);
-	if (IS_ERR(body))
-	{
-		return body;
-	}
-
-	if (!parser_match(parser, TOK_WHILE))
-	{
-		ast_node_destroy(body);
-		return parser_make_error(parser, "Expected 'while' after the do-block.");
-	}
-
-	if (!parser_match(parser, TOK_PAREN_LEFT))
-	{
-		ast_node_destroy(body);
-		return parser_make_error(parser, "Expected '(' after 'while'.");
-	}
-
-	ast_node_t* condition = parse_expression(parser);
-	if (IS_ERR(condition))
-	{
-		ast_node_destroy(body);
-		return condition;
-	}
-
-	if (!parser_match(parser, TOK_PAREN_RIGHT))
-	{
-		ast_node_destroy(body);
-		ast_node_destroy(condition);
-		return parser_make_error(parser, "Expected ')' after the condition.");
-	}
-
-	ast_node_t* node = ast_node_new(AST_DO_WHILE, line, column);
-	node->as.loop.condition = condition;
-	node->as.loop.body = body;
-
-	return node;
-}
-
-
-static ast_node_t* parse_for(parser_t* parser)
-{
-	const uint32_t line = parser->current->line;
-	const uint32_t column = parser->current->column;
-	parser_advance(parser); /* consume 'for' */
-
-	if (!parser_match(parser, TOK_PAREN_LEFT))
-	{
-		return parser_make_error(parser, "Expected '(' after 'for'.");
-	}
-
-	ast_node_t* node = ast_node_new(AST_FOR, line, column);
-
-	/* Initializer — an optional local variable definition */
-	if (!parser_check(parser, TOK_COMMA))
-	{
-		if (!parser_check(parser, TOK_DEFINE))
-		{
-			ast_node_destroy(node);
-			return parser_make_error(
-				parser,
-				"Expected a variable definition or ',' in the for-initializer."
-			);
-		}
-
-		ast_node_t* initializer = parse_define(parser);
-		if (IS_ERR(initializer))
-		{
-			ast_node_destroy(node);
-			return initializer;
-		}
-
-		node->as.forLoop.initializer = initializer;
-	}
-
-	if (!parser_match(parser, TOK_COMMA))
-	{
-		ast_node_destroy(node);
-		return parser_make_error(
-			parser,
-			"Expected ',' after the for-initializer."
-		);
-	}
-
-	/* Condition — an optional expression */
-	if (!parser_check(parser, TOK_COMMA))
-	{
-		ast_node_t* condition = parse_expression(parser);
-		if (IS_ERR(condition))
-		{
-			ast_node_destroy(node);
-			return condition;
-		}
-
-		node->as.forLoop.condition = condition;
-	}
-
-	if (!parser_match(parser, TOK_COMMA))
-	{
-		ast_node_destroy(node);
-		return parser_make_error(
-			parser,
-			"Expected ',' after the for-condition."
-		);
-	}
-
-	/* Update — an optional set or expression */
-	if (!parser_check(parser, TOK_PAREN_RIGHT))
-	{
-		ast_node_t* update = parser_check(parser, TOK_SET)
-			? parse_set(parser)
-			: parse_expression(parser);
-		if (IS_ERR(update))
-		{
-			ast_node_destroy(node);
-			return update;
-		}
-
-		node->as.forLoop.update = update;
-	}
-
-	if (!parser_match(parser, TOK_PAREN_RIGHT))
-	{
-		ast_node_destroy(node);
-		return parser_make_error(parser, "Expected ')' after the for-clauses.");
-	}
-
-	ast_node_t* body = parse_block(parser);
-	if (IS_ERR(body))
-	{
-		ast_node_destroy(node);
-		return body;
-	}
-
-	node->as.forLoop.body = body;
-	return node;
-}
-
-
-static ast_node_t* parse_return(parser_t* parser)
-{
-	const uint32_t line = parser->current->line;
-	const uint32_t column = parser->current->column;
-	parser_advance(parser); /* consume 'return' */
-
-	ast_node_t* node = ast_node_new(AST_RETURN, line, column);
-
-	/* The returned value is optional */
-	if (parser_starts_expression(parser->current->type))
-	{
-		ast_node_t* value = parse_expression(parser);
-		if (IS_ERR(value))
-		{
-			ast_node_destroy(node);
-			return value;
-		}
-
-		node->as.ret.value = value;
-	}
-
-	return node;
-}
-
-
-static ast_node_t* parse_expression(parser_t* parser)
-{
-	return parse_binary(parser, PREC_OR);
-}
-
-
-static ast_node_t* parse_binary(parser_t* parser, const int32_t minPrecedence)
-{
-	ast_node_t* left = parse_unary(parser);
-	if (IS_ERR(left) || NULL == left)
-	{
-		return left;
-	}
-
-	/* Precedence climbing: fold operators at or above the current threshold */
-	for (;;)
-	{
-		const token_type_t op = parser->current->type;
-		const int32_t precedence = parser_binary_precedence(op);
-
-		if (PREC_NONE == precedence || precedence < minPrecedence)
-		{
-			break;
-		}
-
-		parser_advance(parser);
-
-		/* '^' is right-associative; every other operator is left-associative */
-		int32_t nextMinimum = precedence + 1;
-		if (TOK_CARET == op)
-		{
-			nextMinimum = precedence;
-		}
-
-		ast_node_t* right = parse_binary(parser, nextMinimum);
-		if (IS_ERR(right))
-		{
-			ast_node_destroy(left);
-			return right;
-		}
-
-		ast_node_t* binary = ast_node_new(
-			AST_BINARY,
-			left->line,
-			left->column
-		);
-		binary->as.binary.op = op;
-		binary->as.binary.left = left;
-		binary->as.binary.right = right;
-
-		left = binary;
-	}
-
-	return left;
-}
-
-
-static ast_node_t* parse_unary(parser_t* parser)
-{
-	/* Logical negation */
-	if (parser_check(parser, TOK_NOT))
-	{
-		const uint32_t line = parser->current->line;
-		const uint32_t column = parser->current->column;
-		parser_advance(parser);
-
-		ast_node_t* operand = parse_unary(parser);
-		if (IS_ERR(operand))
-		{
-			return operand;
-		}
-
-		ast_node_t* node = ast_node_new(AST_UNARY, line, column);
-		node->as.unary.op = TOK_NOT;
-		node->as.unary.operand = operand;
-		return node;
-	}
-
-	/* Prefix increment / decrement, which apply only to an identifier */
-	if (
-		parser_check(parser, TOK_PLUS_PLUS)
-		|| parser_check(parser, TOK_MINUS_MINUS)
-	)
-	{
-		ast_node_type_t type = AST_PRE_DECREMENT;
-		if (parser_check(parser, TOK_PLUS_PLUS))
-		{
-			type = AST_PRE_INCREMENT;
-		}
-
-		const uint32_t line = parser->current->line;
-		const uint32_t column = parser->current->column;
-		parser_advance(parser);
-
-		if (!parser_check(parser, TOK_IDENT))
-		{
-			return parser_make_error(
-				parser,
-				"Expected an identifier after a prefix '++' or '--'."
-			);
-		}
-
-		ast_node_t* node = ast_node_new(type, line, column);
-		node->as.incdec.target = parser_make_identifier(parser);
-		return node;
-	}
-
-	return parse_postfix(parser);
-}
-
-
-static ast_node_t* parse_postfix(parser_t* parser)
-{
-	ast_node_t* node = parse_primary(parser);
-	if (IS_ERR(node))
-	{
-		return node;
-	}
-
-	/*
-	 * Fold trailing accessors, calls, and postfix increment/decrement onto the
-	 * operand, so chains like "a.b[0].c(x)" nest left-to-right.
-	 */
-	for (;;)
-	{
-		/* Member access: object.name */
-		if (parser_check(parser, TOK_DOT))
-		{
-			parser_advance(parser); /* consume '.' */
-
-			if (!parser_check(parser, TOK_IDENT))
-			{
-				ast_node_destroy(node);
-				return parser_make_error(
-					parser,
-					"Expected a member name after '.'."
-				);
-			}
-
-			ast_node_t* member = ast_node_new(
-				AST_MEMBER,
-				node->line,
-				node->column
-			);
-			member->as.member.object = node;
-			member->as.member.name = parser_dup_current(parser);
+			/* consume the continue token */
 			parser_advance(parser);
 
-			node = member;
-			continue;
-		}
-
-		/* Index access: object[subscript] */
-		if (parser_check(parser, TOK_BRACKET_LEFT))
-		{
-			ast_node_t* index = ast_node_new(
-				AST_INDEX,
-				node->line,
-				node->column
-			);
-			index->as.index.object = node;
-			parser_advance(parser); /* consume '[' */
-
-			ast_node_t* subscript = parse_expression(parser);
-			if (IS_ERR(subscript))
-			{
-				ast_node_destroy(index);
-				return subscript;
-			}
-
-			index->as.index.subscript = subscript;
-
-			if (!parser_match(parser, TOK_BRACKET_RIGHT))
-			{
-				ast_node_destroy(index);
-				return parser_make_error(
-					parser,
-					"Expected ']' to close the index access."
-				);
-			}
-
-			node = index;
-			continue;
-		}
-
-		/* Call: callee(arguments) */
-		if (parser_check(parser, TOK_PAREN_LEFT))
-		{
-			ast_node_t* call = ast_node_new(
-				AST_CALL,
-				node->line,
-				node->column
-			);
-			call->as.call.callee = node;
-			parser_advance(parser); /* consume '(' */
-
-			if (!parser_check(parser, TOK_PAREN_RIGHT))
-			{
-				for (;;)
-				{
-					ast_node_t* argument = parse_expression(parser);
-					if (IS_ERR(argument))
-					{
-						ast_node_destroy(call);
-						return argument;
-					}
-
-					arr_node_add(&call->as.call.arguments, argument);
-
-					if (parser_match(parser, TOK_COMMA))
-					{
-						continue;
-					}
-
-					break;
-				}
-			}
-
-			if (!parser_match(parser, TOK_PAREN_RIGHT))
-			{
-				ast_node_destroy(call);
-				return parser_make_error(
-					parser,
-					"Expected ')' to close the call arguments."
-				);
-			}
-
-			node = call;
-			continue;
-		}
-
-		/* Postfix increment / decrement, which apply only to an identifier */
-		if (
-			(
-				parser_check(parser, TOK_PLUS_PLUS)
-				|| parser_check(parser, TOK_MINUS_MINUS)
-			)
-			&& AST_IDENTIFIER == node->type
-		)
-		{
-			ast_node_type_t type = AST_POST_DECREMENT;
-			if (parser_check(parser, TOK_PLUS_PLUS))
-			{
-				type = AST_POST_INCREMENT;
-			}
-
-			ast_node_t* wrapper = ast_node_new(
-				type,
-				node->line,
-				node->column
-			);
-			wrapper->as.incdec.target = node;
-			parser_advance(parser);
-
-			node = wrapper;
-			continue;
-		}
-
-		break;
-	}
-
-	return node;
-}
-
-
-static ast_node_t* parse_primary(parser_t* parser)
-{
-	const token_t* token = parser->current;
-
-	/* Primitive literals (numbers, strings, chars, booleans) */
-	if (TOKENS_IS_PRIMITIVE[token->type])
-	{
-		ast_node_t* node = ast_node_new(
-			AST_LITERAL,
-			token->line,
-			token->column
-		);
-		node->as.literal.literalType = token->type;
-		node->as.literal.value = parser_dup_current(parser);
-		parser_advance(parser);
-		return node;
-	}
-
-	switch (token->type)
-	{
-		case TOK_IDENT:
-		{
-			return parser_make_identifier(parser);
+			return true;
 		}
 
 		case TOK_IS_SET:
 		{
-			const uint32_t line = token->line;
-			const uint32_t column = token->column;
-			parser_advance(parser); /* consume 'isSet' */
-
-			if (!parser_match(parser, TOK_PAREN_LEFT))
+			if (ast_stmt_is_set(parser, &(*out)->as.statement.statement))
 			{
-				return parser_make_error(parser, "Expected '(' after 'isSet'.");
+				return true;
 			}
 
-			if (!parser_check(parser, TOK_IDENT))
+			goto handle_parse_failure_and_exit;
+		}
+
+		case TOK_DEFINE:
+		{
+			/* TODO: Investigate look-ahead */
+			(*out)->as.statement.statement = parser_make_error(
+				parser,
+				"Branch Unimplemented: " __FILE__ ":" STRINGIFY(__LINE__)
+			);
+
+			return false;
+		}
+
+		case TOK_SET:
+		{
+			if (ast_stmt_var_set(parser, &(*out)->as.statement.statement))
 			{
-				return parser_make_error(
-					parser,
-					"Expected an identifier inside 'isSet(...)'."
-				);
+				return true;
 			}
 
-			ast_node_t* target = parser_make_identifier(parser);
+			goto handle_parse_failure_and_exit;
+		}
 
-			if (!parser_match(parser, TOK_PAREN_RIGHT))
+		case TOK_UNSET:
+		{
+			if (ast_stmt_var_unset(parser, &(*out)->as.statement.statement))
 			{
-				ast_node_destroy(target);
-				return parser_make_error(
-					parser,
-					"Expected ')' after the 'isSet' argument."
-				);
+				return true;
 			}
 
-			ast_node_t* node = ast_node_new(AST_IS_SET, line, column);
-			node->as.isSet.target = target;
-			return node;
+			goto handle_parse_failure_and_exit;
 		}
 
-		case TOK_PAREN_LEFT:
+		case TOK_IF:
 		{
-			parser_advance(parser); /* consume '(' */
-
-			ast_node_t* expression = parse_expression(parser);
-			if (IS_ERR(expression))
+			if (ast_stmt_comp(parser, &(*out)->as.statement.statement))
 			{
-				return expression;
+				return true;
 			}
 
-			if (!parser_match(parser, TOK_PAREN_RIGHT))
+			goto handle_parse_failure_and_exit;
+		}
+
+		case TOK_DO:
+		case TOK_WHILE:
+		{
+			if (ast_stmt_cond_iter(parser, &(*out)->as.statement.statement))
 			{
-				ast_node_destroy(expression);
-				return parser_make_error(
-					parser,
-					"Expected ')' after the expression."
-				);
+				return true;
 			}
 
-			return expression;
+			goto handle_parse_failure_and_exit;
 		}
 
-		case TOK_BRACKET_LEFT:
+		case TOK_FOR:
 		{
-			return parse_array(parser);
+			if (ast_stmt_num_iter(parser, &(*out)->as.statement.statement))
+			{
+				return true;
+			}
+
+			goto handle_parse_failure_and_exit;
 		}
 
-		case TOK_BRACE_LEFT:
+		case TOK_RETURN:
 		{
-			return parse_table(parser);
+			if (ast_stmt_return(parser, &(*out)->as.statement.statement))
+			{
+				return true;
+			}
+
+			goto handle_parse_failure_and_exit;
 		}
 
-		case TOK_FUNC:
+		default:
 		{
-			return parse_function_value(parser);
-		}
+			(*out)->as.statement.statement = parser_make_error(
+				parser,
+				"Syntax Error: unexpected token."
+			);
 
-		DEFAULT_BREAK
-	}
-
-	return parser_make_error(parser, "Expected an expression.");
-}
-
-
-static ast_node_t* parse_array(parser_t* parser)
-{
-	ast_node_t* node = ast_node_new(
-		AST_ARRAY,
-		parser->current->line,
-		parser->current->column
-	);
-	parser_advance(parser); /* consume '[' */
-
-	/* Elements, allowing an optional trailing comma */
-	while (!parser_check(parser, TOK_BRACKET_RIGHT) && !parser_is_at_end(parser))
-	{
-		ast_node_t* element = parse_expression(parser);
-		if (IS_ERR(element))
-		{
-			ast_node_destroy(node);
-			return element;
-		}
-
-		arr_node_add(&node->as.array.elements, element);
-
-		if (!parser_match(parser, TOK_COMMA))
-		{
-			break;
+			return false;
 		}
 	}
 
-	if (!parser_match(parser, TOK_BRACKET_RIGHT))
+handle_parse_failure_and_exit:
+	/*
+	 * If the parsed ast is not an error but failed, this ast
+	 * becomes an error
+	 */
+	if (!IS_AST_ERR((*out)->as.statement.statement))
 	{
-		ast_node_destroy(node);
-		return parser_make_error(parser, "Expected ']' to close the array.");
-	}
+		ast_node_destroy(*out);
 
-	return node;
-}
-
-
-static ast_node_t* parse_table(parser_t* parser)
-{
-	ast_node_t* node = ast_node_new(
-		AST_TABLE,
-		parser->current->line,
-		parser->current->column
-	);
-	parser_advance(parser); /* consume '{' */
-
-	/* Entries, allowing an optional trailing comma */
-	while (!parser_check(parser, TOK_BRACE_RIGHT) && !parser_is_at_end(parser))
-	{
-		ast_node_t* entry = parse_table_entry(parser);
-		if (IS_ERR(entry))
-		{
-			ast_node_destroy(node);
-			return entry;
-		}
-
-		arr_node_add(&node->as.table.entries, entry);
-
-		if (!parser_match(parser, TOK_COMMA))
-		{
-			break;
-		}
-	}
-
-	if (!parser_match(parser, TOK_BRACE_RIGHT))
-	{
-		ast_node_destroy(node);
-		return parser_make_error(parser, "Expected '}' to close the table.");
-	}
-
-	return node;
-}
-
-
-static ast_node_t* parse_table_entry(parser_t* parser)
-{
-	const uint32_t line = parser->current->line;
-	const uint32_t column = parser->current->column;
-
-	if (!parser_match(parser, TOK_BRACKET_LEFT))
-	{
-		return parser_make_error(parser, "Expected '[' to begin a table key.");
-	}
-
-	/* Keys are limited to string, char, or integer literals */
-	const token_type_t keyType = parser->current->type;
-	const bool isIntegerKey = keyType >= TOK_INT8 && keyType <= TOK_UINT64;
-	if (TOK_STRING != keyType && TOK_CHAR != keyType && !isIntegerKey)
-	{
-		return parser_make_error(
+		*out = parser_make_error(
 			parser,
-			"Table keys must be a string, char, or integer literal."
+			"Internal Parser Failure: statement parse failed"
 		);
 	}
 
-	ast_node_t* key = ast_node_new(AST_LITERAL, line, column);
-	key->as.literal.literalType = keyType;
-	key->as.literal.value = parser_dup_current(parser);
-	parser_advance(parser);
-
-	if (!parser_match(parser, TOK_BRACKET_RIGHT))
-	{
-		ast_node_destroy(key);
-		return parser_make_error(parser, "Expected ']' after the table key.");
-	}
-
-	if (!parser_match(parser, TOK_EQUAL))
-	{
-		ast_node_destroy(key);
-		return parser_make_error(parser, "Expected '=' after the table key.");
-	}
-
-	ast_node_t* value = parse_expression(parser);
-	if (IS_ERR(value))
-	{
-		ast_node_destroy(key);
-		return value;
-	}
-
-	ast_node_t* entry = ast_node_new(AST_TABLE_ENTRY, line, column);
-	entry->as.tableEntry.key = key;
-	entry->as.tableEntry.value = value;
-
-	return entry;
+	return false;
 }
 
 
-static ast_node_t* parse_function_value(parser_t* parser)
+static bool ast_stmt_return(parser_t* parser, ast_node_t** out)
 {
-	const uint32_t line = parser->current->line;
-	const uint32_t column = parser->current->column;
-	parser_advance(parser); /* consume 'function' */
-
-	ast_node_t* node = ast_node_new(AST_FUNCTION, line, column);
-
-	ast_node_t* paramsError = parse_parameters(
-		parser,
-		&node->as.function.parameters
-	);
-	if (IS_ERR(paramsError))
-	{
-		ast_node_destroy(node);
-		return paramsError;
-	}
-
-	ast_node_t* body = parse_block(parser);
-	if (IS_ERR(body))
-	{
-		ast_node_destroy(node);
-		return body;
-	}
-
-	node->as.function.body = body;
-	return node;
+	// TODO: Implement
 }
 
 
-static ast_node_t* parse_parameters(parser_t* parser, arr_ast_node_t* out)
+static bool ast_stmt_num_iter(parser_t* parser, ast_node_t** out)
 {
-	if (!parser_match(parser, TOK_PAREN_LEFT))
-	{
-		return parser_make_error(
-			parser,
-			"Expected '(' to begin the parameter list."
-		);
-	}
+	// TODO: Implement
+}
 
-	if (!parser_check(parser, TOK_PAREN_RIGHT))
-	{
-		for (;;)
-		{
-			if (!parser_check(parser, TOK_IDENT))
-			{
-				return parser_make_error(parser, "Expected a parameter name.");
-			}
 
-			arr_node_add(out, parser_make_identifier(parser));
+static bool ast_stmt_cond_iter(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
 
-			if (parser_match(parser, TOK_COMMA))
-			{
-				continue;
-			}
 
-			break;
-		}
-	}
+static bool ast_stmt_comp(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
 
-	if (!parser_match(parser, TOK_PAREN_RIGHT))
-	{
-		return parser_make_error(
-			parser,
-			"Expected ')' to close the parameter list."
-		);
-	}
 
-	/* NULL signals success; a non-error return value is never produced */
-	return NULL;
+static bool ast_stmt_func_call(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_stmt_const_def(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_stmt_var_def(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_stmt_var_set(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_stmt_var_unset(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_stmt_is_set(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_stmt_break(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_stmt_continue(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_condition(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_expr_ident(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_expr(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_expr_logi_or(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_expr_logi_and(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_expr_equ(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_expr_comp(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_expr_add(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_expr_mult(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_expr_expo(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_expr_unary(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_expr_postfix(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_expr_primary(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_func_def(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_func_def_value(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_accessor_member(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_accessor_index(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_accessor_call(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_table_def(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_table_field(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_array_def(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_literal(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
+}
+
+
+static bool ast_identifier(parser_t* parser, ast_node_t** out)
+{
+	// TODO: Implement
 }
 
 
@@ -1810,7 +931,7 @@ ast_node_t* parser_parse(parser_t* parser)
 
 	if (NULL == parser->ast)
 	{
-		parser->ast = parse_program(parser);
+		ast_program(parser, &parser->ast);
 	}
 
 	return parser->ast;

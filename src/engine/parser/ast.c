@@ -26,27 +26,17 @@
  * ==================================================
  */
 
-#ifdef TULA_EXE_DEBUG
 /**
- * \brief           Recursively prints a node as an indented tree
- * \param[in]       node: The node to print
- * \param[in]       label: A short role label for the node (e.g. "left"), or
- *                  NULL for no label
- * \param[in]       depth: The current indentation depth
+ * TBD
  */
-static void ast_node_print_indented(
-	const ast_node_t* node,
-	const char* label,
-	uint32_t depth
-);
-#endif /* TULA_EXE_DEBUG */
+/* static void example(); */
 
 
 /*
  * ==================================================
  * Module Level Variables & Constants
  * ==================================================
- */
+*/
 
 const char* AST_NODE_TYPE_VALUE[TOTAL_AST_NODE_TYPES] = {
 	DEFINE_AST_NODE_TYPES(AST_NODE_TYPE_VALUE_DEFINER)
@@ -129,157 +119,428 @@ void ast_node_destroy(ast_node_t* node)
 			break;
 		}
 
+		case AST_PROGRAM:
+		{
+			arr_ast_node_destroy(&node->as.program.statements);
+			break;
+		}
+
 		case AST_BLOCK:
 		{
-			arr_node_destroy(&node->as.block.statements);
+			arr_ast_node_destroy(&node->as.block.statements);
+			break;
+		}
+
+		case AST_STATEMENT:
+		{
+			if (NULL != node->as.statement.statement)
+			{
+				ast_node_destroy(node->as.statement.statement);
+			}
+			break;
+		}
+
+		case AST_STMT_RETURN:
+		{
+			if (NULL != node->as.returnStmt.value)
+			{
+				ast_node_destroy(node->as.returnStmt.value);
+			}
+
+			break;
+		}
+
+		case AST_STMT_NUM_ITER:
+		{
+			if (NULL != node->as.numericIteration.initialization)
+			{
+				ast_node_destroy(node->as.numericIteration.initialization);
+			}
+
+			if (NULL != node->as.numericIteration.condition)
+			{
+				ast_node_destroy(node->as.numericIteration.condition);
+			}
+
+			if (NULL != node->as.numericIteration.block)
+			{
+				ast_node_destroy(node->as.numericIteration.block);
+			}
+
+			break;
+		}
+
+		case AST_STMT_COND_ITER:
+		{
+			if (NULL != node->as.conditionalIteration.condition)
+			{
+				ast_node_destroy(node->as.conditionalIteration.condition);
+			}
+
+			if (NULL != node->as.conditionalIteration.block)
+			{
+				ast_node_destroy(node->as.conditionalIteration.block);
+			}
+
+			break;
+		}
+
+		case AST_STMT_COMP:
+		{
+			if (NULL != node->as.comparison.condition)
+			{
+				ast_node_destroy(node->as.comparison.condition);
+			}
+
+			if (NULL != node->as.comparison.block)
+			{
+				ast_node_destroy(node->as.comparison.block);
+			}
+
+			if (NULL != node->as.comparison.elseNode)
+			{
+				ast_node_destroy(node->as.comparison.elseNode);
+			}
+
+			break;
+		}
+
+		case AST_STMT_FUNC_CALL:
+		{
+			if (NULL != node->as.functionCall.callee)
+			{
+				ast_node_destroy(node->as.functionCall.callee);
+			}
+
+			arr_ast_node_destroy(&node->as.functionCall.elseNode);
+
+			break;
+		}
+
+		case AST_STMT_CONST_DEF:
+		{
+			if (NULL != node->as.constantDef.identifier)
+			{
+				ast_node_destroy(node->as.constantDef.identifier);
+			}
+
+			if (NULL != node->as.constantDef.expression)
+			{
+				ast_node_destroy(node->as.constantDef.expression);
+			}
+
+			break;
+		}
+
+		case AST_STMT_VAR_DEF:
+		{
+			if (NULL != node->as.variableDef.identifier)
+			{
+				ast_node_destroy(node->as.variableDef.identifier);
+			}
+
+			if (NULL != node->as.variableDef.expression)
+			{
+				ast_node_destroy(node->as.variableDef.expression);
+			}
+
+			break;
+		}
+
+		case AST_STMT_VAR_SET:
+		{
+			if (NULL != node->as.variableSet.identifier)
+			{
+				ast_node_destroy(node->as.variableSet.identifier);
+			}
+
+			if (NULL != node->as.variableSet.expression)
+			{
+				ast_node_destroy(node->as.variableSet.expression);
+			}
+
+			break;
+		}
+
+		case AST_STMT_VAR_UNSET:
+		{
+			if (NULL != node->as.variableUnset.identifier)
+			{
+				ast_node_destroy(node->as.variableUnset.identifier);
+			}
+
+			break;
+		}
+
+		case AST_STMT_IS_SET:
+		{
+			if (NULL != node->as.isSet.identifier)
+			{
+				ast_node_destroy(node->as.isSet.identifier);
+			}
+
+			break;
+		}
+
+		case AST_CONDITION:
+		{
+			if (NULL != node->as.condition.expression)
+			{
+				ast_node_destroy(node->as.condition.expression);
+			}
+
+			break;
+		}
+
+		case AST_EXPR_IDENT:
+		{
+			if (NULL != node->as.expressionIdentifier.identifier)
+			{
+				ast_node_destroy(node->as.expressionIdentifier.identifier);
+			}
+
+			arr_ast_node_destroy(&node->as.expressionIdentifier.accessors);
+			break;
+		}
+
+		case AST_EXPR:
+		{
+			if (NULL != node->as.expression.lhs)
+			{
+				ast_node_destroy(node->as.expression.lhs);
+			}
+
+			break;
+		}
+
+		case AST_EXPR_LOGI_OR:
+		{
+			if (NULL != node->as.expressionLogicalOr.lhs)
+			{
+				ast_node_destroy(node->as.expressionLogicalOr.lhs);
+			}
+
+			if (NULL != node->as.expressionLogicalOr.rhs)
+			{
+				ast_node_destroy(node->as.expressionLogicalOr.rhs);
+			}
+
+			break;
+		}
+
+		case AST_EXPR_LOGI_AND:
+		{
+			if (NULL != node->as.expressionLogicalAnd.lhs)
+			{
+				ast_node_destroy(node->as.expressionLogicalAnd.lhs);
+			}
+
+			if (NULL != node->as.expressionLogicalAnd.rhs)
+			{
+				ast_node_destroy(node->as.expressionLogicalAnd.rhs);
+			}
+
+			break;
+		}
+
+		case AST_EXPR_EQU:
+		{
+			if (NULL != node->as.expressionEquality.lhs)
+			{
+				ast_node_destroy(node->as.expressionEquality.lhs);
+			}
+
+			if (NULL != node->as.expressionEquality.rhs)
+			{
+				ast_node_destroy(node->as.expressionEquality.rhs);
+			}
+
+			break;
+		}
+
+		case AST_EXPR_COMP:
+		{
+			if (NULL != node->as.expressionComparison.lhs)
+			{
+				ast_node_destroy(node->as.expressionComparison.lhs);
+			}
+
+			if (NULL != node->as.expressionComparison.rhs)
+			{
+				ast_node_destroy(node->as.expressionComparison.rhs);
+			}
+
+			break;
+		}
+
+		case AST_EXPR_ADD:
+		{
+			if (NULL != node->as.expressionAdditive.lhs)
+			{
+				ast_node_destroy(node->as.expressionAdditive.lhs);
+			}
+
+			if (NULL != node->as.expressionAdditive.rhs)
+			{
+				ast_node_destroy(node->as.expressionAdditive.rhs);
+			}
+
+			break;
+		}
+
+		case AST_EXPR_MULT:
+		{
+			if (NULL != node->as.expressionMultiplicative.lhs)
+			{
+				ast_node_destroy(node->as.expressionMultiplicative.lhs);
+			}
+
+			if (NULL != node->as.expressionMultiplicative.rhs)
+			{
+				ast_node_destroy(node->as.expressionMultiplicative.rhs);
+			}
+
+			break;
+		}
+
+		case AST_EXPR_EXPO:
+		{
+			if (NULL != node->as.expressionExponent.lhs)
+			{
+				ast_node_destroy(node->as.expressionExponent.lhs);
+			}
+
+			if (NULL != node->as.expressionExponent.rhs)
+			{
+				ast_node_destroy(node->as.expressionExponent.rhs);
+			}
+
+			break;
+		}
+
+		case AST_EXPR_UNARY:
+		{
+			if (NULL != node->as.expressionUnary.rhs)
+			{
+				ast_node_destroy(node->as.expressionUnary.rhs);
+			}
+
+			break;
+		}
+
+		case AST_EXPR_POSTFIX:
+		{
+			if (NULL != node->as.expressionPostfix.lhs)
+			{
+				ast_node_destroy(node->as.expressionPostfix.lhs);
+			}
+
+			if (NULL != node->as.expressionPostfix.accessors)
+			{
+				arr_ast_node_destroy(node->as.expressionPostfix.accessors);
+			}
+
+			break;
+		}
+
+		case AST_EXPR_PRIMARY:
+		{
+			if (NULL != node->as.expressionPrimary.expression)
+			{
+				ast_node_destroy(node->as.expressionPrimary.expression);
+			}
+
+			break;
+		}
+
+		case AST_FUNC_DEF:
+		{
+			if (NULL != node->as.functionDef.body)
+			{
+				ast_node_destroy(node->as.functionDef.body);
+			}
+
+			if (NULL != node->as.functionDef.name)
+			{
+				free(node->as.functionDef.name);
+			}
+
+			break;
+		}
+
+		case AST_ACCESSOR_MEMBER:
+		{
+			if (NULL != node->as.accessorMember.identifier)
+			{
+				ast_node_destroy(node->as.accessorMember.identifier);
+			}
+
+			break;
+		}
+
+		case AST_ACCESSOR_INDEX:
+		{
+			if (NULL != node->as.accessorIndex.expression)
+			{
+				ast_node_destroy(node->as.accessorIndex.expression);
+			}
+
+			break;
+		}
+
+		case AST_ACCESSOR_CALL:
+		{
+			arr_ast_node_destroy(&node->as.accessorCall.expressions);
+			break;
+		}
+
+		case AST_TABLE_DEF:
+		{
+			arr_ast_node_destroy(&node->as.tableDef.fields);
+			break;
+		}
+
+		case AST_TABLE_FIELD:
+		{
+			if (NULL != node->as.tableField.key)
+			{
+				ast_node_destroy(node->as.tableField.key);
+			}
+
+			if (NULL != node->as.tableField.value)
+			{
+				ast_node_destroy(node->as.tableField.value);
+			}
+
+			break;
+		}
+
+		case AST_ARRAY_DEF:
+		{
+			arr_ast_node_destroy(&node->as.arrayDef.elements);
 			break;
 		}
 
 		case AST_LITERAL:
 		{
-			free(node->as.literal.value);
+			if (TOK_STRING == node->as.literal.type)
+			{
+				if (NULL != node->as.literal.value.t_string)
+				{
+					free(node->as.literal.value.t_string);
+				}
+			}
+
 			break;
 		}
 
 		case AST_IDENTIFIER:
 		{
-			free(node->as.identifier.name);
-			break;
-		}
+			if (NULL != node->as.identifier.name)
+			{
+				free(node->as.identifier.name);
+			}
 
-		case AST_BINARY:
-		{
-			ast_node_destroy(node->as.binary.left);
-			ast_node_destroy(node->as.binary.right);
-			break;
-		}
-
-		case AST_UNARY:
-		{
-			ast_node_destroy(node->as.unary.operand);
-			break;
-		}
-
-		case AST_PRE_INCREMENT:
-		case AST_POST_INCREMENT:
-		case AST_PRE_DECREMENT:
-		case AST_POST_DECREMENT:
-		{
-			ast_node_destroy(node->as.incdec.target);
-			break;
-		}
-
-		case AST_CALL:
-		{
-			ast_node_destroy(node->as.call.callee);
-			arr_node_destroy(&node->as.call.arguments);
-			break;
-		}
-
-		case AST_MEMBER:
-		{
-			ast_node_destroy(node->as.member.object);
-			free(node->as.member.name);
-			break;
-		}
-
-		case AST_INDEX:
-		{
-			ast_node_destroy(node->as.index.object);
-			ast_node_destroy(node->as.index.subscript);
-			break;
-		}
-
-		case AST_IS_SET:
-		{
-			ast_node_destroy(node->as.isSet.target);
-			break;
-		}
-
-		case AST_ARRAY:
-		{
-			arr_node_destroy(&node->as.array.elements);
-			break;
-		}
-
-		case AST_TABLE:
-		{
-			arr_node_destroy(&node->as.table.entries);
-			break;
-		}
-
-		case AST_TABLE_ENTRY:
-		{
-			ast_node_destroy(node->as.tableEntry.key);
-			ast_node_destroy(node->as.tableEntry.value);
-			break;
-		}
-
-		case AST_FUNCTION:
-		case AST_FUNC_DEFINE:
-		{
-			free(node->as.function.name);
-			arr_node_destroy(&node->as.function.parameters);
-			ast_node_destroy(node->as.function.body);
-			break;
-		}
-
-		case AST_VAR_DEFINE:
-		case AST_VAR_SET:
-		case AST_CONST_DEFINE:
-		{
-			free(node->as.variable.name);
-			ast_node_destroy(node->as.variable.value);
-			break;
-		}
-
-		case AST_VAR_UNSET:
-		{
-			free(node->as.unset.name);
-			break;
-		}
-
-		case AST_IF:
-		{
-			arr_node_destroy(&node->as.conditional.conditions);
-			arr_node_destroy(&node->as.conditional.bodies);
-			ast_node_destroy(node->as.conditional.elseBody);
-			break;
-		}
-
-		case AST_WHILE:
-		case AST_DO_WHILE:
-		{
-			ast_node_destroy(node->as.loop.condition);
-			ast_node_destroy(node->as.loop.body);
-			break;
-		}
-
-		case AST_FOR:
-		{
-			ast_node_destroy(node->as.forLoop.initializer);
-			ast_node_destroy(node->as.forLoop.condition);
-			ast_node_destroy(node->as.forLoop.update);
-			ast_node_destroy(node->as.forLoop.body);
-			break;
-		}
-
-		case AST_RETURN:
-		{
-			ast_node_destroy(node->as.ret.value);
-			break;
-		}
-
-		case AST_EXPR_STATEMENT:
-		{
-			ast_node_destroy(node->as.exprStatement.expression);
-			break;
-		}
-
-		case AST_BREAK: /* NOLINT(*-branch-clone) */
-		case AST_CONTINUE:
-		{
-			/* No owned children */
 			break;
 		}
 
@@ -290,7 +551,7 @@ void ast_node_destroy(ast_node_t* node)
 }
 
 
-void arr_node_init(arr_ast_node_t* array)
+void arr_ast_node_init(arr_ast_node_t* array)
 {
 	if (NULL == array)
 	{
@@ -303,7 +564,7 @@ void arr_node_init(arr_ast_node_t* array)
 }
 
 
-void arr_node_destroy(arr_ast_node_t* array)
+void arr_ast_node_destroy(arr_ast_node_t* array)
 {
 	if (NULL == array)
 	{
@@ -327,7 +588,7 @@ void arr_node_destroy(arr_ast_node_t* array)
 }
 
 
-void arr_node_add(arr_ast_node_t* array, ast_node_t* value)
+void arr_ast_node_add(arr_ast_node_t* array, ast_node_t* value)
 {
 	if (NULL == array || NULL == value)
 	{
@@ -391,15 +652,39 @@ static void ast_node_print_indented(
 	/* Print the node's own scalar fields, then recurse into its children */
 	switch (node->type)
 	{
+		case AST_STMT_BREAK:
+		case AST_STMT_CONTINUE:
+		{
+			printf("\n");
+			break;
+		}
+
 		case AST_ERROR:
 		{
 			printf(" message=\"%s\"\n", node->as.error.message);
 			break;
 		}
 
+		case AST_PROGRAM:
+		{
+			printf(" count=%lld\n", node->as.program.statements.count);
+
+			for (size_t i = 0; i < node->as.program.statements.count; i++)
+			{
+				ast_node_print_indented(
+					node->as.program.statements.values[i],
+					NULL,
+					depth + 1
+				);
+			}
+
+			break;
+		}
+
 		case AST_BLOCK:
 		{
-			printf("\n");
+			printf(" count=%lld\n", node->as.block.statements.count);
+
 			for (size_t i = 0; i < node->as.block.statements.count; i++)
 			{
 				ast_node_print_indented(
@@ -408,16 +693,148 @@ static void ast_node_print_indented(
 					depth + 1
 				);
 			}
+
 			break;
+		}
+
+		case AST_STATEMENT:
+		{
+			ast_node_print_indented(
+				node->as.statement.statement,
+				NULL,
+				depth + 1
+			);
 		}
 
 		case AST_LITERAL:
 		{
-			printf(
-				" type=%s value=\"%s\"\n",
-				TOKENS_TYPE_VALUE[node->as.literal.literalType],
-				node->as.literal.value
-			);
+			printf(" type=%s", TOKENS_TYPE_VALUE[node->as.literal.type]);
+
+			switch (node->as.literal.type)
+			{
+				case TOK_CHAR:
+				{
+					printf(
+						"value='%c'\n",
+						node->as.literal.value.t_char
+					);
+					break;
+				}
+
+				case TOK_INT8:
+				{
+					printf(
+						"value=%i\n",
+						node->as.literal.value.t_int8
+					);
+					break;
+				}
+
+				case TOK_UINT8:
+				{
+					printf(
+						"value=%u\n",
+						node->as.literal.value.t_uint8
+					);
+					break;
+				}
+
+				case TOK_INT16:
+				{
+					printf(
+						"value=%i\n",
+						node->as.literal.value.t_int16
+					);
+					break;
+				}
+
+				case TOK_UINT16:
+				{
+					printf(
+						"value=%u\n",
+						node->as.literal.value.t_uint16
+					);
+					break;
+				}
+
+				case TOK_INT32:
+				{
+					printf(
+						"value=%i\n",
+						node->as.literal.value.t_int32
+					);
+					break;
+				}
+
+				case TOK_UINT32:
+				{
+					printf(
+						"value=%u\n",
+						node->as.literal.value.t_uint32
+					);
+					break;
+				}
+
+				case TOK_INT64:
+				{
+					printf(
+						"value=%lli\n",
+						node->as.literal.value.t_int64
+					);
+					break;
+				}
+
+				case TOK_UINT64:
+				{
+					printf(
+						"value=%llu\n",
+						node->as.literal.value.t_uint64
+					);
+					break;
+				}
+
+				case TOK_FLOAT:
+				{
+					printf(
+						"value=%f\n",
+						node->as.literal.value.t_float
+					);
+					break;
+				}
+
+				case TOK_DOUBLE:
+				{
+					printf(
+						"value=%lf\n",
+						node->as.literal.value.t_double
+					);
+					break;
+				}
+
+				case TOK_STRING:
+				{
+					printf(
+						"value=\"%s\"\n",
+						node->as.literal.value.t_string
+					);
+					break;
+				}
+
+				case TOK_TRUE:
+				{
+					printf("value=true\n");
+					break;
+				}
+
+				case TOK_FALSE:
+				{
+					printf("value=false\n");
+					break;
+				}
+
+				UNREACHABLE_DEFAULT();
+			}
+
 			break;
 		}
 
@@ -427,113 +844,485 @@ static void ast_node_print_indented(
 			break;
 		}
 
-		case AST_BINARY:
+		case AST_STMT_RETURN:
 		{
-			printf(" op=%s\n", TOKENS_TYPE_VALUE[node->as.binary.op]);
-			ast_node_print_indented(node->as.binary.left, "left", depth + 1);
-			ast_node_print_indented(node->as.binary.right, "right", depth + 1);
-			break;
-		}
-
-		case AST_UNARY:
-		{
-			printf(" op=%s\n", TOKENS_TYPE_VALUE[node->as.unary.op]);
+			printf("\n");
 			ast_node_print_indented(
-				node->as.unary.operand,
-				"operand",
+				node->as.returnStmt.value,
+				"value",
 				depth + 1
 			);
 			break;
 		}
 
-		case AST_PRE_INCREMENT:
-		case AST_POST_INCREMENT:
-		case AST_PRE_DECREMENT:
-		case AST_POST_DECREMENT:
+		case AST_STMT_NUM_ITER:
 		{
 			printf("\n");
 			ast_node_print_indented(
-				node->as.incdec.target,
-				"target",
+				node->as.numericIteration.initialization,
+				"init",
+				depth + 1
+			);
+			ast_node_print_indented(
+				node->as.numericIteration.condition,
+				"condition",
+				depth + 1
+			);
+			ast_node_print_indented(
+				node->as.numericIteration.block,
+				"block",
 				depth + 1
 			);
 			break;
 		}
 
-		case AST_CALL:
+		case AST_STMT_COND_ITER:
+		{
+			printf(
+				" do=%s\n",
+				node->as.conditionalIteration.doMode ? "true" : "false"
+			);
+			ast_node_print_indented(
+				node->as.conditionalIteration.condition,
+				"condition",
+				depth + 1
+			);
+			ast_node_print_indented(
+				node->as.conditionalIteration.block,
+				"block",
+				depth + 1
+			);
+			break;
+		}
+
+		case AST_STMT_COMP:
 		{
 			printf("\n");
-			ast_node_print_indented(node->as.call.callee, "callee", depth + 1);
-			for (size_t i = 0; i < node->as.call.arguments.count; i++)
+			ast_node_print_indented(
+				node->as.comparison.condition,
+				"condition",
+				depth + 1
+			);
+			ast_node_print_indented(
+				node->as.comparison.block,
+				"block",
+				depth + 1
+			);
+			ast_node_print_indented(
+				node->as.comparison.elseNode,
+				"else",
+				depth + 1
+			);
+			break;
+		}
+
+		case AST_STMT_FUNC_CALL:
+		{
+			printf("\n");
+			ast_node_print_indented(
+				node->as.functionCall.callee,
+				"callee",
+				depth + 1
+			);
+
+			for (size_t i = 0; i < node->as.functionCall.elseNode.count; i++)
 			{
 				ast_node_print_indented(
-					node->as.call.arguments.values[i],
-					"arg",
+					node->as.functionCall.elseNode.values[i],
+					NULL,
 					depth + 1
 				);
 			}
+
 			break;
 		}
 
-		case AST_MEMBER:
+		case AST_STMT_CONST_DEF:
 		{
-			printf(" name=\"%s\"\n", node->as.member.name);
+			printf(
+				" global=%s\n",
+				node->as.constantDef.isGlobal ? "true" : "false"
+			);
 			ast_node_print_indented(
-				node->as.member.object,
-				"object",
+				node->as.constantDef.identifier,
+				"identifier",
+				depth + 1
+			);
+			ast_node_print_indented(
+				node->as.constantDef.expression,
+				"expression",
 				depth + 1
 			);
 			break;
 		}
 
-		case AST_INDEX:
+		case AST_STMT_VAR_DEF:
+		{
+			printf(
+				" global=%s\n",
+				node->as.variableDef.isGlobal ? "true" : "false"
+			);
+			ast_node_print_indented(
+				node->as.variableDef.identifier,
+				"identifier",
+				depth + 1
+			);
+			ast_node_print_indented(
+				node->as.variableDef.expression,
+				"expression",
+				depth + 1
+			);
+			break;
+		}
+
+		case AST_STMT_VAR_SET:
+		{
+			printf(
+				" global=%s\n",
+				node->as.variableSet.isGlobal ? "true" : "false"
+			);
+			ast_node_print_indented(
+				node->as.variableSet.identifier,
+				"identifier",
+				depth + 1
+			);
+			ast_node_print_indented(
+				node->as.variableSet.expression,
+				"expression",
+				depth + 1
+			);
+			break;
+		}
+
+		case AST_STMT_VAR_UNSET:
+		{
+			printf(
+				" global=%s\n",
+				node->as.variableUnset.isGlobal ? "true" : "false"
+			);
+			ast_node_print_indented(
+				node->as.variableUnset.identifier,
+				"identifier",
+				depth + 1
+			);
+			break;
+		}
+
+		case AST_STMT_IS_SET:
 		{
 			printf("\n");
 			ast_node_print_indented(
-				node->as.index.object,
-				"object",
-				depth + 1
-			);
-			ast_node_print_indented(
-				node->as.index.subscript,
-				"subscript",
+				node->as.isSet.identifier,
+				"identifier",
 				depth + 1
 			);
 			break;
 		}
 
-		case AST_IS_SET:
+		case AST_CONDITION:
 		{
 			printf("\n");
 			ast_node_print_indented(
-				node->as.isSet.target,
-				"target",
+				node->as.condition.expression,
+				"expression",
 				depth + 1
 			);
 			break;
 		}
 
-		case AST_ARRAY:
+		case AST_EXPR_IDENT:
 		{
-			printf("\n");
-			for (size_t i = 0; i < node->as.array.elements.count; i++)
+			printf(
+				" accessors=%lld\n",
+				node->as.expressionIdentifier.accessors.count
+			);
+			ast_node_print_indented(
+				node->as.expressionIdentifier.identifier,
+				"identifier",
+				depth + 1
+			);
+
+			for (
+				size_t i = 0;
+				i < node->as.expressionIdentifier.accessors.count;
+				i++
+			)
 			{
 				ast_node_print_indented(
-					node->as.array.elements.values[i],
-					"element",
+					node->as.expressionIdentifier.accessors.values[i],
+					"accessor",
 					depth + 1
 				);
 			}
+
 			break;
 		}
 
-		case AST_TABLE:
+		case AST_EXPR:
 		{
 			printf("\n");
-			for (size_t i = 0; i < node->as.table.entries.count; i++)
+			ast_node_print_indented(
+				node->as.expression.lhs,
+				"lhs",
+				depth + 1
+			);
+			break;
+		}
+
+		case AST_EXPR_LOGI_OR:
+		{
+			printf("\n");
+			ast_node_print_indented(
+				node->as.expressionLogicalOr.lhs,
+				"lhs",
+				depth + 1
+			);
+			ast_node_print_indented(
+				node->as.expressionLogicalOr.rhs,
+				"rhs",
+				depth + 1
+			);
+			break;
+		}
+
+		case AST_EXPR_LOGI_AND:
+		{
+			printf("\n");
+			ast_node_print_indented(
+				node->as.expressionLogicalAnd.lhs,
+				"lhs",
+				depth + 1
+			);
+			ast_node_print_indented(
+				node->as.expressionLogicalAnd.rhs,
+				"rhs",
+				depth + 1
+			);
+			break;
+		}
+
+		case AST_EXPR_EQU:
+		{
+			printf(
+				" op=%s\n",
+				TOKENS_TYPE_VALUE[node->as.expressionEquality.op]
+			);
+			ast_node_print_indented(
+				node->as.expressionEquality.lhs,
+				"lhs",
+				depth + 1
+			);
+			ast_node_print_indented(
+				node->as.expressionEquality.rhs,
+				"rhs",
+				depth + 1
+			);
+			break;
+		}
+
+		case AST_EXPR_COMP:
+		{
+			printf(
+				" op=%s\n",
+				TOKENS_TYPE_VALUE[node->as.expressionComparison.op]
+			);
+			ast_node_print_indented(
+				node->as.expressionComparison.lhs,
+				"lhs",
+				depth + 1
+			);
+			ast_node_print_indented(
+				node->as.expressionComparison.rhs,
+				"rhs",
+				depth + 1
+			);
+			break;
+		}
+
+		case AST_EXPR_ADD:
+		{
+			printf(
+				" op=%s\n",
+				TOKENS_TYPE_VALUE[node->as.expressionAdditive.op]
+			);
+			ast_node_print_indented(
+				node->as.expressionAdditive.lhs,
+				"lhs",
+				depth + 1
+			);
+			ast_node_print_indented(
+				node->as.expressionAdditive.rhs,
+				"rhs",
+				depth + 1
+			);
+			break;
+		}
+
+		case AST_EXPR_MULT:
+		{
+			printf(
+				" op=%s\n",
+				TOKENS_TYPE_VALUE[node->as.expressionMultiplicative.op]
+			);
+			ast_node_print_indented(
+				node->as.expressionMultiplicative.lhs,
+				"lhs",
+				depth + 1
+			);
+			ast_node_print_indented(
+				node->as.expressionMultiplicative.rhs,
+				"rhs",
+				depth + 1
+			);
+			break;
+		}
+
+		case AST_EXPR_EXPO:
+		{
+			printf("\n");
+			ast_node_print_indented(
+				node->as.expressionExponent.lhs,
+				"lhs",
+				depth + 1
+			);
+			ast_node_print_indented(
+				node->as.expressionExponent.rhs,
+				"rhs",
+				depth + 1
+			);
+			break;
+		}
+
+		case AST_EXPR_UNARY:
+		{
+			printf(
+				" op=%s\n",
+				TOKENS_TYPE_VALUE[node->as.expressionUnary.op]
+			);
+			ast_node_print_indented(
+				node->as.expressionUnary.rhs,
+				"rhs",
+				depth + 1
+			);
+			break;
+		}
+
+		case AST_EXPR_POSTFIX:
+		{
+			printf(
+				" op=%s\n",
+				TOKENS_TYPE_VALUE[node->as.expressionPostfix.op]
+			);
+			ast_node_print_indented(
+				node->as.expressionPostfix.lhs,
+				"lhs",
+				depth + 1
+			);
+
+			if (NULL != node->as.expressionPostfix.accessors)
+			{
+				for (
+					size_t i = 0;
+					i < node->as.expressionPostfix.accessors->count;
+					i++
+				)
+				{
+					ast_node_print_indented(
+						node->as.expressionPostfix.accessors->values[i],
+						"accessor",
+						depth + 1
+					);
+				}
+			}
+
+			break;
+		}
+
+		case AST_EXPR_PRIMARY:
+		{
+			printf("\n");
+			ast_node_print_indented(
+				node->as.expressionPrimary.expression,
+				"expression",
+				depth + 1
+			);
+			break;
+		}
+
+		case AST_FUNC_DEF:
+		{
+			printf(
+				" global=%s name=\"%s\"\n",
+				node->as.functionDef.isGlobal ? "true" : "false",
+				NULL == node->as.functionDef.name
+					? "<anonymous>"
+					: node->as.functionDef.name
+			);
+			ast_node_print_indented(
+				node->as.functionDef.body,
+				"body",
+				depth + 1
+			);
+			break;
+		}
+
+		case AST_FUNC_DEF_VAL:
+		{
+			printf(
+				" params=%lld\n",
+				node->as.functionDefValue.parameters.count
+			);
+
+			for (
+				size_t i = 0;
+				i < node->as.functionDefValue.parameters.count;
+				i++
+			)
 			{
 				ast_node_print_indented(
-					node->as.table.entries.values[i],
+					node->as.functionDefValue.parameters.values[i],
+					"param",
+					depth + 1
+				);
+			}
+
+			ast_node_print_indented(
+				node->as.functionDefValue.body,
+				"body",
+				depth + 1
+			);
+			break;
+		}
+
+		case AST_ACCESSOR_MEMBER:
+		{
+			printf("\n");
+			ast_node_print_indented(
+				node->as.accessorMember.identifier,
+				"identifier",
+				depth + 1
+			);
+			break;
+		}
+
+		case AST_ACCESSOR_INDEX:
+		{
+			printf("\n");
+			ast_node_print_indented(
+				node->as.accessorIndex.expression,
+				"expression",
+				depth + 1
+			);
+			break;
+		}
+
+		case AST_ACCESSOR_CALL:
+		{
+			printf("\n");
+			for (size_t i = 0; i < node->as.accessorCall.expressions.count; i++)
+			{
+				ast_node_print_indented(
+					node->as.accessorCall.expressions.values[i],
 					NULL,
 					depth + 1
 				);
@@ -541,166 +1330,55 @@ static void ast_node_print_indented(
 			break;
 		}
 
-		case AST_TABLE_ENTRY:
+		case AST_TABLE_DEF:
+		{
+			printf(" count=%lld\n", node->as.tableDef.fields.count);
+
+			for (size_t i = 0; i < node->as.tableDef.fields.count; i++)
+			{
+				ast_node_print_indented(
+					node->as.tableDef.fields.values[i],
+					NULL,
+					depth + 1
+				);
+			}
+
+			break;
+		}
+
+		case AST_TABLE_FIELD:
 		{
 			printf("\n");
-			ast_node_print_indented(node->as.tableEntry.key, "key", depth + 1);
 			ast_node_print_indented(
-				node->as.tableEntry.value,
+				node->as.tableField.key,
+				"key",
+				depth + 1
+			);
+			ast_node_print_indented(
+				node->as.tableField.value,
 				"value",
 				depth + 1
 			);
 			break;
 		}
 
-		case AST_FUNCTION:
-		case AST_FUNC_DEFINE:
+		case AST_ARRAY_DEF:
 		{
-			printf(
-				" global=%s name=\"%s\"\n",
-				node->as.function.isGlobal ? "true" : "false",
-				NULL == node->as.function.name
-					? "<anonymous>"
-					: node->as.function.name
-			);
-			for (size_t i = 0; i < node->as.function.parameters.count; i++)
+			printf(" count=%lld\n", node->as.arrayDef.elements.count);
+
+			for (size_t i = 0; i < node->as.arrayDef.elements.count; i++)
 			{
 				ast_node_print_indented(
-					node->as.function.parameters.values[i],
-					"param",
+					node->as.arrayDef.elements.values[i],
+					"element",
 					depth + 1
 				);
 			}
-			ast_node_print_indented(node->as.function.body, "body", depth + 1);
+
 			break;
 		}
 
-		case AST_VAR_DEFINE:
-		case AST_VAR_SET:
-		case AST_CONST_DEFINE:
-		{
-			printf(
-				" global=%s name=\"%s\"\n",
-				node->as.variable.isGlobal ? "true" : "false",
-				node->as.variable.name
-			);
-			ast_node_print_indented(
-				node->as.variable.value,
-				"value",
-				depth + 1
-			);
-			break;
-		}
-
-		case AST_VAR_UNSET:
-		{
-			printf(
-				" global=%s name=\"%s\"\n",
-				node->as.unset.isGlobal ? "true" : "false",
-				node->as.unset.name
-			);
-			break;
-		}
-
-		case AST_IF:
-		{
-			printf("\n");
-			for (size_t i = 0; i < node->as.conditional.conditions.count; i++)
-			{
-				ast_node_print_indented(
-					node->as.conditional.conditions.values[i],
-					"condition",
-					depth + 1
-				);
-				ast_node_print_indented(
-					node->as.conditional.bodies.values[i],
-					"then",
-					depth + 1
-				);
-			}
-			if (NULL != node->as.conditional.elseBody)
-			{
-				ast_node_print_indented(
-					node->as.conditional.elseBody,
-					"else",
-					depth + 1
-				);
-			}
-			break;
-		}
-
-		case AST_WHILE:
-		case AST_DO_WHILE:
-		{
-			printf("\n");
-			ast_node_print_indented(
-				node->as.loop.condition,
-				"condition",
-				depth + 1
-			);
-			ast_node_print_indented(node->as.loop.body, "body", depth + 1);
-			break;
-		}
-
-		case AST_FOR:
-		{
-			printf("\n");
-			ast_node_print_indented(
-				node->as.forLoop.initializer,
-				"init",
-				depth + 1
-			);
-			ast_node_print_indented(
-				node->as.forLoop.condition,
-				"condition",
-				depth + 1
-			);
-			ast_node_print_indented(
-				node->as.forLoop.update,
-				"update",
-				depth + 1
-			);
-			ast_node_print_indented(node->as.forLoop.body, "body", depth + 1);
-			break;
-		}
-
-		case AST_RETURN:
-		{
-			printf("\n");
-			if (NULL != node->as.ret.value)
-			{
-				ast_node_print_indented(
-					node->as.ret.value,
-					"value",
-					depth + 1
-				);
-			}
-			break;
-		}
-
-		case AST_EXPR_STATEMENT:
-		{
-			printf("\n");
-			ast_node_print_indented(
-				node->as.exprStatement.expression,
-				NULL,
-				depth + 1
-			);
-			break;
-		}
-
-		case AST_BREAK: /* NOLINT(*-branch-clone) */
-		case AST_CONTINUE:
-		{
-			printf("\n");
-			break;
-		}
-
-		default:
-		{
-			printf("\n");
-			break;
-		}
+		UNREACHABLE_DEFAULT();
 	}
 }
 

@@ -32,6 +32,7 @@
  *	)
  */
 #define DEFINE_TOKENS(def)																\
+	def(TOK_NONE,			"<none>",		NULL,		true,	false,	false,	false)	\
 	def(TOK_ERROR,			"<error>",		NULL,		true,	false,	false,	false)	\
 	def(TOK_EOS,			"<eos>",		NULL,		true,	false,	false,	false)	\
 	def(TOK_IDENT,			"<identifier>",	NULL,		false,	false,	false,	false)	\
@@ -57,7 +58,6 @@
 	def(TOK_SET,			"set",			NULL,		false,	false,	true,	false)	\
 	def(TOK_UNSET,			"unset",		NULL,		false,	false,	true,	false)	\
 	def(TOK_IS_SET,			"isSet",		NULL,		false,	false,	true,	false)	\
-	/*def(TOK_EMIT,			"emit",			NULL,		false,	false,	true,	false)*/\
 	def(TOK_IF,				"if",			NULL,		false,	false,	true,	false)	\
 	def(TOK_ELSE,			"else",			NULL,		false,	false,	true,	false)	\
 	def(TOK_WHILE,			"while",		NULL,		false,	false,	true,	false)	\
