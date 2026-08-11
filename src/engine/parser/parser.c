@@ -1958,262 +1958,50 @@ static bool ast_expr_unary(parser_t* parser, ast_node_t** out)
 
 static bool ast_expr_postfix(parser_t* parser, ast_node_t** out)
 {
-	/* AST folding attempt (START) */
-	// const uint32_t line = parser->current->line;
-	// const uint32_t column = parser->current->column;
-	//
-	// ast_node_t* lhs = NULL;
-	// while (true)
-	// {
-	// 	const bool startsWithIdent = parser_check(parser, TOK_IDENT);
-	//
-	// 	/* Handle the lhs ast */
-	// 	ast_node_t* nextLhs = NULL;
-	// 	bool astParseStatus = false;
-	// 	if (startsWithIdent)
-	// 	{
-	// 		astParseStatus = ast_expr_ident(parser, &nextLhs);
-	// 	}
-	// 	else
-	// 	{
-	// 		astParseStatus = ast_expr_primary(parser, &nextLhs);
-	// 	}
-	//
-	// 	if (!astParseStatus)
-	// 	{
-	// 		/*
-	// 		 * If the parsed ast is not an error but failed, this ast
-	// 		 * becomes an error
-	// 		 */
-	// 		if (!IS_AST_ERR(nextLhs))
-	// 		{
-	// 			ast_node_destroy(lhs);
-	// 			ast_node_destroy(nextLhs);
-	//
-	// 			*out = parser_err_internal(
-	// 				parser,
-	// 				"postfix expression left-hand side parse failed"
-	// 			);
-	// 		}
-	//
-	// 		return false;
-	// 	}
-	//
-	//
-	// 	/* Detect post-increment and post-decrement */
-	// 	token_type_t op = TOK_NONE;
-	// 	if (parser_check(parser, TOK_PLUS_PLUS))
-	// 	{
-	// 		op = TOK_PLUS_PLUS;
-	// 	}
-	// 	else if (parser_check(parser, TOK_MINUS_MINUS))
-	// 	{
-	// 		op = TOK_MINUS_MINUS;
-	// 	}
-	//
-	//
-	// 	/* Handle post-increment and post-decrement */
-	// 	if (TOK_NONE != op)
-	// 	{
-	// 		if (!startsWithIdent)
-	// 		{
-	// 			ast_node_destroy(lhs);
-	// 			ast_node_destroy(nextLhs);
-	//
-	// 			*out = parser_err_syntax(
-	// 				parser,
-	// 				"expected variable, field, or index while parsing "
-	// 					"increment/decrement expression."
-	// 			);
-	//
-	// 			return false;
-	// 		}
-	//
-	// 		parser_advance(parser);
-	//
-	//
-	// 		/* fold the accumulated tree */
-	// 		ast_node_t* foldedNode = ast_node_new(
-	// 			AST_EXPR_POSTFIX,
-	// 			line,
-	// 			column
-	// 		);
-	// 		foldedNode->as.expressionPostfix.lhs = nextLhs;
-	// 		foldedNode->as.expressionPostfix.op = op;
-	// 		arr_ast_node_init(&foldedNode->as.expressionPostfix.accessors);
-	//
-	// 		lhs = foldedNode;
-	// 		continue;
-	// 	}
-	//
-	//
-	// 	/* Handle non-post-in(de)crement */
-	// 	while (true)
-	// 	{
-	// 		ast_node_t* accessor = NULL;
-	// 		bool accessorParseStatus;
-	//
-	// 		if (parser_check(parser, TOK_DOT))
-	// 		{
-	// 			accessorParseStatus = ast_accessor_member(parser, &accessor);
-	// 		}
-	// 		else if (parser_check(parser, TOK_BRACKET_LEFT))
-	// 		{
-	// 			accessorParseStatus = ast_accessor_index(parser, &accessor);
-	// 		}
-	// 		else if (parser_check(parser, TOK_PAREN_LEFT))
-	// 		{
-	// 			accessorParseStatus = ast_accessor_call(parser, &accessor);
-	// 		}
-	// 		else
-	// 		{
-	// 			break;
-	// 		}
-	//
-	//
-	// 		/* Handle accessor parse failure */
-	// 		if (!accessorParseStatus)
-	// 		{
-	// 			ast_node_destroy(lhs);
-	// 			ast_node_destroy(nextLhs);
-	//
-	// 			/*
-	// 			 * If the parsed ast is not an error but failed, this ast
-	// 			 * becomes an error
-	// 			*/
-	// 			if (!IS_AST_ERR(accessor))
-	// 			{
-	//
-	// 				*out = parser_err_internal(
-	// 					parser,
-	// 					"postfix expression accessor parse failed"
-	// 				);
-	// 			}
-	// 			else
-	// 			{
-	// 				*out = accessor;
-	// 			}
-	//
-	// 			return false;
-	// 		}
-	//
-	// 		arr_ast_node_add(
-	// 			&nextLhs->as.expressionPostfix.accessors,
-	// 			accessor
-	// 		);
-	// 	}
-	//
-	//
-	// 	/* Ensure there is no trailing increment or decrement */
-	// 	if (
-	// 		parser_check(parser, TOK_PLUS_PLUS)
-	// 		|| parser_check(parser, TOK_MINUS_MINUS)
-	// 	)
-	// 	{
-	// 		ast_node_destroy(lhs);
-	// 		ast_node_destroy(nextLhs);
-	//
-	// 		*out = parser_err_syntax(
-	// 			parser,
-	// 			"expected a variable, field, or index while parsing "
-	// 				"increment/decrement expression."
-	// 		);
-	//
-	// 		return false;
-	// 	}
-	//
-	//
-	// 	/* fold the accumulated tree */
-	// 	ast_node_t* foldedNode = ast_node_new(
-	// 		AST_EXPR_POSTFIX,
-	// 		line,
-	// 		column
-	// 	);
-	// 	foldedNode->as.expressionPostfix.lhs = nextLhs;
-	// 	foldedNode->as.expressionPostfix.op = op;
-	//
-	// 	lhs = foldedNode;
-	// }
-	//
-	// if (NULL == lhs)
-	// {
-	// 	if (!ast_expr_postfix(parser, &lhs))
-	// 	{
-	// 		/*
-	// 		 * If the parsed ast is not an error but failed, this ast
-	// 		 * becomes an error
-	// 		 */
-	// 		if (!IS_AST_ERR(lhs))
-	// 		{
-	// 			ast_node_destroy(lhs);
-	//
-	// 			*out = parser_err_internal(
-	// 				parser,
-	// 				"unary expression right-hand side parse failed"
-	// 			);
-	// 		}
-	//
-	// 		return false;
-	// 	}
-	// }
-	//
-	//
-	// *out = lhs;
-	//
-	// return true;
-	/* AST folding attempt (END) */
+	const uint32_t line = parser->current->line;
+	const uint32_t column = parser->current->column;
 
-
-	*out = ast_node_new(
-		AST_EXPR_POSTFIX,
-		parser->current->line,
-		parser->current->column
-	);
-
-	arr_ast_node_init(&(*out)->as.expressionPostfix.accessors);
-	(*out)->as.expressionPostfix.op = TOK_NONE;
-
-
+	/* Handle the base operand (one tighter operand) */
 	const bool startsWithIdent = parser_check(parser, TOK_IDENT);
 
-	bool lhsParseStatus = false;
+	
+	ast_node_t* lhs = NULL;
+	bool lhsParseStatus;
 	if (startsWithIdent)
 	{
-		lhsParseStatus = ast_expr_ident(
-			parser,
-			&(*out)->as.expressionPostfix.lhs
-		);
+
+		lhsParseStatus = ast_expr_ident(parser, &lhs);
 	}
 	else
 	{
-		lhsParseStatus = ast_expr_primary(
-			parser,
-			&(*out)->as.expressionPostfix.lhs
-		);
+		lhsParseStatus = ast_expr_primary(parser, &lhs);
 	}
 
-	/* Handle LHS AST parse failure */
 	if (!lhsParseStatus)
 	{
 		/*
 		 * If the parsed ast is not an error but failed, this ast
 		 * becomes an error
 		 */
-		if (!IS_AST_ERR((*out)->as.expressionPostfix.lhs))
+		if (!IS_AST_ERR(lhs))
 		{
-			ast_node_destroy(*out);
+			ast_node_destroy(lhs);
 
 			*out = parser_err_internal(
 				parser,
-				"postfix expression right-hand side parse failed"
+				"postfix expression left-hand side parse failed"
 			);
+		}
+		else
+		{
+			*out = lhs;
 		}
 
 		return false;
 	}
 
 
-	/* Handle the in(de)crement */
+	/* A post-in(de)crement only targets a variable, field, or index */
 	if (
 		parser_check(parser, TOK_PLUS_PLUS)
 		|| parser_check(parser, TOK_MINUS_MINUS)
@@ -2221,7 +2009,7 @@ static bool ast_expr_postfix(parser_t* parser, ast_node_t** out)
 	{
 		if (!startsWithIdent)
 		{
-			ast_node_destroy(*out);
+			ast_node_destroy(lhs);
 
 			*out = parser_err_syntax(
 				parser,
@@ -2232,75 +2020,108 @@ static bool ast_expr_postfix(parser_t* parser, ast_node_t** out)
 			return false;
 		}
 
+		ast_node_t* node = ast_node_new(AST_EXPR_POSTFIX, line, column);
+		node->as.expressionPostfix.lhs = lhs;
+		node->as.expressionPostfix.op = TOK_NONE;
+		arr_ast_node_init(&node->as.expressionPostfix.accessors);
+
 		if (parser_check_and_advance(parser, TOK_PLUS_PLUS))
 		{
-			(*out)->as.expressionPostfix.op = TOK_PLUS_PLUS;
+			node->as.expressionPostfix.op = TOK_PLUS_PLUS;
 		}
 		else if (parser_check_and_advance(parser, TOK_MINUS_MINUS))
 		{
-			(*out)->as.expressionPostfix.op = TOK_MINUS_MINUS;
+			node->as.expressionPostfix.op = TOK_MINUS_MINUS;
 		}
+
+		*out = node;
 
 		return true;
 	}
 
 
-	/* Handle any trailing accessors */
-    while (true)
+	/* No accessors follow, so this tier adds nothing -> collapse it out */
+	if (
+		!parser_check(parser, TOK_DOT)
+		&& !parser_check(parser, TOK_BRACKET_LEFT)
+		&& !parser_check(parser, TOK_PAREN_LEFT)
+	)
+	{
+		*out = lhs;
+
+		return true;
+	}
+
+
+	/* Trailing accessors are present, so a postfix node is needed */
+	ast_node_t* node = ast_node_new(AST_EXPR_POSTFIX, line, column);
+	node->as.expressionPostfix.lhs = lhs;
+	node->as.expressionPostfix.op = TOK_NONE;
+	arr_ast_node_init(&node->as.expressionPostfix.accessors);
+
+
+	/* As long as we can keep going, collect trailing accessors */
+	while (true)
     {
         ast_node_t* accessor = NULL;
         bool accessorParseStatus;
 
         if (parser_check(parser, TOK_DOT))
         {
-            accessorParseStatus = ast_accessor_member(parser, &accessor);
+        	accessorParseStatus = ast_accessor_member(parser, &accessor);
         }
         else if (parser_check(parser, TOK_BRACKET_LEFT))
         {
-            accessorParseStatus = ast_accessor_index(parser, &accessor);
+        	accessorParseStatus = ast_accessor_index(parser, &accessor);
         }
         else if (parser_check(parser, TOK_PAREN_LEFT))
         {
-            accessorParseStatus = ast_accessor_call(parser, &accessor);
+        	accessorParseStatus = ast_accessor_call(parser, &accessor);
         }
         else
         {
-            break;
+        	break;
         }
 
 
-        /* Handle accessor parse failure */
+    	/* Handle accessor parse failure */
         if (!accessorParseStatus)
         {
             /*
-             * If the parsed ast is not an error but failed, this ast
-             * becomes an error
-             */
-            ast_node_destroy(*out);
+			 * If the parsed ast is not an error but failed, this ast
+			 * becomes an error
+			 */
             if (!IS_AST_ERR(accessor))
             {
-                *out = parser_err_internal(
-                    parser,
-                    "postfix expression accessor parse failed"
-                );
+                ast_node_destroy(node);
+                ast_node_destroy(accessor);
+
+            	*out = parser_err_internal(
+					parser,
+					"postfix expression accessor parse failed"
+				);
             }
             else
             {
-                *out = accessor;
+            	ast_node_destroy(node);
+
+            	*out = accessor;
             }
 
-            return false;
-		}
+        	return false;
+        }
 
-        arr_ast_node_add(&(*out)->as.expressionPostfix.accessors, accessor);
+    	arr_ast_node_add(&node->as.expressionPostfix.accessors, accessor);
     }
 
+
+	/* A value chain ending in a call cannot be in(de)cremented (f()++) */
 	if (
 		parser_check(parser, TOK_PLUS_PLUS)
 		|| parser_check(parser, TOK_MINUS_MINUS)
 	)
 	{
-		ast_node_destroy(*out);
+		ast_node_destroy(node);
 
 		*out = parser_err_syntax(
 			parser,
@@ -2310,6 +2131,9 @@ static bool ast_expr_postfix(parser_t* parser, ast_node_t** out)
 
 		return false;
 	}
+
+
+	*out = node;
 
 	return true;
 }

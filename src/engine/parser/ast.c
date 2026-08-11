@@ -1033,7 +1033,7 @@ static void ast_node_print_indented(
 		case AST_EXPR_IDENT:
 		{
 			printf(
-				" accessors=%lld\n",
+				" accessor_count=%lld\n",
 				node->as.expressionIdentifier.accessors.count
 			);
 			ast_node_print_indented(
