@@ -435,10 +435,7 @@ void ast_node_destroy(ast_node_t* node)
 				ast_node_destroy(node->as.expressionPostfix.lhs);
 			}
 
-			if (NULL != node->as.expressionPostfix.accessors)
-			{
-				arr_ast_node_destroy(node->as.expressionPostfix.accessors);
-			}
+			arr_ast_node_destroy(&node->as.expressionPostfix.accessors);
 
 			break;
 		}
@@ -699,16 +696,19 @@ static void ast_node_print_indented(
 
 		case AST_STATEMENT:
 		{
+			printf("\n");
 			ast_node_print_indented(
 				node->as.statement.statement,
 				NULL,
 				depth + 1
 			);
+
+			break;
 		}
 
 		case AST_LITERAL:
 		{
-			printf(" type=%s", TOKENS_TYPE_VALUE[node->as.literal.type]);
+			printf(" type=%s ", TOKENS_TYPE_VALUE[node->as.literal.type]);
 
 			switch (node->as.literal.type)
 			{
@@ -1219,20 +1219,17 @@ static void ast_node_print_indented(
 				depth + 1
 			);
 
-			if (NULL != node->as.expressionPostfix.accessors)
+			for (
+				size_t i = 0;
+				i < node->as.expressionPostfix.accessors.count;
+				i++
+			)
 			{
-				for (
-					size_t i = 0;
-					i < node->as.expressionPostfix.accessors->count;
-					i++
-				)
-				{
-					ast_node_print_indented(
-						node->as.expressionPostfix.accessors->values[i],
-						"accessor",
-						depth + 1
-					);
-				}
+				ast_node_print_indented(
+					node->as.expressionPostfix.accessors.values[i],
+					"accessor",
+					depth + 1
+				);
 			}
 
 			break;

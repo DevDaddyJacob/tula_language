@@ -157,6 +157,7 @@ expression_logical_or = expression_logical_and {"or" expression_logical_and} ;
 (* AST Type *)
 expression_logical_and = expression_equality {"and" expression_equality} ;
 
+
 (* AST Type *)
 expression_equality = expression_comparison
                         {operator_equality expression_comparison} ;
@@ -183,7 +184,7 @@ expression_unary = ("not" expression_unary)
                     | expression_postfix ;
 
 (* AST Type *)
-expression_postfix = expression_primary [{accessor}]
+expression_postfix = (expression_primary {accessor})
                      | expression_post_increment
                      | expression_post_decrement ;
 
@@ -208,7 +209,7 @@ expression_list = expression {field_separator expression} ;
 *)
 variable_base = ("variable" | "var") identifier ;
 
-variable_assignment = variable_base "=" expression ;
+variable_assignment = variable_base ["=" expression] ;
 
 (* AST Type (grouped with global def) *)
 variable_local_definition = ("define" | "def") variable_assignment ;
@@ -217,10 +218,10 @@ variable_local_definition = ("define" | "def") variable_assignment ;
 variable_global_definition = ("define" | "def") "global" variable_assignment ;
 
 (* AST Type (grouped with global set) *)
-variable_local_set = "set" variable_assignment ;
+variable_local_set = "set" variable_base "=" expression ;
 
 (* AST Type (grouped with local set) *)
-variable_global_set = "set" "global" variable_assignment ;
+variable_global_set = "set" "global" variable_base "=" expression ;
 
 (* AST Type (grouped with global unset) *)
 variable_local_unset = "unset" variable_base ;

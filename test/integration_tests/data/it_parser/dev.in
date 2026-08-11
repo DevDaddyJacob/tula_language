@@ -1,0 +1,7 @@
+def global var globalVar = "I am global"
+def var localVar = "I am local"
+
+def global const globalConst = 420
+def const localConst = -69
+
+def const unaryTest = not false

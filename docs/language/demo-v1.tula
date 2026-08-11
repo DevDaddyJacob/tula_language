@@ -20,6 +20,9 @@
 def global var globalVar = "I am global"
 def var localVar = "I am local"
 
+def global var globalDefaultVar
+def var localDefaultVar
+
 // Modifying Variables
 set global var globalVar = "I am still global"
 set var localVar = "I am still local"
@@ -29,8 +32,8 @@ unset var localVar
 
 
 // Defining Constants
-def global const = "I am global"
-def const = "I am local"
+def global const globalConst = "I am global"
+def const localConst = "I am local"
 
 // Constants cannot be set / unset
 

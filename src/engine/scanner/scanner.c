@@ -865,6 +865,7 @@ static token_t* scanner_consume_number(const scanner_t* scanner)
 				{
 					type = TOK_INT32;
 				}
+
 				break;
 			}
 
@@ -1014,6 +1015,17 @@ static token_t* scanner_consume_number(const scanner_t* scanner)
 	}
 
 
+	/*
+	 * There is an edge case where if a number is the last thing in the file
+	 * the above loop may never enter the path to choose the type, if this
+	 * happens, assume it's a default / plain number and assume TOK_INT32
+	 */
+	if (-1 == nextChar && TOTAL_TOKENS == type)
+	{
+		type = TOK_INT32;
+	}
+
+
 	uint32_t bufferSize;
 	switch (type)
 	{
@@ -1059,6 +1071,46 @@ static token_t* scanner_consume_number(const scanner_t* scanner)
 
 		default:
 		{
+			err_print_f("Scanner Failure: failed to determine number type");
+			err_print_f("\t startLine\t\t: %u", startLine);
+			err_print_f("\t startCol\t\t: %u", startCol);
+			err_print_f("\t type\t\t\t: %d", type);
+			err_print_f("\t isNegative\t\t: %d", isNegative);
+			err_print_f("\t isFloatingPoint\t: %d", isFloatingPoint);
+			err_print_f("\t charsSeeked\t\t: %u", charsSeeked);
+			for (uint32_t i = 0; i < charsSeeked; i++)
+			{
+				const int32_t c = buf_reader_peek_n(scanner->reader, i);
+
+				switch (c)
+				{
+					case '\t':
+					{
+						err_print_f("\t\t [%u]\t: '\\t'\t(%u)", i, c);
+						break;
+					}
+
+					case '\n':
+					{
+						err_print_f("\t\t [%u]\t: '\\n'\t(%u)", i, c);
+						break;
+					}
+
+					case '\0':
+					{
+						err_print_f("\t\t [%u]\t: '\\0'\t(%u)", i, c);
+						break;
+					}
+
+					default:
+					{
+						err_print_f("\t\t [%u]\t: '%c'\t(%u)", i, c, c);
+						break;
+					}
+				}
+			}
+			err_print_f("\n");
+
 			tula_exit_err_internal(
 				"Entered illegal state while scanning numeric"
 			);

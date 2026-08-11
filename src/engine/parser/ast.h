@@ -454,10 +454,9 @@ struct tula_ast_node
 
 			/**
 			 *	\brief	The right accessor expressions (@c AST_ACCESSOR_MEMBER,
-			 *			@c AST_ACCESSOR_INDEX, or @c AST_ACCESSOR_CALL), or
-			 *			@c NULL
+			 *			@c AST_ACCESSOR_INDEX, or @c AST_ACCESSOR_CALL)
 			*/
-			arr_ast_node_t* accessors;
+			arr_ast_node_t accessors;
 		} expressionPostfix;
 
 		/** \brief	@c AST_EXPR_PRIMARY */
@@ -553,7 +552,7 @@ struct tula_ast_node
 
 			union
 			{
-				char dummy;
+				char _dummy;
 				int8_t t_int8;
 				uint8_t t_uint8;
 				int16_t t_int16;

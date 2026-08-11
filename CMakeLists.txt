@@ -139,6 +139,7 @@ endif()
 set(TULA_SOURCES
         src/common/buffered_reader.c
         src/common/exit.c
+        src/common/numeric.c
         src/common/os.c
         src/common/strings.c
         src/common/trace.c
