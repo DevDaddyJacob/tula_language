@@ -1,0 +1,53 @@
+program [3:1] count=4
+  numeric-iteration [3:1]
+    init: variable-definition-statement [3:6] global=false
+      identifier: identifier [3:14] name="i"
+      expression: expression [3:18]
+        lhs: expression-primary [3:18]
+          expression: literal [3:18] type=TOK_INT32 value=0
+    condition: expression [3:21]
+      lhs: expression-comparison [3:21] op=TOK_LESS_THAN
+        lhs: expression-identifier [3:21] accessor_count=0
+          identifier: identifier [3:21] name="i"
+        rhs: expression-primary [3:25]
+          expression: literal [3:25] type=TOK_INT32 value=10
+    increment: expression-postfix [3:29] op=TOK_PLUS_PLUS
+      lhs: expression-identifier [3:29] accessor_count=0
+        identifier: identifier [3:29] name="i"
+    block: block [3:34] count=0
+  numeric-iteration [7:1]
+    init: <none>
+    condition: expression [7:8]
+      lhs: expression-comparison [7:8] op=TOK_LESS_THAN
+        lhs: expression-identifier [7:8] accessor_count=0
+          identifier: identifier [7:8] name="i"
+        rhs: expression-primary [7:12]
+          expression: literal [7:12] type=TOK_INT32 value=10
+    increment: expression-postfix [7:16] op=TOK_PLUS_PLUS
+      lhs: expression-identifier [7:16] accessor_count=0
+        identifier: identifier [7:16] name="i"
+    block: block [7:21] count=0
+  numeric-iteration [11:1]
+    init: variable-definition-statement [11:6] global=false
+      identifier: identifier [11:14] name="i"
+      expression: expression [11:18]
+        lhs: expression-primary [11:18]
+          expression: literal [11:18] type=TOK_INT32 value=0
+    condition: expression [11:21]
+      lhs: expression-comparison [11:21] op=TOK_LESS_THAN
+        lhs: expression-identifier [11:21] accessor_count=0
+          identifier: identifier [11:21] name="i"
+        rhs: expression-primary [11:25]
+          expression: literal [11:25] type=TOK_INT32 value=10
+    increment: <none>
+    block: block [11:30] count=0
+  numeric-iteration [15:1]
+    init: <none>
+    condition: expression [15:8]
+      lhs: expression-comparison [15:8] op=TOK_LESS_THAN
+        lhs: expression-identifier [15:8] accessor_count=0
+          identifier: identifier [15:8] name="i"
+        rhs: expression-primary [15:12]
+          expression: literal [15:12] type=TOK_INT32 value=10
+    increment: <none>
+    block: block [15:17] count=0

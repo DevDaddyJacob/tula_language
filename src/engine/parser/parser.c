@@ -139,6 +139,12 @@ static bool ast_stmt_const_def_internal(
 );
 
 
+static bool ast_stmt_var_local_def_internal(
+	parser_t* parser,
+	ast_node_t** out
+);
+
+
 static bool ast_stmt_var_def_internal(
 	parser_t* parser,
 	ast_node_t** out,
@@ -744,9 +750,273 @@ static bool ast_stmt_return(parser_t* parser, ast_node_t** out)
 
 static bool ast_stmt_num_iter(parser_t* parser, ast_node_t** out)
 {
-	// TODO: Implement
-	*out = parser_err_unimplemented(parser);
-	return false;
+	const uint32_t line = parser->current->line;
+	const uint32_t column = parser->current->column;
+
+	if (!parser_check_and_advance(parser, TOK_FOR))
+	{
+		*out =  parser_err_internal(
+			parser,
+			"expected 'for' while parsing numeric iteration statement"
+		);
+
+		return false;
+	}
+
+	if (!parser_check_and_advance(parser, TOK_PAREN_LEFT))
+	{
+		*out =  parser_err_internal(
+			parser,
+			"expected '(' while parsing numeric iteration statement"
+		);
+
+		return false;
+	}
+
+
+	/* Init the AST */
+	*out = ast_node_new(AST_STMT_NUM_ITER, line, column);
+
+
+	/* Read the iteration init (local var def) */
+	(*out)->as.numericIteration.initialization = NULL;
+	if (parser_check(parser, TOK_DEFINE))
+	{
+		if (
+			!ast_stmt_var_local_def_internal(
+				parser,
+				&(*out)->as.numericIteration.initialization
+			)
+		)
+		{
+			/*
+			 * If the parsed ast is not an error but failed, this ast
+			 * becomes an error
+			 */
+			if (!IS_AST_ERR((*out)->as.numericIteration.initialization))
+			{
+				ast_node_destroy(*out);
+
+				*out = parser_err_internal(
+					parser,
+					"numeric iteration statement initializer parse failed"
+				);
+
+				return false;
+			}
+
+			(*out)->as.numericIteration.initialization = NULL;
+		}
+	}
+
+
+	/* Require the field separator */
+	if (!parser_check_and_advance(parser, TOK_FIELD_SEPARATOR))
+	{
+		ast_node_destroy(*out);
+
+		*out =  parser_err_internal(
+			parser,
+			"expected ',' while parsing numeric iteration statement"
+		);
+
+		return false;
+	}
+
+
+	/* Read the iteration condition (boolean resolved expression) */
+	if (!ast_expr(parser, &(*out)->as.numericIteration.condition))
+	{
+		/*
+		 * If the parsed ast is not an error but failed, this ast
+		 * becomes an error
+		 */
+		if (!IS_AST_ERR((*out)->as.numericIteration.condition))
+		{
+			ast_node_destroy(*out);
+
+			*out = parser_err_internal(
+				parser,
+				"numeric iteration statement condition parse failed"
+			);
+		}
+
+		return false;
+	}
+
+
+	/* Require the field separator */
+	if (!parser_check_and_advance(parser, TOK_FIELD_SEPARATOR))
+	{
+		ast_node_destroy(*out);
+
+		*out =  parser_err_internal(
+			parser,
+			"expected ',' while parsing numeric iteration statement"
+		);
+
+		return false;
+	}
+
+
+	/* Require the increment */
+	const uint32_t incrementLine = parser->current->line;
+	const uint32_t incrementColumn = parser->current->column;
+	if (parser_check(parser, TOK_SET))
+	{
+		if (!ast_stmt_var_set(parser, &(*out)->as.numericIteration.increment))
+		{
+			/*
+			 * If the parsed ast is not an error but failed, this ast
+			 * becomes an error
+			 */
+			if (!IS_AST_ERR((*out)->as.numericIteration.increment))
+			{
+				ast_node_destroy(*out);
+
+				*out = parser_err_internal(
+					parser,
+					"numeric iteration statement increment (set) parse failed"
+				);
+			}
+
+			return false;
+		}
+	}
+	else if (parser_check(parser, TOK_IDENT))
+	{
+		if (!ast_expr_postfix(parser, &(*out)->as.numericIteration.increment))
+		{
+			/*
+			 * If the parsed ast is not an error but failed, this ast
+			 * becomes an error
+			 */
+			if (!IS_AST_ERR((*out)->as.numericIteration.increment))
+			{
+				ast_node_destroy(*out);
+
+				*out = parser_err_internal(
+					parser,
+					"numeric iteration statement increment (post) parse failed"
+				);
+			}
+
+			return false;
+		}
+
+
+		/* Make sure the increment was actually parsed */
+		if (
+			AST_EXPR_POSTFIX != (*out)->as.numericIteration.increment->type
+			/* ReSharper disable once CppRedundantParentheses */
+			|| TOK_NONE == (
+				(*out)->as.numericIteration.increment->as.expressionPostfix.op
+			)
+		)
+		{
+			ast_node_destroy(*out);
+
+			*out = parser_err_internal(
+				parser,
+				"numeric iteration statement increment (post) parse failed"
+			);
+
+			(*out)->line = incrementLine;
+			(*out)->column = incrementColumn;
+
+			return false;
+		}
+	}
+	else if (
+		parser_check(parser, TOK_PLUS_PLUS)
+		|| parser_check(parser, TOK_MINUS_MINUS)
+	)
+	{
+		if (!ast_expr_unary(parser, &(*out)->as.numericIteration.increment))
+		{
+			/*
+			 * If the parsed ast is not an error but failed, this ast
+			 * becomes an error
+			 */
+			if (!IS_AST_ERR((*out)->as.numericIteration.increment))
+			{
+				ast_node_destroy(*out);
+
+				*out = parser_err_internal(
+					parser,
+					"numeric iteration statement increment (pre) parse failed"
+				);
+			}
+
+			return false;
+		}
+
+
+		/* Make sure the increment was actually parsed */
+		if (
+			AST_EXPR_UNARY != (*out)->as.numericIteration.increment->type
+			|| (
+				/* ReSharper disable once CppRedundantParentheses */
+				TOK_PLUS_PLUS != (
+					(*out)->as.numericIteration.increment->as.expressionUnary.op
+				)
+				/* ReSharper disable once CppRedundantParentheses */
+				&& TOK_MINUS_MINUS != (
+					(*out)->as.numericIteration.increment->as.expressionUnary.op
+				)
+			)
+		)
+		{
+			ast_node_destroy(*out);
+
+			*out = parser_err_internal(
+				parser,
+				"numeric iteration statement increment (pre) parse failed"
+			);
+
+			(*out)->line = incrementLine;
+			(*out)->column = incrementColumn;
+
+			return false;
+		}
+	}
+
+
+	/* Read the closing ) */
+	if (!parser_check_and_advance(parser, TOK_PAREN_RIGHT))
+	{
+		ast_node_destroy(*out);
+
+		*out =  parser_err_internal(
+			parser,
+			"expected ')' while parsing numeric iteration statement"
+		);
+
+		return false;
+	}
+
+
+	/* Read the iteration update */
+	if (!ast_block(parser, &(*out)->as.numericIteration.block))
+	{
+		/*
+		 * If the parsed ast is not an error but failed, this ast
+		 * becomes an error
+		 */
+		if (!IS_AST_ERR((*out)->as.numericIteration.block))
+		{
+			ast_node_destroy(*out);
+
+			*out = parser_err_internal(
+				parser,
+				"numeric iteration statement block parse failed"
+			);
+		}
+
+		return false;
+	}
+
+	return true;
 }
 
 
@@ -887,6 +1157,102 @@ static bool ast_stmt_const_def_internal(
 			*out = parser_err_internal(
 				parser,
 				"constant definition statement expression parse failed"
+			);
+		}
+
+		return false;
+	}
+
+	return true;
+}
+
+
+static bool ast_stmt_var_local_def_internal(
+	parser_t* parser,
+	ast_node_t** out
+)
+{
+	const uint32_t line = parser->current->line;
+	const uint32_t column = parser->current->column;
+
+
+	/* Find the opening define */
+	if (!parser_check_and_advance(parser, TOK_DEFINE))
+	{
+		*out = parser_err_internal(
+			parser,
+			"expected 'define' while parsing "
+				"local variable definition statement"
+		);
+
+		return false;
+	}
+
+
+	/* Find the var */
+	if (!parser_check_and_advance(parser, TOK_VARIABLE))
+	{
+		*out = parser_err_internal(
+			parser,
+			"expected 'variable'/'var' while parsing "
+				"local variable definition statement"
+		);
+
+		return false;
+	}
+
+
+	*out = ast_node_new(AST_STMT_VAR_DEF, line, column);
+	(*out)->as.variableDef.isGlobal = false;
+
+
+	/* Get the identifier */
+	if (!ast_identifier(parser, &(*out)->as.variableDef.identifier))
+	{
+		/*
+		 * If the parsed ast is not an error but failed, this ast
+		 * becomes an error
+		 */
+		if (!IS_AST_ERR((*out)->as.variableDef.identifier))
+		{
+			ast_node_destroy(*out);
+
+			*out = parser_err_internal(
+				parser,
+				"local variable definition statement identifier parse failed"
+			);
+		}
+
+		return false;
+	}
+
+
+	/* Check for a = */
+	if (!parser_check(parser, TOK_EQUAL))
+	{
+		(*out)->as.variableDef.expression = NULL;
+		return true;
+	}
+
+
+	/* consume '=' */
+	parser_advance(parser);
+
+
+	/* Get the expression */
+	if (!ast_expr(parser, &(*out)->as.variableDef.expression))
+	{
+		/*
+		 * If the parsed ast is not an error but failed, this ast
+		 * becomes an error
+		 */
+		if (!IS_AST_ERR((*out)->as.variableDef.expression))
+		{
+			ast_node_destroy(*out);
+
+			*out = parser_err_internal(
+				parser,
+				"local variable definition statement expression parse failed"
 			);
 		}
 

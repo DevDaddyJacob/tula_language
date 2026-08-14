@@ -94,6 +94,8 @@
 	def(TOK_LT_EQUAL,		"<=",			NULL,		false,	false,	false,	true)	\
 
 
+#define TOK_FIELD_SEPARATOR TOK_COMMA
+
 /**
  * \brief	An enum representation of all the tokens in the language
  */

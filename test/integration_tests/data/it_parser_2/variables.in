@@ -1,0 +1,10 @@
+def const LIMIT = 100
+def global const MIN = 5
+
+def var x = 2 + 3 * 4
+set var x = x - 1
+unset var x
+
+def global var y = "hello"
+set global var y = "world"
+unset global var y

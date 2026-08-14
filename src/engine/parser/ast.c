@@ -162,6 +162,11 @@ void ast_node_destroy(ast_node_t* node)
 				ast_node_destroy(node->as.numericIteration.condition);
 			}
 
+			if (NULL != node->as.numericIteration.increment)
+			{
+				ast_node_destroy(node->as.numericIteration.increment);
+			}
+
 			if (NULL != node->as.numericIteration.block)
 			{
 				ast_node_destroy(node->as.numericIteration.block);
@@ -862,10 +867,15 @@ static void ast_node_print_indented(
 				node->as.numericIteration.initialization,
 				"init",
 				depth + 1
-			);
+				);
 			ast_node_print_indented(
 				node->as.numericIteration.condition,
 				"condition",
+				depth + 1
+				);
+			ast_node_print_indented(
+				node->as.numericIteration.increment,
+				"increment",
 				depth + 1
 			);
 			ast_node_print_indented(

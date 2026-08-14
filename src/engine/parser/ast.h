@@ -171,6 +171,9 @@ struct tula_ast_node
 			/** \brief	The condition (@c AST_CONDITION) */
 			ast_node_t* condition;
 
+			/** \brief	The increment */
+			ast_node_t* increment;
+
 			/** \brief	The code block  (@c AST_BLOCK) */
 			ast_node_t* block;
 		} numericIteration;
