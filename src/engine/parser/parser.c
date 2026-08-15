@@ -103,6 +103,13 @@ static char* parser_dup_current(const parser_t* parser);
 static ast_node_t* parser_make_error(parser_t* parser, const char* message);
 
 
+static ast_node_t* make_bool_conditional_ast(
+	uint32_t line,
+	uint32_t column,
+	bool value
+);
+
+
 static bool ast_program(parser_t* parser, ast_node_t** out);
 
 
@@ -393,6 +400,34 @@ static ast_node_t* parser_make_identifier(parser_t* parser)
 	parser_advance(parser);
 
 	return node;
+}
+
+
+static ast_node_t* make_bool_conditional_ast(
+	uint32_t line,
+	uint32_t column,
+	bool value
+)
+{
+	ast_node_t* condNode = ast_node_new(AST_CONDITION, line, column);
+	ast_node_t* exprNode = ast_node_new(AST_EXPR, line, column);
+	ast_node_t* exprPrimaryNode = ast_node_new(AST_EXPR_PRIMARY, line, column);
+	ast_node_t* literalNode = ast_node_new(AST_LITERAL, line, column);
+
+	if (value)
+	{
+		literalNode->as.literal.type = TOK_TRUE;
+	}
+	else
+	{
+		literalNode->as.literal.type = TOK_FALSE;
+	}
+
+	condNode->as.condition.expression = exprNode;
+	exprNode->as.expression.lhs = exprPrimaryNode;
+	exprPrimaryNode->as.expressionPrimary.expression = literalNode;
+
+	return condNode;
 }
 
 
@@ -1022,17 +1057,305 @@ static bool ast_stmt_num_iter(parser_t* parser, ast_node_t** out)
 
 static bool ast_stmt_cond_iter(parser_t* parser, ast_node_t** out)
 {
-	// TODO: Implement
-	*out = parser_err_unimplemented(parser);
-	return false;
+	const uint32_t line = parser->current->line;
+	const uint32_t column = parser->current->column;
+
+
+	/* Read do / while */
+	const bool isDoMode = parser_check_and_advance(parser, TOK_DO);
+	if (!isDoMode && !parser_check_and_advance(parser, TOK_WHILE))
+	{
+		*out =  parser_err_internal(
+			parser,
+			"expected 'while'/'do' while parsing "
+				"conditional iteration statement"
+		);
+
+		return false;
+	}
+
+
+	/* Init AST */
+	*out = ast_node_new(AST_STMT_COND_ITER, line, column);
+	(*out)->as.conditionalIteration.doMode = isDoMode;
+
+
+	/* If in do mode, start with block */
+	if (isDoMode)
+	{
+		goto read_block;
+	}
+
+
+read_condition:
+	/* If in do mode, read while */
+	if (isDoMode && !parser_check_and_advance(parser, TOK_WHILE))
+	{
+		ast_node_destroy(*out);
+
+		*out =  parser_err_internal(
+			parser,
+			"expected 'while' while parsing conditional iteration statement"
+		);
+
+		return false;
+	}
+
+
+	/* Read ( */
+	if (!parser_check_and_advance(parser, TOK_PAREN_LEFT))
+	{
+		ast_node_destroy(*out);
+
+		*out =  parser_err_internal(
+			parser,
+			"expected '(' while parsing conditional iteration statement"
+		);
+
+		return false;
+	}
+
+
+	/* Read condition */
+	if (!ast_condition(parser, &(*out)->as.conditionalIteration.condition))
+	{
+		/*
+		 * If the parsed ast is not an error but failed, this ast
+		 * becomes an error
+		 */
+		if (!IS_AST_ERR((*out)->as.conditionalIteration.condition))
+		{
+			ast_node_destroy(*out);
+
+			*out = parser_err_internal(
+				parser,
+				"conditional iteration statement condition parse failed"
+			);
+		}
+
+		return false;
+	}
+
+
+	/* Read ) */
+	if (!parser_check_and_advance(parser, TOK_PAREN_RIGHT))
+	{
+		ast_node_destroy(*out);
+
+		*out =  parser_err_internal(
+			parser,
+			"expected ')' while parsing conditional iteration statement"
+		);
+
+		return false;
+	}
+
+
+	/* If while mode, parse block, else end */
+	if (!isDoMode)
+	{
+		goto read_block;
+	}
+
+	return true;
+
+
+read_block:
+	/* Read block */
+	if (!ast_block(parser, &(*out)->as.conditionalIteration.block))
+	{
+		/*
+		 * If the parsed ast is not an error but failed, this ast
+		 * becomes an error
+		 */
+		if (!IS_AST_ERR((*out)->as.conditionalIteration.block))
+		{
+			ast_node_destroy(*out);
+
+			*out = parser_err_internal(
+				parser,
+				"conditional iteration statement block parse failed"
+			);
+		}
+
+		return false;
+	}
+
+
+	/* If do mode, parse block, else end */
+	if (isDoMode)
+	{
+		goto read_condition;
+	}
+
+	return true;
 }
 
 
 static bool ast_stmt_comp(parser_t* parser, ast_node_t** out)
 {
-	// TODO: Implement
-	*out = parser_err_unimplemented(parser);
-	return false;
+	const uint32_t line = parser->current->line;
+	const uint32_t column = parser->current->column;
+
+
+	/* Read if */
+	if (!parser_check_and_advance(parser, TOK_IF))
+	{
+		*out = parser_err_internal(
+			parser,
+			"expected 'if' while parsing comparison statement"
+		);
+
+		return false;
+	}
+
+
+	/* Read ( */
+	if (!parser_check_and_advance(parser, TOK_PAREN_LEFT))
+	{
+		*out = parser_err_internal(
+			parser,
+			"expected '(' while parsing comparison statement"
+		);
+
+		return false;
+	}
+
+
+	/* Init the AST */
+	*out = ast_node_new(AST_STMT_COMP, line, column);
+
+
+	/* Read condition resolvable */
+	if (!ast_condition(parser, &(*out)->as.comparison.condition))
+	{
+		/*
+		 * If the parsed ast is not an error but failed, this ast
+		 * becomes an error
+		 */
+		if (!IS_AST_ERR((*out)->as.comparison.condition))
+		{
+			ast_node_destroy(*out);
+
+			*out = parser_err_internal(
+				parser,
+				"comparison statement condition parse failed"
+			);
+		}
+
+		return false;
+	}
+
+
+	/* Read ) */
+	if (!parser_check_and_advance(parser, TOK_PAREN_RIGHT))
+	{
+		ast_node_destroy(*out);
+
+		*out = parser_err_internal(
+			parser,
+			"expected ')' while parsing comparison statement"
+		);
+
+		return false;
+	}
+
+
+	/* Read block */
+	if (!ast_block(parser, &(*out)->as.comparison.block))
+	{
+		/*
+		 * If the parsed ast is not an error but failed, this ast
+		 * becomes an error
+		 */
+		if (!IS_AST_ERR((*out)->as.comparison.block))
+		{
+			ast_node_destroy(*out);
+
+			*out = parser_err_internal(
+				parser,
+				"comparison statement block parse failed"
+			);
+		}
+
+		return false;
+	}
+
+
+	/* Check for else */
+	(*out)->as.comparison.elseNode = NULL;
+
+	if (!parser_check_and_advance(parser, TOK_ELSE))
+	{
+		return true;
+	}
+
+
+	/* If has else and followed by if, parse comparison statement */
+	if (parser_check(parser, TOK_IF))
+	{
+		if (!ast_stmt_comp(parser, &(*out)->as.comparison.elseNode))
+		{
+			/*
+			 * If the parsed ast is not an error but failed, this ast
+			 * becomes an error
+			 */
+			if (!IS_AST_ERR((*out)->as.comparison.elseNode))
+			{
+				ast_node_destroy(*out);
+
+				*out = parser_err_internal(
+					parser,
+					"comparison statement else node parse failed"
+				);
+			}
+
+			return false;
+		}
+
+		return true;
+	}
+
+
+	/*
+	 * If has else and not followed by if, parse block (stored in a
+	 * comparison statement AST with condition true)
+	 */
+	(*out)->as.comparison.elseNode = ast_node_new(
+		AST_STMT_COMP,
+		parser->current->line,
+		parser->current->column
+	);
+
+	ast_node_t** elseNode = &(*out)->as.comparison.elseNode;
+
+	(*elseNode)->as.comparison.elseNode = NULL;
+	(*elseNode)->as.comparison.condition = make_bool_conditional_ast(
+		parser->current->line,
+		parser->current->column,
+		true
+	);
+
+	if (!ast_block(parser, &(*elseNode)->as.comparison.block))
+	{
+		/*
+		 * If the parsed ast is not an error but failed, this ast
+		 * becomes an error
+		 */
+		if (!IS_AST_ERR((*elseNode)->as.comparison.block))
+		{
+			ast_node_destroy(*out);
+
+			*out = parser_err_internal(
+				parser,
+				"comparison statement else block parse failed"
+			);
+		}
+
+		return false;
+	}
+
+	return true;
 }
 
 
@@ -1430,9 +1753,66 @@ static bool ast_stmt_var_set(parser_t* parser, ast_node_t** out)
 
 static bool ast_stmt_var_unset(parser_t* parser, ast_node_t** out)
 {
-	// TODO: Implement
-	*out = parser_err_unimplemented(parser);
-	return false;
+	const uint32_t line = parser->current->line;
+	const uint32_t column = parser->current->column;
+
+
+	/* Find the opening define */
+	if (!parser_check_and_advance(parser, TOK_UNSET))
+	{
+		*out = parser_err_internal(
+			parser,
+			"expected 'unset' while parsing variable unset definition statement"
+		);
+
+		return false;
+	}
+
+
+	/* Init the AST */
+	*out = ast_node_new(AST_STMT_VAR_UNSET, line, column);
+	(*out)->as.variableUnset.isGlobal = parser_check_and_advance(
+		parser,
+		TOK_GLOBAL
+		);
+
+
+	/* Find the var keywork */
+	if (!parser_check_and_advance(parser, TOK_VARIABLE))
+	{
+		ast_node_destroy(*out);
+
+		*out = parser_err_internal(
+			parser,
+			"expected 'variable'/'var' while parsing "
+				"variable unset definition statement"
+		);
+
+		return false;
+	}
+
+
+	/* Parse the identifier */
+	if (!ast_identifier(parser, &(*out)->as.variableUnset.identifier))
+	{
+		/*
+		 * If the parsed ast is not an error but failed, this ast
+		 * becomes an error
+		 */
+		if (!IS_AST_ERR((*out)->as.variableUnset.identifier))
+		{
+			ast_node_destroy(*out);
+
+			*out = parser_err_internal(
+				parser,
+				"variable unset statement identifier parse failed"
+			);
+		}
+
+		return false;
+	}
+
+	return true;
 }
 
 
@@ -1462,9 +1842,7 @@ static bool ast_stmt_continue(parser_t* parser, ast_node_t** out)
 
 static bool ast_condition(parser_t* parser, ast_node_t** out)
 {
-	// TODO: Implement
-	*out = parser_err_unimplemented(parser);
-	return false;
+	return ast_expr(parser, out);
 }
 
 

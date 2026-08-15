@@ -1,0 +1,52 @@
+program [1:1] count=4
+  comparison-statement [1:1]
+    condition: expression [1:5]
+      lhs: expression-primary [1:5]
+        expression: literal [1:5] type=TOK_TRUE value=true
+    block: block [2:1] count=0
+    else: <none>
+  comparison-statement [6:1]
+    condition: expression [6:5]
+      lhs: expression-primary [6:5]
+        expression: literal [6:5] type=TOK_TRUE value=true
+    block: block [7:1] count=0
+    else: comparison-statement [11:1]
+      condition: condition [11:1]
+        expression: expression [11:1]
+          lhs: expression-primary [11:1]
+            expression: literal [11:1] type=TOK_TRUE value=true
+      block: block [11:1] count=0
+      else: <none>
+  comparison-statement [15:1]
+    condition: expression [15:5]
+      lhs: expression-primary [15:5]
+        expression: literal [15:5] type=TOK_TRUE value=true
+    block: block [16:1] count=0
+    else: comparison-statement [19:6]
+      condition: expression [19:10]
+        lhs: expression-primary [19:10]
+          expression: literal [19:10] type=TOK_TRUE value=true
+      block: block [20:1] count=0
+      else: comparison-statement [24:1]
+        condition: condition [24:1]
+          expression: expression [24:1]
+            lhs: expression-primary [24:1]
+              expression: literal [24:1] type=TOK_TRUE value=true
+        block: block [24:1] count=0
+        else: <none>
+  comparison-statement [28:1]
+    condition: expression [28:5]
+      lhs: expression-primary [28:5]
+        expression: literal [28:5] type=TOK_TRUE value=true
+    block: block [29:1] count=0
+    else: comparison-statement [32:6]
+      condition: expression [32:10]
+        lhs: expression-primary [32:10]
+          expression: literal [32:10] type=TOK_TRUE value=true
+      block: block [33:1] count=0
+      else: comparison-statement [36:6]
+        condition: expression [36:10]
+          lhs: expression-primary [36:10]
+            expression: literal [36:10] type=TOK_TRUE value=true
+        block: block [37:1] count=0
+        else: <none>

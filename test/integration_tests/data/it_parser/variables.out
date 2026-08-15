@@ -1,27 +1,44 @@
-block [1:1]
-  variable-define [1:1] global=false name="x"
-    value: binary [1:13] op=TOK_PLUS
-      left: literal [1:13] type=TOK_INT32 value="2"
-      right: binary [1:17] op=TOK_STAR
-        left: literal [1:17] type=TOK_INT32 value="3"
-        right: literal [1:21] type=TOK_INT32 value="4"
-  variable-define [2:1] global=true name="greeting"
-    value: literal [2:27] type=TOK_STRING value="hello"
-  constant-define [3:1] global=false name="LIMIT"
-    value: literal [3:19] type=TOK_INT32 value="100"
-  variable-set [4:1] global=false name="x"
-    value: binary [4:13] op=TOK_MINUS
-      left: identifier [4:13] name="x"
-      right: literal [4:17] type=TOK_INT32 value="1"
-  variable-set [5:1] global=true name="greeting"
-    value: literal [5:27] type=TOK_STRING value="world"
-  variable-unset [6:1] global=false name="x"
-  variable-define [7:1] global=false name="flag"
-    value: unary [7:16] op=TOK_NOT
-      operand: literal [7:20] type=TOK_TRUE value="true"
-  variable-define [8:1] global=false name="deep"
-    value: binary [8:16] op=TOK_CARET
-      left: literal [8:16] type=TOK_INT32 value="2"
-      right: binary [8:20] op=TOK_CARET
-        left: literal [8:20] type=TOK_INT32 value="3"
-        right: literal [8:24] type=TOK_INT32 value="2"
+program [1:1] count=8
+  constant-definition-statement [1:1] global=false
+    identifier: identifier [1:11] name="LIMIT"
+    expression: expression [1:19]
+      lhs: expression-primary [1:19]
+        expression: literal [1:19] type=TOK_INT32 value=100
+  constant-definition-statement [2:1] global=true
+    identifier: identifier [2:18] name="MIN"
+    expression: expression [2:24]
+      lhs: expression-primary [2:24]
+        expression: literal [2:24] type=TOK_INT32 value=5
+  variable-definition-statement [4:1] global=false
+    identifier: identifier [4:9] name="x"
+    expression: expression [4:13]
+      lhs: expression-additive [4:13] op=TOK_PLUS
+        lhs: expression-primary [4:13]
+          expression: literal [4:13] type=TOK_INT32 value=2
+        rhs: expression-multiplicative [4:17] op=TOK_STAR
+          lhs: expression-primary [4:17]
+            expression: literal [4:17] type=TOK_INT32 value=3
+          rhs: expression-primary [4:21]
+            expression: literal [4:21] type=TOK_INT32 value=4
+  variable-set-statement [5:1] global=false
+    identifier: identifier [5:9] name="x"
+    expression: expression [5:13]
+      lhs: expression-additive [5:13] op=TOK_MINUS
+        lhs: expression-identifier [5:13] accessor_count=0
+          identifier: identifier [5:13] name="x"
+        rhs: expression-primary [5:17]
+          expression: literal [5:17] type=TOK_INT32 value=1
+  variable-unset-statement [6:1] global=false
+    identifier: identifier [6:11] name="x"
+  variable-definition-statement [8:1] global=true
+    identifier: identifier [8:16] name="y"
+    expression: expression [8:20]
+      lhs: expression-primary [8:20]
+        expression: literal [8:20] type=TOK_STRING value="hello"
+  variable-set-statement [9:1] global=true
+    identifier: identifier [9:16] name="y"
+    expression: expression [9:20]
+      lhs: expression-primary [9:20]
+        expression: literal [9:20] type=TOK_STRING value="world"
+  variable-unset-statement [10:1] global=true
+    identifier: identifier [10:18] name="y"

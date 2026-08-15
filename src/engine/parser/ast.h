@@ -23,6 +23,7 @@
 	def(AST_STMT_RETURN,			"return")							\
 	def(AST_STMT_NUM_ITER,			"numeric-iteration")				\
 	def(AST_STMT_COND_ITER,			"conditional-iteration")			\
+	/* TODO: Rename comparison statement to conditional statement */	\
 	def(AST_STMT_COMP,				"comparison-statement")				\
 	def(AST_STMT_FUNC_CALL,			"function-call-statement")			\
 	def(AST_STMT_CONST_DEF,			"constant-definition-statement")	\

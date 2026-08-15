@@ -21,14 +21,14 @@ void setUp(void) { }
 
 void tearDown(void) { }
 
-DEFINE_TULAD_TEST_PARSER(dev)
+DEFINE_TULAD_TEST_PARSER(comparison)
 DEFINE_TULAD_TEST_PARSER(iteration)
 DEFINE_TULAD_TEST_PARSER(variables)
 
 int main(void) {
 	UNITY_BEGIN();
 
-	RUN_TEST(test_parser_dev);
+	RUN_TEST(test_parser_comparison);
 	RUN_TEST(test_parser_iteration);
 	RUN_TEST(test_parser_variables);
 

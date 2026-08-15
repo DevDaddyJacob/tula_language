@@ -1,19 +1,40 @@
 /* START - Numeric Iteration */
 
-for (def var i = 0, i < 10, i++) {
+for (def var i = 0, i < 10, i++)
+{
     /* block */
 }
 
-for (, i < 10, i++) {
+for (, i < 10, i++)
+{
     /* block */
 }
 
-for (def var i = 0, i < 10,) {
+for (def var i = 0, i < 10,)
+{
     /* block */
 }
 
-for (, i < 10,) {
+for (, i < 10,)
+{
     /* block */
 }
 
 /* END - Numeric Iteration */
+
+
+/* START - Conditional Iteration */
+
+
+while (true)
+{
+    /* block */
+}
+
+do
+{
+    /* block */
+} while (true)
+
+
+/* END - Conditional Iteration */

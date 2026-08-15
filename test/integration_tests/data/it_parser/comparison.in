@@ -1,0 +1,39 @@
+if (true)
+{
+    /* block */
+}
+
+if (true)
+{
+    /* block */
+}
+else
+{
+    /* block */
+}
+
+if (true)
+{
+    /* block */
+}
+else if (true)
+{
+    /* block */
+}
+else
+{
+    /* block */
+}
+
+if (true)
+{
+    /* block */
+}
+else if (true)
+{
+    /* block */
+}
+else if (true)
+{
+    /* block */
+}
