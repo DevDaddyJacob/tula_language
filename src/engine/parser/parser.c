@@ -398,9 +398,9 @@ static ast_node_t* parser_make_identifier(parser_t* parser)
 
 
 static ast_node_t* make_bool_conditional_ast(
-	uint32_t line,
-	uint32_t column,
-	bool value
+	const uint32_t line,
+	const uint32_t column,
+	const bool value
 )
 {
 	ast_node_t* condNode = ast_node_new(AST_CONDITION, line, column);
@@ -618,7 +618,7 @@ static bool ast_statement(parser_t* parser, ast_node_t** out)
 				goto fold_and_exit;
 			}
 
-			goto fold_failure_and_exit;;
+			goto fold_failure_and_exit;
 		}
 
 		case TOK_DEFINE:
@@ -633,7 +633,7 @@ static bool ast_statement(parser_t* parser, ast_node_t** out)
 				goto fold_and_exit;
 			}
 
-			goto fold_failure_and_exit;;
+			goto fold_failure_and_exit;
 		}
 
 		case TOK_SET:
@@ -643,7 +643,7 @@ static bool ast_statement(parser_t* parser, ast_node_t** out)
 				goto fold_and_exit;
 			}
 
-			goto fold_failure_and_exit;;
+			goto fold_failure_and_exit;
 		}
 
 		case TOK_UNSET:
@@ -653,7 +653,7 @@ static bool ast_statement(parser_t* parser, ast_node_t** out)
 				goto fold_and_exit;
 			}
 
-			goto fold_failure_and_exit;;
+			goto fold_failure_and_exit;
 		}
 
 		case TOK_IF:
@@ -663,7 +663,7 @@ static bool ast_statement(parser_t* parser, ast_node_t** out)
 				goto fold_and_exit;
 			}
 
-			goto fold_failure_and_exit;;
+			goto fold_failure_and_exit;
 		}
 
 		case TOK_DO:
@@ -674,7 +674,7 @@ static bool ast_statement(parser_t* parser, ast_node_t** out)
 				goto fold_and_exit;
 			}
 
-			goto fold_failure_and_exit;;
+			goto fold_failure_and_exit;
 		}
 
 		case TOK_FOR:
@@ -684,7 +684,7 @@ static bool ast_statement(parser_t* parser, ast_node_t** out)
 				goto fold_and_exit;
 			}
 
-			goto fold_failure_and_exit;;
+			goto fold_failure_and_exit;
 		}
 
 		case TOK_RETURN:
@@ -694,7 +694,7 @@ static bool ast_statement(parser_t* parser, ast_node_t** out)
 				goto fold_and_exit;
 			}
 
-			goto fold_failure_and_exit;;
+			goto fold_failure_and_exit;
 		}
 
 		default:
@@ -3154,25 +3154,175 @@ static bool ast_func_def_value(parser_t* parser, ast_node_t** out)
 
 static bool ast_accessor_member(parser_t* parser, ast_node_t** out)
 {
-	// TODO: Implement
-	*out = parser_err_unimplemented(parser);
-	return false;
+	const uint32_t line = parser->current->line;
+	const uint32_t column = parser->current->column;
+
+
+	/* Read . */
+	if (!parser_check_and_advance(parser, TOK_DOT))
+	{
+		*out =  parser_err_internal(
+			parser,
+			"expected '.' while parsing member accessor statement"
+		);
+
+		return false;
+	}
+
+
+	/* Init AST */
+	*out = ast_node_new(AST_ACCESSOR_MEMBER, line, column);
+
+
+	/* Read identifier */
+	if (!ast_identifier(parser, &(*out)->as.accessorMember.identifier))
+	{
+		/*
+		 * If the parsed ast is not an error but failed, this ast
+		 * becomes an error
+		 */
+		if (!IS_AST_ERR((*out)->as.accessorMember.identifier))
+		{
+			ast_node_destroy(*out);
+
+			*out = parser_err_internal(
+				parser,
+				"member accessor statement identifier parse failed"
+			);
+		}
+
+		return false;
+	}
+
+	return true;
 }
 
 
 static bool ast_accessor_index(parser_t* parser, ast_node_t** out)
 {
-	// TODO: Implement
-	*out = parser_err_unimplemented(parser);
-	return false;
+	const uint32_t line = parser->current->line;
+	const uint32_t column = parser->current->column;
+
+
+	/* Read [ */
+	if (!parser_check_and_advance(parser, TOK_BRACKET_LEFT))
+	{
+		*out =  parser_err_internal(
+			parser,
+			"expected '[' while parsing index accessor statement"
+		);
+
+		return false;
+	}
+
+
+	/* Init AST */
+	*out = ast_node_new(AST_ACCESSOR_INDEX, line, column);
+
+
+	/* Read expression */
+	if (!ast_expr(parser, &(*out)->as.accessorIndex.expression))
+	{
+		/*
+		 * If the parsed ast is not an error but failed, this ast
+		 * becomes an error
+		 */
+		if (!IS_AST_ERR((*out)->as.accessorIndex.expression))
+		{
+			ast_node_destroy(*out);
+
+			*out = parser_err_internal(
+				parser,
+				"index accessor statement expression parse failed"
+			);
+		}
+
+		return false;
+	}
+
+
+	/* Read ] */
+	if (!parser_check_and_advance(parser, TOK_BRACKET_RIGHT))
+	{
+		*out =  parser_err_internal(
+			parser,
+			"expected ']' while parsing index accessor statement"
+		);
+
+		return false;
+	}
+
+	return true;
 }
 
 
 static bool ast_accessor_call(parser_t* parser, ast_node_t** out)
 {
-	// TODO: Implement
-	*out = parser_err_unimplemented(parser);
-	return false;
+	const uint32_t line = parser->current->line;
+	const uint32_t column = parser->current->column;
+
+
+	/* Read ( */
+	if (!parser_check_and_advance(parser, TOK_PAREN_LEFT))
+	{
+		*out =  parser_err_internal(
+			parser,
+			"expected '(' while parsing call accessor statement"
+		);
+
+		return false;
+	}
+
+
+	/* Init AST */
+	*out = ast_node_new(AST_ACCESSOR_CALL, line, column);
+	arr_ast_node_init(&(*out)->as.accessorCall.expressions);
+
+
+	/* Read the expression */
+	bool hadError = false;
+	ast_node_t* expression = NULL;
+
+read_expression:
+	if (!ast_expr(parser, &expression))
+	{
+		/*
+		 * If the parsed ast is not an error but failed, this ast
+		 * becomes an error
+		 */
+		if (!IS_AST_ERR(expression))
+		{
+			ast_node_destroy(expression);
+
+			expression = parser_err_internal(
+				parser,
+				"index accessor statement expression parse failed"
+			);
+		}
+
+		hadError = false;
+
+		arr_ast_node_add(&(*out)->as.accessorCall.expressions, expression);
+	}
+
+	if (parser_check_and_advance(parser, TOK_FIELD_SEPARATOR))
+	{
+		goto read_expression;
+	}
+
+
+	/* Read ) */
+	if (!parser_check_and_advance(parser, TOK_PAREN_RIGHT))
+	{
+		*out =  parser_err_internal(
+			parser,
+			"expected ')' while parsing call accessor statement"
+		);
+
+		return false;
+	}
+
+	return hadError;
 }
 
 
