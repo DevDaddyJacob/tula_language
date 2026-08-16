@@ -218,7 +218,12 @@ static bool ast_func_def_internal(
 );
 
 
-static bool ast_func_def_value(parser_t* parser, ast_node_t** out);
+static bool ast_func_def_value_internal(
+	parser_t* parser,
+	ast_node_t** out,
+	uint32_t line,
+	uint32_t column
+);
 
 
 static bool ast_accessor_member(parser_t* parser, ast_node_t** out);
@@ -288,35 +293,6 @@ static bool parser_is_at_end(const parser_t* parser)
 	return NULL == parser->current
 		|| TOK_EOS == parser->current->type
 		|| TOK_ERROR == parser->current->type;
-}
-
-
-static bool parser_starts_expression(const token_type_t type)
-{
-	if (TOKENS_IS_PRIMITIVE[type])
-	{
-		return true;
-	}
-
-	switch (type)
-	{
-		case TOK_IDENT:
-		case TOK_IS_SET:
-		case TOK_PAREN_LEFT:
-		case TOK_BRACKET_LEFT:
-		case TOK_BRACE_LEFT:
-		case TOK_FUNC:
-		case TOK_NOT:
-		case TOK_PLUS_PLUS:
-		case TOK_MINUS_MINUS:
-		{
-			return true;
-		}
-
-		DEFAULT_BREAK
-	}
-
-	return false;
 }
 
 
@@ -3026,10 +3002,16 @@ static bool ast_expr_primary(parser_t* parser, ast_node_t** out)
 	/* Handle function definition value */
 	if (parser_check(parser, TOK_FUNC))
 	{
+		const uint32_t funcDefValueLine = parser->current->line;
+		const uint32_t funcDefValueColumn = parser->current->column;
+		parser_advance(parser);
+
 		if (
-			!ast_func_def_value(
+			!ast_func_def_value_internal(
 				parser,
-				&(*out)->as.expressionPrimary.expression
+				&(*out)->as.expressionPrimary.expression,
+				funcDefValueLine,
+				funcDefValueColumn
 			)
 		)
 		{
@@ -3138,17 +3120,142 @@ static bool ast_func_def_internal(
 	const bool global
 )
 {
-	// TODO: Implement
-	*out = parser_err_unimplemented(parser);
-	return false;
+	/* Init the AST */
+	*out = ast_node_new(AST_FUNC_DEF, line, column);
+	(*out)->as.functionDef.isGlobal = global;
+
+
+	/* Read identifier */
+	if (!ast_identifier(parser, &(*out)->as.functionDef.identifier))
+	{
+		ast_node_destroy(*out);
+
+		*out = parser_err_internal(
+			parser,
+			"function definition statement identifier parse failed"
+		);
+
+		return false;
+	}
+
+
+	/* Read the definition */
+	if (
+		!ast_func_def_value_internal(
+			parser,
+			&(*out)->as.functionDef.def,
+			parser->current->line,
+			parser->current->column
+		)
+	)
+	{
+		return !IS_AST_ERR((*out)->as.functionDef.def);
+	}
+
+	return true;
 }
 
 
-static bool ast_func_def_value(parser_t* parser, ast_node_t** out)
+static bool ast_func_def_value_internal(
+	parser_t* parser,
+	ast_node_t** out,
+	const uint32_t line,
+	const uint32_t column
+)
 {
-	// TODO: Implement
-	*out = parser_err_unimplemented(parser);
-	return false;
+	/* Read ( */
+	if (!parser_check_and_advance(parser, TOK_PAREN_LEFT))
+	{
+		*out = parser_err_internal(
+			parser,
+			"expected '(' while parsing function definition value statement"
+		);
+
+		return false;
+	}
+
+
+	/* Init AST */
+	*out = ast_node_new(AST_FUNC_DEF_VAL, line, column);
+
+
+	/* Read identifier list */
+	arr_ast_node_init(&(*out)->as.functionDefValue.parameters);
+	bool hadError = false;
+	ast_node_t* parameter = NULL;
+
+	if (!parser_check(parser, TOK_IDENT))
+	{
+		goto read_right_paren;
+	}
+
+read_parameter:
+	if (!ast_identifier(parser, &parameter))
+	{
+		/*
+		 * If the parsed ast is not an error but failed, this ast
+		 * becomes an error
+		 */
+		if (!IS_AST_ERR(parameter))
+		{
+			ast_node_destroy(parameter);
+
+			parameter = parser_err_internal(
+				parser,
+				"function definition value statement parameter parse failed"
+			);
+		}
+
+		hadError = true;
+	}
+
+	arr_ast_node_add(
+		&(*out)->as.functionDefValue.parameters,
+		parameter
+	);
+
+	if (parser_check_and_advance(parser, TOK_FIELD_SEPARATOR))
+	{
+		goto read_parameter;
+	}
+
+
+	/* Read ) */
+read_right_paren:
+	if (!parser_check_and_advance(parser, TOK_PAREN_RIGHT))
+	{
+		ast_node_destroy(*out);
+
+		*out = parser_err_internal(
+			parser,
+			"expected ')' while parsing function definition value statement"
+		);
+
+		return false;
+	}
+
+
+	/* Read block */
+	if (!ast_block(parser, &(*out)->as.functionDefValue.body))
+	{
+		/*
+		 * If the parsed ast is not an error but failed, this ast
+		 * becomes an error
+		 */
+		if (!IS_AST_ERR((*out)->as.functionDefValue.body))
+		{
+			ast_node_destroy(*out);
+
+			*out = parser_err_internal(
+				parser,
+				"function definition value statement body parse failed"
+			);
+		}
+
+		return false;
+	}
+
+	return !hadError;
 }
 
 
@@ -3322,7 +3429,7 @@ read_expression:
 		return false;
 	}
 
-	return hadError;
+	return !hadError;
 }
 
 

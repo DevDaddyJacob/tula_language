@@ -480,11 +480,11 @@ struct tula_ast_node
 			/** \brief	Whether the definition targets the global scope */
 			bool isGlobal;
 
-			/** \brief	The function's name (owned) */
-			char* name;
+			/** \brief	The function's identifier */
+			ast_node_t* identifier;
 
 			/** \brief	The function def value node (@c AST_FUNC_DEF_VAL) */
-			ast_node_t* body;
+			ast_node_t* def;
 		} functionDef;
 
 		/** \brief	@c AST_FUNC_DEF_VAL */

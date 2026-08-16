@@ -457,14 +457,14 @@ void ast_node_destroy(ast_node_t* node)
 
 		case AST_FUNC_DEF:
 		{
-			if (NULL != node->as.functionDef.body)
+			if (NULL != node->as.functionDef.def)
 			{
-				ast_node_destroy(node->as.functionDef.body);
+				ast_node_destroy(node->as.functionDef.def);
 			}
 
-			if (NULL != node->as.functionDef.name)
+			if (NULL != node->as.functionDef.identifier)
 			{
-				free(node->as.functionDef.name);
+				ast_node_destroy(node->as.functionDef.identifier);
 			}
 
 			break;
@@ -1258,16 +1258,27 @@ static void ast_node_print_indented(
 
 		case AST_FUNC_DEF:
 		{
-			printf(
-				" global=%s name=\"%s\"\n",
-				node->as.functionDef.isGlobal ? "true" : "false",
-				NULL == node->as.functionDef.name
-					? "<anonymous>"
-					: node->as.functionDef.name
-			);
+			printf(" global=");
+			if (node->as.functionDef.isGlobal)
+			{
+				printf("true");
+			}
+			else
+			{
+				printf("false");
+			}
+
+			printf("\n");
+
 			ast_node_print_indented(
-				node->as.functionDef.body,
-				"body",
+				node->as.functionDef.identifier,
+				"identifier",
+				depth + 1
+			);
+
+			ast_node_print_indented(
+				node->as.functionDef.def,
+				"def",
 				depth + 1
 			);
 			break;

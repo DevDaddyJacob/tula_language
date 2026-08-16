@@ -1,0 +1,213 @@
+/* START - "define ... function" style */
+
+define global function s1_arg0_globalFunc()
+{
+    /* block */
+}
+
+define global function s1_arg1_globalFunc(p0)
+{
+    /* block */
+}
+
+define global function s1_arg3_globalFunc(p0, p1, p2)
+{
+    /* block */
+}
+
+define function s1_arg0_localFunc()
+{
+    /* block */
+}
+
+define function s1_arg1_localFunc(p0)
+{
+    /* block */
+}
+
+define function s1_arg3_localFunc(p0, p1, p2)
+{
+    /* block */
+}
+
+/* END - "define ... function" style */
+
+
+
+/* START - "define ... func" style */
+
+define global func s2_arg0_globalFunc()
+{
+    /* block */
+}
+
+define global func s2_arg1_globalFunc(p0)
+{
+    /* block */
+}
+
+define global func s2_arg3_globalFunc(p0, p1, p2)
+{
+    /* block */
+}
+
+define func s2_arg0_localFunc()
+{
+    /* block */
+}
+
+define func s2_arg1_localFunc(p0)
+{
+    /* block */
+}
+
+define func s2_arg3_localFunc(p0, p1, p2)
+{
+    /* block */
+}
+
+/* END - "define ... func" style */
+
+
+
+/* START - "def ... function" style */
+
+def global function s3_arg0_globalFunc()
+{
+    /* block */
+}
+
+def global function s3_arg1_globalFunc(p0)
+{
+    /* block */
+}
+
+def global function s3_arg3_globalFunc(p0, p1, p2)
+{
+    /* block */
+}
+
+def function s3_arg0_localFunc()
+{
+    /* block */
+}
+
+def function s3_arg1_localFunc(p0)
+{
+    /* block */
+}
+
+def function s3_arg3_localFunc(p0, p1, p2)
+{
+    /* block */
+}
+
+/* END - "def ... function" style */
+
+
+
+/* START - "def ... func" style */
+
+def global func s4_arg0_globalFunc()
+{
+    /* block */
+}
+
+def global func s4_arg1_globalFunc(p0)
+{
+    /* block */
+}
+
+def global func s4_arg3_globalFunc(p0, p1, p2)
+{
+    /* block */
+}
+
+def func s4_arg0_localFunc()
+{
+    /* block */
+}
+
+def func s4_arg1_localFunc(p0)
+{
+    /* block */
+}
+
+def func s4_arg3_localFunc(p0, p1, p2)
+{
+    /* block */
+}
+
+/* END - "def ... func" style */
+
+
+
+/* START - first-class "function" style */
+
+define global variable s5_arg0_globalFunc = function()
+{
+    /* block */
+}
+
+define global variable s5_arg1_globalFunc = function(p0)
+{
+    /* block */
+}
+
+define global variable s5_arg3_globalFunc = function(p0, p1, p2)
+{
+    /* block */
+}
+
+define variable s5_arg0_localFunc = function()
+{
+    /* block */
+}
+
+define variable s5_arg1_localFunc = function(p0)
+{
+    /* block */
+}
+
+define variable s5_arg3_localFunc = function(p0, p1, p2)
+{
+    /* block */
+}
+
+/* END - first-class "function" style */
+
+
+
+/* START - first-class "func" style */
+
+define global variable s6_arg0_globalFunc = func()
+{
+    /* block */
+}
+
+define global variable s6_arg1_globalFunc = func(p0)
+{
+    /* block */
+}
+
+define global variable s6_arg3_globalFunc = func(p0, p1, p2)
+{
+    /* block */
+}
+
+define variable s6_arg0_localFunc = func()
+{
+    /* block */
+}
+
+define variable s6_arg1_localFunc = func(p0)
+{
+    /* block */
+}
+
+define variable s6_arg3_localFunc = func(p0, p1, p2)
+{
+    /* block */
+}
+
+/* END - first-class "func" style */
