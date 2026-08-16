@@ -1,0 +1,2 @@
+// A variable name cannot be a numeric literal
+def var 5 = 1

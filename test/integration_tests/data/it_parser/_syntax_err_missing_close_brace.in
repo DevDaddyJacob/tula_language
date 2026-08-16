@@ -1,0 +1,4 @@
+// Block is never closed before end-of-file
+if (true)
+{
+    def var x = 1

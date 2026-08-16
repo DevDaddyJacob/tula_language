@@ -1,0 +1,43 @@
+// Member accessor, index accessor, and call accessor used together
+define func myPrintF(format, vargs)
+{
+    io.print(format)
+
+    for (def var i = 0, i < vargs.length, i++)
+    {
+        io.print(vargs[i])
+    }
+}
+
+// Chained member and index accessors
+def var chained = obj.field[0].other
+
+// Call accessor with multiple arguments
+def var multi_arg_call = foo(1, 2, 3)
+
+// Call accessor chained directly off an index accessor
+def var call_after_index = arr[0](1)
+
+// Member and index accessors chained directly off a call accessor
+def var member_after_call = foo(1).field
+def var index_after_call = foo(1)[0]
+
+// Chained call accessors
+foo(1)(2)
+a.b(1).c(2)
+
+// Pre-increment / post-increment targeting a member accessor
+def var pre_member = ++obj.field
+def var post_member = obj.field++
+
+// Post-decrement targeting an index accessor
+def var post_index = obj[0]--
+
+// isSet on a plain identifier
+def var mySpecialVar = "foo"
+isSet(mySpecialVar)
+unset var mySpecialVar
+isSet(mySpecialVar)
+
+// isSet on an accessor chain
+isSet(obj.field)

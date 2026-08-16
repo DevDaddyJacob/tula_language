@@ -1,4 +1,0 @@
-def var ok = 1
-if (x < 0 {
-    return
-}

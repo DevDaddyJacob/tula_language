@@ -1,0 +1,3 @@
+// Constant definitions require "=" between the identifier and the
+// expression
+def const X 5

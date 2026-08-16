@@ -1,0 +1,50 @@
+// break / continue inside each of the three iteration statement forms
+
+def var i = 1
+while (i <= 3)
+{
+    if (i == 2)
+    {
+        continue
+    }
+
+    i++
+}
+
+do
+{
+    if (i >= 5)
+    {
+        break
+    }
+
+    i--
+} while (i >= 0)
+
+for (def var j = 0, j < 10, j++)
+{
+    if (j == 2)
+    {
+        continue
+    }
+
+    if (j == 4)
+    {
+        break
+    }
+}
+
+// return statement with a value
+def func addTwo(foo, bar)
+{
+    return foo + bar
+}
+
+// return statement with no value
+def func earlyExit(foo)
+{
+    if (foo)
+    {
+        return
+    }
+}

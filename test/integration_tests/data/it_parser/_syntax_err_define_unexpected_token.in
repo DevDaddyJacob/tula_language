@@ -1,0 +1,3 @@
+// "define"/"def" must be followed by "constant"/"const", "variable"/"var",
+// or "function"/"func"
+def foo = 1

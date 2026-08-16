@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="[DEBUG] tulad" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="--mode parser --input-file .\test\integration_tests\data\it_parser\control_flow.in" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="tula" TARGET_NAME="tulad" CONFIG_NAME="MSVC (Debug)" RUN_TARGET_PROJECT_NAME="tula" RUN_TARGET_NAME="tulad">
+    <method v="2">
+      <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+    </method>
+  </configuration>
+</component>

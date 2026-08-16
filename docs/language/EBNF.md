@@ -298,7 +298,7 @@ numeric_iteration_statement = "for" "(" numeric_iteration_initialization
 return_statement = "return" [expression] ;
 
 
-statement = "break" | "continue" 
+statement = "break" | "continue"
             | expression_is_set
             | function_definition_local
             | function_definition_global
@@ -316,6 +316,7 @@ statement = "break" | "continue"
             | numeric_iteration_statement
             | comparison_statement
             | return_statement
+            | expression
             ;
 
 

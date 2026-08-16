@@ -1,0 +1,2 @@
+// String literal missing its closing quote, nested inside an expression
+def var x = "unterminated

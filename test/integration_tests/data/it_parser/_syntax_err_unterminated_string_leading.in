@@ -1,0 +1,3 @@
+// String literal missing its closing quote, as the very first token in
+// the program
+"unterminated

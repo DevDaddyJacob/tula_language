@@ -1,0 +1,3 @@
+// The if-statement's body is missing its opening "{"
+if (true)
+    def var x = 1

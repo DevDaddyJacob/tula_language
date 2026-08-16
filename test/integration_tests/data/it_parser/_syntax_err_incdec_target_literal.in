@@ -1,0 +1,3 @@
+// Post-increment can only target a variable, field, or index - not a
+// literal
+def var x = 5++

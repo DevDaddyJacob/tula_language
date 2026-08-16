@@ -1,0 +1,74 @@
+// Additive operators
+def var op_sum = 10 + 3
+def var op_sub = 10 - 3
+
+// Multiplicative operators
+def var op_prod = 10 * 3
+def var op_div = 10 / 3
+def var op_mod = 10 % 3
+
+// Exponentiation operator
+def var op_expo = 2 ^ 10
+
+// Negative integer literal
+def var op_neg = -72
+
+// Post-increment / post-decrement
+def var op_init = 72
+op_init++
+op_init--
+
+// Pre-increment / pre-decrement
+++op_init
+--op_init
+
+// Equality operators
+def var rel_eq = 1 == 1
+def var rel_neq = 1 != 1
+
+// Comparison operators
+def var rel_gt = 3 > 4
+def var rel_lt = 3 < 4
+def var rel_gte = 3 >= 4
+def var rel_lte = 3 <= 4
+
+// Logical operators
+def var log_and = true and false
+def var log_or = true or false
+def var log_not = not true
+
+// "not" applied twice
+def var log_not_not = not not true
+
+// "not" applied to a grouped expression
+def var log_not_grouped = not (true or false)
+
+// "not" applied to a pre-increment expression
+def var log_not_pre_inc = not ++op_init
+
+// Grouping overrides precedence
+def var prec_grouping = (1 + 2) * 3
+
+// Multiplication binds tighter than addition: 1 + (2 * 3)
+def var prec_mult_before_add = 1 + 2 * 3
+
+// Exponentiation binds tighter than multiplication: 2 * (3 ^ 2)
+def var prec_expo_before_mult = 2 * 3 ^ 2
+
+// Addition binds tighter than comparison: (1 + 1) < 3
+def var prec_add_before_comp = 1 + 1 < 3
+
+// Comparison binds tighter than equality: (1 < 2) == true
+def var prec_comp_before_equ = 1 < 2 == true
+
+// "and" binds tighter than "or": true or (true and false)
+def var prec_and_before_or = true or true and false
+
+// Addition/subtraction are left-associative: (10 - 3) - 2
+def var prec_add_left_assoc = 10 - 3 - 2
+
+// Equality is left-associative: (1 == 1) == true
+def var prec_equ_left_assoc = 1 == 1 == true
+
+// Exponentiation is right-associative: 2 ^ (3 ^ 2)
+def var prec_expo_right_assoc = 2 ^ 3 ^ 2

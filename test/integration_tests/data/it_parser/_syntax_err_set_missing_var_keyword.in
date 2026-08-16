@@ -1,0 +1,2 @@
+// "set" must be followed by "variable"/"var" (optionally "global" first)
+set x = 1

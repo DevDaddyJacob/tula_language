@@ -1,0 +1,3 @@
+// Variable definitions with no initializer expression
+def global var globalDefaultVar
+def var localDefaultVar

@@ -1,0 +1,34 @@
+// Update clause as a local variable set statement
+for (def var i = 0, i < 10, set var i = i + 1)
+{
+}
+
+// Update clause as a global variable set statement
+for (def var i = 0, i < 10, set global var i = i + 1)
+{
+}
+
+// Update clause as a pre-increment expression
+for (def var i = 0, i < 10, ++i)
+{
+}
+
+// Update clause as a pre-decrement expression
+for (def var i = 10, i > 0, --i)
+{
+}
+
+// Update clause as a post-decrement expression
+for (def var i = 10, i > 0, i--)
+{
+}
+
+// Condition clause omitted
+for (def var i = 0, , i++)
+{
+}
+
+// All three clauses omitted
+for (, , )
+{
+}

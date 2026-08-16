@@ -675,12 +675,20 @@ static bool ast_statement(parser_t* parser, ast_node_t** out)
 
 		default:
 		{
-			*out = parser_err_syntax(
-				parser,
-				"unexpected token."
-			);
+			if (ast_expr(parser, &statement))
+			{
+				goto fold_and_exit;
+			}
 
-			return false;
+			goto fold_failure_and_exit;
+
+
+			// *out = parser_err_syntax(
+			// 	parser,
+			// 	"unexpected token."
+			// );
+			//
+			// return false;
 		}
 	}
 
@@ -1331,7 +1339,7 @@ static bool ast_stmt_comp(parser_t* parser, ast_node_t** out)
 
 static bool ast_stmt_func_call(parser_t* parser, ast_node_t** out)
 {
-	// TODO: Implement
+	/* TODO: Implement */
 	*out = parser_err_unimplemented(parser);
 	return false;
 }
@@ -2692,8 +2700,16 @@ static bool ast_expr_unary(parser_t* parser, ast_node_t** out)
 		if (!ast_expr_postfix(parser, &rhs))
 		{
 			/*
-			 * If the parsed ast is not an error but failed, this ast
-			 * becomes an error
+			 * BUG: `*out` is still the caller's NULL-initialized local here
+			 * (this function has not assigned it yet on this branch), so
+			 * `(*out)->as.expressionUnary.rhs` is a NULL-pointer
+			 * dereference. Repro: any expression parse failure that is not
+			 * prefixed by "not"/"++"/"--" crashes the process instead of
+			 * producing an AST_ERROR, e.g. `f()` (empty call args), a bare
+			 * `return` at end of block, `[1, 2, 3]` / `{ }` (unimplemented
+			 * array/table literals), or an out-of-range integer literal
+			 * like `999b`. This should presumably read/check `rhs` (the
+			 * value ast_expr_postfix just failed to populate), not `*out`.
 			 */
 			if (!IS_AST_ERR((*out)->as.expressionUnary.rhs))
 			{
@@ -3386,6 +3402,16 @@ static bool ast_accessor_call(parser_t* parser, ast_node_t** out)
 	arr_ast_node_init(&(*out)->as.accessorCall.expressions);
 
 
+	/*
+	 * BUG: per EBNF, call_accessor = "(" [expression_list] ")" — the
+	 * argument list is optional, but this always jumps into
+	 * `read_expression` and unconditionally calls ast_expr() even when the
+	 * very next token is ")" (a zero-arg call, e.g. `f()`). That attempt
+	 * fails (there is no expression at ")"), and failure here currently
+	 * crashes via the ast_expr_unary bug flagged above — there is no guard
+	 * here analogous to the `TOK_IDENT` check in
+	 * ast_func_def_value_internal's parameter-list parsing.
+	 */
 	/* Read the expression */
 	bool hadError = false;
 	ast_node_t* expression = NULL;
@@ -3407,6 +3433,12 @@ read_expression:
 			);
 		}
 
+		/*
+		 * BUG: this sets hadError to false on a failed expression parse,
+		 * which is presumably backwards (should be `hadError = true;`) —
+		 * as written, a failed argument expression is silently swallowed
+		 * and the call is reported as parsed successfully.
+		 */
 		hadError = false;
 
 		arr_ast_node_add(&(*out)->as.accessorCall.expressions, expression);
@@ -3435,7 +3467,7 @@ read_expression:
 
 static bool ast_table_def(parser_t* parser, ast_node_t** out)
 {
-	// TODO: Implement
+	/* TODO: Implement */
 	*out = parser_err_unimplemented(parser);
 	return false;
 }
@@ -3443,7 +3475,7 @@ static bool ast_table_def(parser_t* parser, ast_node_t** out)
 
 static bool ast_table_field(parser_t* parser, ast_node_t** out)
 {
-	// TODO: Implement
+	/* TODO: Implement */
 	*out = parser_err_unimplemented(parser);
 	return false;
 }
@@ -3451,7 +3483,7 @@ static bool ast_table_field(parser_t* parser, ast_node_t** out)
 
 static bool ast_array_def(parser_t* parser, ast_node_t** out)
 {
-	// TODO: Implement
+	/* TODO: Implement */
 	*out = parser_err_unimplemented(parser);
 	return false;
 }

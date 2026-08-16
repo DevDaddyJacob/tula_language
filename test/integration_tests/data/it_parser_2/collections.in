@@ -1,9 +1,0 @@
-def var empty = [ ]
-def var nums = [ 1, 2, 3, ]
-def var nested = [ [ 1, 2 ], [ 3, 4 ] ]
-def var table = {
-    ["foo"] = "bar",
-    ["count"] = 5,
-    ['c'] = true,
-}
-def var query = isSet(nums)

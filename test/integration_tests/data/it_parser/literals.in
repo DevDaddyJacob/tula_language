@@ -1,0 +1,84 @@
+// Literal 8-bit signed integer (byte)
+def var n_int8 = 72b
+def var n_int8_neg = -72b
+
+// Literal 8-bit unsigned integer (ubyte)
+def var n_uint8 = 72ub
+
+// Literal 16-bit signed integer (short)
+def var n_int16 = 72s
+def var n_int16_neg = -72s
+
+// Literal 16-bit unsigned integer (ushort)
+def var n_uint16 = 72us
+
+// Literal 32-bit signed integer (int)
+def var n_int32 = 72
+def var n_int32_neg = -72
+
+// Literal 32-bit unsigned integer (uint)
+def var n_uint32 = 72u
+
+// Literal 64-bit signed integer (long)
+def var n_int64 = 72l
+def var n_int64_neg = -72l
+
+// Literal 64-bit unsigned integer (ulong)
+def var n_uint64 = 72ul
+
+// Literal float
+def var n_float = 3.14
+def var n_float_neg = -3.14
+
+// Literal double
+def var n_double = 3.14d
+def var n_double_neg = -3.14d
+
+// Decimal literals with no leading digit before the "."
+def var n_float_leading_dot = .5
+def var n_double_leading_dot = .5d
+
+// Character literals
+def var char_a = 'a'
+def var char_b = 'b'
+def var char_c = 'c'
+def var char_0 = '0'
+def var char_1 = '1'
+def var char_9 = '9'
+def var char_lf = '\n'
+def var char_cr = '\r'
+def var char_null = '\0'
+def var char_backslash = '\\'
+def var char_quote = '\''
+
+// String literals
+def var string_1 = "apple"
+def var string_2 = "I'm Happy!"
+def var string_3 = "Hello\nWorld!"
+def var string_4 = "She said \"hi\""
+def var string_5 = "back\\slash"
+
+// Boolean literals
+def var b_true = true
+def var b_false = false
+
+// Array literals
+def var a_empty = [ ]
+def var a_non_empty = [ 1, 2, 3, 4, 5 ]
+def var a_trailing_comma = [ 1, 2, 3, 4, 5, ]
+def var a_mixed = [ 1, "two", true, x ]
+
+// Table literals
+def var t_empty = { }
+def var t_non_empty = {
+    ["foo"] = "bar",
+    ["cat"] = "dog",
+}
+def var t_int_key = {
+    [1] = "one",
+    [2] = "two",
+}
+def var t_char_key = {
+    ['a'] = 1,
+    ['b'] = 2,
+}

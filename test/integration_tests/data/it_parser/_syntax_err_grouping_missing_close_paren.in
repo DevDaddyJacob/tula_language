@@ -1,0 +1,2 @@
+// Grouped expression is missing its closing ")"
+def var x = (1 + 2

@@ -6,7 +6,7 @@
 
 #include "os.h"
 
-// BUG: CRLF causes drifting column count
+/* BUG: CRLF causes drifting column count */
 
 /*
  * ==================================================
