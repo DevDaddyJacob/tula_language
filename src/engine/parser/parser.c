@@ -170,12 +170,6 @@ static bool ast_stmt_var_unset(parser_t* parser, ast_node_t** out);
 static bool ast_stmt_is_set(parser_t* parser, ast_node_t** out);
 
 
-static bool ast_stmt_break(parser_t* parser, ast_node_t** out);
-
-
-static bool ast_stmt_continue(parser_t* parser, ast_node_t** out);
-
-
 static bool ast_condition(parser_t* parser, ast_node_t** out);
 
 
@@ -1818,25 +1812,71 @@ static bool ast_stmt_var_unset(parser_t* parser, ast_node_t** out)
 
 static bool ast_stmt_is_set(parser_t* parser, ast_node_t** out)
 {
-	// TODO: Implement
-	*out = parser_err_unimplemented(parser);
-	return false;
-}
+	const uint32_t line = parser->current->line;
+	const uint32_t column = parser->current->column;
 
 
-static bool ast_stmt_break(parser_t* parser, ast_node_t** out)
-{
-	// TODO: Implement
-	*out = parser_err_unimplemented(parser);
-	return false;
-}
+	/* Read isSet */
+	if (!parser_check_and_advance(parser, TOK_IS_SET))
+	{
+		*out = parser_err_internal(
+			parser,
+			"expected 'isSet' while parsing variable is set statement"
+		);
+
+		return false;
+	}
 
 
-static bool ast_stmt_continue(parser_t* parser, ast_node_t** out)
-{
-	// TODO: Implement
-	*out = parser_err_unimplemented(parser);
-	return false;
+	/* Read ( */
+	if (!parser_check_and_advance(parser, TOK_PAREN_LEFT))
+	{
+		*out = parser_err_internal(
+			parser,
+			"expected '(' while parsing variable is set statement"
+		);
+
+		return false;
+	}
+
+
+	/* Init the AST */
+	*out = ast_node_new(AST_STMT_IS_SET, line, column);
+
+
+	/* Read identifier */
+	if (!ast_identifier(parser, &(*out)->as.isSet.identifier))
+	{
+		/*
+		 * If the parsed ast is not an error but failed, this ast
+		 * becomes an error
+		 */
+		if (!IS_AST_ERR((*out)->as.isSet.identifier))
+		{
+			ast_node_destroy(*out);
+
+			*out = parser_err_internal(
+				parser,
+				"is set statement identifier parse failed"
+			);
+		}
+
+		return false;
+	}
+
+
+	/* Read ) */
+	if (!parser_check_and_advance(parser, TOK_PAREN_RIGHT))
+	{
+		*out = parser_err_internal(
+			parser,
+			"expected ')' while parsing variable is set statement"
+		);
+
+		return false;
+	}
+
+	return true;
 }
 
 

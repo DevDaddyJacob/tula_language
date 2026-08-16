@@ -8,3 +8,5 @@ unset var x
 def global var y = "hello"
 set global var y = "world"
 unset global var y
+
+isSet(local_var_name)

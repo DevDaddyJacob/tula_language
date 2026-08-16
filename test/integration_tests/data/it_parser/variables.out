@@ -1,4 +1,4 @@
-program [1:1] count=8
+program [1:1] count=9
   constant-definition-statement [1:1] global=false
     identifier: identifier [1:11] name="LIMIT"
     expression: expression [1:19]
@@ -42,3 +42,5 @@ program [1:1] count=8
         expression: literal [9:20] type=TOK_STRING value="world"
   variable-unset-statement [10:1] global=true
     identifier: identifier [10:18] name="y"
+  is-set-statement [12:1]
+    identifier: identifier [12:7] name="local_var_name"
