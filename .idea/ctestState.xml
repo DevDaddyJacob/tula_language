@@ -5,7 +5,10 @@
       <lineNumber testId="path:test/CMakeLists.txt test:test_all" value="18" />
       <lineNumber testId="path:test/regression_tests/CMakeLists.txt test:regression_test_0000_example" value="5" />
       <lineNumber testId="path:test/regression_tests/CMakeLists.txt test:rt_0000_example" value="5" />
+      <lineNumber testId="path:test/unit_tests/CMakeLists.txt test:unit_test_buffered_reader" value="5" />
       <lineNumber testId="path:test/unit_tests/CMakeLists.txt test:unit_test_parser" value="5" />
+      <lineNumber testId="path:test/unit_tests/CMakeLists.txt test:unit_test_strings" value="5" />
+      <lineNumber testId="path:test/unit_tests/CMakeLists.txt test:unit_test_token" value="5" />
     </ctestState>
   </component>
 </project>

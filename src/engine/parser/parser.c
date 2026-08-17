@@ -681,14 +681,6 @@ static bool ast_statement(parser_t* parser, ast_node_t** out)
 			}
 
 			goto fold_failure_and_exit;
-
-
-			// *out = parser_err_syntax(
-			// 	parser,
-			// 	"unexpected token."
-			// );
-			//
-			// return false;
 		}
 	}
 
@@ -1616,13 +1608,14 @@ static bool ast_stmt_var_def_internal(
 		 * If the parsed ast is not an error but failed, this ast
 		 * becomes an error
 		 */
+		/* TODO: Improve error checking, depth included */
 		if (!IS_AST_ERR((*out)->as.variableDef.expression))
 		{
 			ast_node_destroy(*out);
 
 			*out = parser_err_internal(
 				parser,
-				"constant definition statement expression parse failed"
+				"variable definition statement expression parse failed"
 			);
 		}
 
@@ -2711,10 +2704,8 @@ static bool ast_expr_unary(parser_t* parser, ast_node_t** out)
 			 * like `999b`. This should presumably read/check `rhs` (the
 			 * value ast_expr_postfix just failed to populate), not `*out`.
 			 */
-			if (!IS_AST_ERR((*out)->as.expressionUnary.rhs))
+			if (!IS_AST_ERR(rhs))
 			{
-				ast_node_destroy(*out);
-
 				*out = parser_err_internal(
 					parser,
 					"unary expression right-hand side parse failed"
@@ -3413,8 +3404,13 @@ static bool ast_accessor_call(parser_t* parser, ast_node_t** out)
 	 * ast_func_def_value_internal's parameter-list parsing.
 	 */
 	/* Read the expression */
-	bool hadError = false;
+	bool hasError = false;
 	ast_node_t* expression = NULL;
+
+	if (!parser_check(parser, TOK_IDENT))
+	{
+		goto read_right_paren;
+	}
 
 read_expression:
 	if (!ast_expr(parser, &expression))
@@ -3433,13 +3429,7 @@ read_expression:
 			);
 		}
 
-		/*
-		 * BUG: this sets hadError to false on a failed expression parse,
-		 * which is presumably backwards (should be `hadError = true;`) —
-		 * as written, a failed argument expression is silently swallowed
-		 * and the call is reported as parsed successfully.
-		 */
-		hadError = false;
+		hasError = true;
 
 		arr_ast_node_add(&(*out)->as.accessorCall.expressions, expression);
 	}
@@ -3450,6 +3440,7 @@ read_expression:
 	}
 
 
+read_right_paren:
 	/* Read ) */
 	if (!parser_check_and_advance(parser, TOK_PAREN_RIGHT))
 	{
@@ -3461,7 +3452,7 @@ read_expression:
 		return false;
 	}
 
-	return !hadError;
+	return !hasError;
 }
 
 

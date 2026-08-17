@@ -1,0 +1,2 @@
+program [2:1] count=1
+  <error> [2:19] message="Syntax Error: expected ')' while parsing expression grouping."
